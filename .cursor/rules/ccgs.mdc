@@ -1,0 +1,11 @@
+---
+description: Claude Code Game Studios rules for Cursor agents
+alwaysApply: true
+---
+
+Coding agents in this repository may be Cursor agents rather than Claude Code. These rules apply either way.
+
+- Follow `CLAUDE.md` at the repository root, and every folder `CLAUDE.md`, as the project rules.
+- Treat each `.claude/skills/<name>/SKILL.md` as the procedure for the slash command of the same name. For example, `/prototype` means follow `.claude/skills/prototype/SKILL.md`.
+- When the harness does not run the hooks, run those hooks' checks by hand.
+- Treat `.claude/agents` as roles to play.
