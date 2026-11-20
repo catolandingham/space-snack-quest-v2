@@ -165,7 +165,8 @@ const PLANTER = [
   [460, 540], [425, 540], [423, 516], [410, 504], [403, 486], [412, 468], [426, 452],
 ];
 const LEAF = { x: 424, y: 498, w: 48, h: 16 };
-const EYES = [{ x: 431, y: 510 }, { x: 449, y: 510 }];
+// Peeking from the front leaves. y=510 sat on the pot rim (the white circles reach 6px below this point).
+const EYES = [{ x: 431, y: 500 }, { x: 449, y: 500 }];
 const POT = { x: 442, y: 526 };
 const DOOR = { x: 300, y: 590 };
 const WATCH_FEET = { x: 640, y: 592 };
@@ -366,6 +367,16 @@ function tickWorld(dt) {
     }
   }
   if (state.beat === 'sing' && state.sq.target) walkToward(state.sq, state.sq.target.x, state.sq.target.y, dt);
+  // Morning, the song, and Mops leaving all stay in this room. The party hall
+  // is only the evening sneak (enterSneak). The old goodbye walked Mops to
+  // (930, 500) with the walls turned off, and treated x > 890 as "he is gone".
+  // The right wall of this picture is about x=925, so that walk carried him
+  // through the wall and off the picture. The hall is a different picture and
+  // was not drawn yet, but he had already left the room, and the next place
+  // the player stands is that hall.
+  if (state.beat !== 'sneak' && state.beat !== 'hop' && state.beat !== 'hidden' && state.beat !== 'jail') {
+    state.room = 'home';
+  }
   if (state.beat === 'songwalk') {
     const a = walkToward(state.mo, 790, 490, dt);
     const b = walkToward(state.sq, 450, 490, dt);
@@ -378,7 +389,8 @@ function tickWorld(dt) {
   }
   if (state.beat === 'leave') {
     state.mo.face = 1; state.mo.sing = false;
-    if (walkToward(state.mo, 930, 500, dt, true) || state.mo.x > 890) {
+    // Just inside the right-wall doorway, still on the bedroom floor.
+    if (walkToward(state.mo, 820, 500, dt)) {
       state.mo.hidden = true;
       state.beat = 'evening';
     }
@@ -553,17 +565,23 @@ function drawCard(title, sub, lit) {
   if (lit) state.controls.push({ id: 'card', x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
 }
 function drawPlanterHint() {
+  // The old game's goal mark is #ffcf33, 6px wide. That mark was a circle.
+  // This is the same yellow and the same thickness, drawn around the leaves and the pot.
+  const pulse = 0.5 + 0.5 * Math.sin(state.t * 2.4);
   ctx.save();
   ctx.beginPath();
   PLANTER.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
   ctx.closePath();
-  ctx.lineWidth = 2.5;
-  ctx.strokeStyle = '#1e2430';
-  ctx.setLineDash([4, 3]);
-  ctx.stroke();
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.shadowColor = '#ffcf33';
+  ctx.shadowBlur = 4 + 10 * pulse;
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = '#ffcf33';
   ctx.setLineDash([]);
+  ctx.stroke();
   ctx.restore();
-  state.hint = { kind: 'planter', points: PLANTER.map(p => p.slice()) };
+  state.hint = { kind: 'planter', points: PLANTER.map(p => p.slice()), color: '#ffcf33', width: 6 };
 }
 function drawChip(id, lit) {
   const box = { x: 16, y: 64, w: 210, h: 72 };
@@ -605,9 +623,10 @@ function drawIconButtons() {
   if (pulse) return;
 }
 function drawEyes() {
-  // Same eye drawing as the live game (ga). Placed in the two lower clumps of this locked bush.
-  ART.eyes(ctx, 440, 510, state.t);
-  state.eyes = [{ x: 431, y: 510 }, { x: 449, y: 510 }];
+  // Same eye drawing as the live game (ga). The circles are 6px across, so the
+  // center sits a little above the pot rim and the eyes peek from the front leaves.
+  ART.eyes(ctx, 440, 500, state.t);
+  state.eyes = EYES.map(p => ({ x: p.x, y: p.y }));
 }
 function guestFace(kind, look) {
   if (kind === 'spots') return look.face > 1 ? -1 : look.face < -0.2 ? 1 : -1;
@@ -616,6 +635,17 @@ function guestFace(kind, look) {
 function drawPeople() {
   if (state.room === 'home') {
     const sqScale = tune.home_sq, moScale = tune.home_mo;
+    // While he walks out, he faces the door. A cone there would leave the picture.
+    if (!state.mo.hidden && state.beat !== 'leave') {
+      const f = state.mo.face || 1;
+      const hx = state.mo.x + 17 * moScale * f;
+      const hy = state.mo.y - 36 * moScale;
+      const faceBox = { x: hx - 16 * moScale, y: hy - 14 * moScale, w: 34 * moScale, h: 34 * moScale };
+      const aim = f < 0 ? Math.PI : 0;
+      const ox = faceBox.x + faceBox.w / 2 + Math.cos(aim) * (faceBox.w / 2 + 10);
+      const oy = faceBox.y + faceBox.h * 0.42;
+      drawCone(ox, oy, aim, tune.cone_half, tune.cone_len, false);
+    }
     const sqHead = drawSquatch(state.sq.x, state.sq.y, sqScale, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, sing: state.sq.sing });
     if (!state.mo.hidden) {
       const sway = state.beat === 'song' && state.mo.sing ? Math.sin(state.t * 6) * 0.06 : 0;

@@ -53,11 +53,12 @@ async function readState(page) {
   return page.evaluate(() => {
     const s = window.game.state;
     return {
-      beat: s.beat, scene: window.game.scene, song: s.song, chip: s.chip,
-      words: s.words, bubbles: s.bubbles, cones: s.cones, hint: s.hint,
+      beat: s.beat, room: s.room, scene: window.game.scene, song: s.song, chip: s.chip,
+      words: s.words, bubbles: s.bubbles, cones: s.cones, heads: s.heads, hint: s.hint,
       eyes: s.eyes, hidden: s.hidden, mopProp: s.mopProp, look: s.look,
       close: s.close, restarted: s.restarted,
       sq: { x: s.sq.x, y: s.sq.y },
+      mo: { x: s.mo.x, y: s.mo.y, hidden: s.mo.hidden },
       hop: s.hopTrace.map(p => ({ x: p.x, y: p.y })),
       controls: s.controls.map(c => ({ id: c.id, lit: c.lit })),
     };
@@ -82,14 +83,31 @@ function checkRules(s, label) {
     if (b.who === 'sq' && b.text.startsWith('Morning')) problems.push(fails(label + ' wrong speaker', b.text));
   }
   if (s.beat === 'morning' || s.beat === 'sing') {
-    if (s.cones.length) problems.push(fails(label + ' cones', 'Mops has a sight cone in the morning'));
+    const c = s.cones[0];
+    if (s.cones.length !== 1 || !c || !c.dashed) problems.push(fails(label + ' cones', 'Mops needs one dashed cone'));
+    else if (Math.abs(c.len - 190) > 0.01 || Math.abs(c.half - 0.38) > 0.001) problems.push(fails(label + ' cones', 'Mops cone is ' + c.len + ' by ' + c.half));
+    else {
+      const mops = (s.heads || []).find(h => h.who === 'mops');
+      const sq = (s.heads || []).find(h => h.who === 'sq');
+      const inside = (box, x, y) => box && x > box.x && x < box.x + box.w && y > box.y && y < box.y + box.h;
+      if (inside(mops, c.x, c.y)) problems.push(fails(label + ' cones', 'the cone starts on Mops\'s face'));
+      if (inside(sq, c.x, c.y)) problems.push(fails(label + ' cones', 'the cone starts on Squatch\'s face'));
+      for (const b of s.bubbles) if (inside(b.box, c.x, c.y)) problems.push(fails(label + ' cones', 'the cone starts on a speech bubble'));
+    }
   }
   if (s.beat === 'sneak' || s.beat === 'hidden') {
     if (!s.cones.length) problems.push(fails(label + ' cones', 'nobody has a cone'));
     if (s.cones.some(c => !c.dashed)) problems.push(fails(label + ' cones', 'a cone is not dashed'));
+    const watcher = s.cones.find(c => Math.abs(c.len - 190) < 0.01);
+    if (!watcher) problems.push(fails(label + ' cones', 'the guest cone is not the same length as Mops\'s'));
   }
+  const homeBeats = ['title', 'morning', 'sing', 'song', 'songwalk', 'leave', 'evening'];
+  if (homeBeats.includes(s.beat) && s.room !== 'home') problems.push(fails(label + ' room', s.beat + ' is in the ' + s.room));
+  if (homeBeats.includes(s.beat) && s.mo && !s.mo.hidden && s.mo.x > 860) problems.push(fails(label + ' room', 'Mops is outside the bedroom at x ' + s.mo.x));
+  if (['sneak', 'hidden', 'hop', 'jail'].includes(s.beat) && s.room !== 'hall') problems.push(fails(label + ' room', 'the sneak is not in the hall'));
   if ((s.beat === 'sneak' || s.beat === 'hidden' || s.beat === 'hop' || s.beat === 'jail') && s.hint) {
     if (s.hint.kind !== 'planter' || s.hint.points.length < 8) problems.push(fails(label + ' hint', JSON.stringify(s.hint && s.hint.kind)));
+    if (s.hint.color !== '#ffcf33' || s.hint.width !== 6) problems.push(fails(label + ' hint', 'outline is ' + s.hint.color + ' at ' + s.hint.width));
   }
   if (s.chip === 'HIDE' && !(s.beat === 'sneak' && s.close)) problems.push(fails(label + ' chip', 'HIDE before he can hide'));
   if (s.chip === 'SING' && s.beat !== 'sing') problems.push(fails(label + ' chip', 'SING at the wrong time'));
@@ -185,7 +203,18 @@ async function play(page, label) {
   problems.push(...checkRules(s, label + ' mops song'));
 
   await tapLit(page);
-  await waitFor(page, () => window.game.state.beat === 'evening', 8000, 'evening');
+  let sawLeave = false;
+  const leaveStart = Date.now();
+  while (Date.now() - leaveStart < 8000) {
+    const beat = await page.evaluate(() => window.game.state.beat);
+    if (beat === 'leave' && !sawLeave) {
+      sawLeave = true;
+      await shot(page, label + '-3-goodbye');
+    }
+    if (beat === 'evening') break;
+    await new Promise(r => setTimeout(r, 40));
+  }
+  await waitFor(page, () => window.game.state.beat === 'evening', 2000, 'evening');
   await shot(page, label + '-4-evening');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' evening'));
@@ -195,6 +224,7 @@ async function play(page, label) {
   await waitFor(page, () => window.game.state.beat === 'sneak', 4000, 'sneak');
   await new Promise(r => setTimeout(r, 300));
   await shot(page, label + '-5-sneak');
+  fs.copyFileSync(path.join(shotDir, label + '-5-sneak.png'), path.join(artDir, label + '-outline.png'));
   s = await readState(page);
   problems.push(...checkRules(s, label + ' sneak'));
   if (s.chip === 'HIDE') problems.push(fails(label + ' sneak', 'HIDE is offered before he is at the plant'));
@@ -240,6 +270,7 @@ async function play(page, label) {
   await tapLit(page);
   await waitFor(page, () => window.game.state.beat === 'hidden', 4000, 'hidden');
   await shot(page, label + '-6-eyes');
+  fs.copyFileSync(path.join(shotDir, label + '-6-eyes.png'), path.join(artDir, label + '-eyes.png'));
   s = await readState(page);
   problems.push(...checkRules(s, label + ' eyes'));
   const leaf = { x: 424, y: 498, w: 48, h: 16 };
