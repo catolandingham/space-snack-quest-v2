@@ -1,3 +1,7 @@
+# Contributing
+
+Agents working on Space Snack Quest: read `docs/RULEBOOK.md` first. A correction from Brian replaces the old rule there and adds or updates a check in the same change. Do not keep the old wording.
+
 # Contributing to Claude Code Game Studios
 
 CCGS is a coordination framework for indie game development using Claude Code.

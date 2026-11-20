@@ -1,6 +1,6 @@
 # Locked room pictures. Brian approved these. Do not redraw them.
 # Copied from github.com/catolandingham/space-snack-quest docs/locked-rooms (the set named in that folder's README).
-- path: assets/rooms/hall-room-empty-v1.png
+- path: assets/approved/hall-room-empty-v1.png
   origin: you
   source: {vendor: Brian, product: "locked party hall", url: "https://github.com/catolandingham/space-snack-quest"}
   date: 2026-11-20
@@ -15,7 +15,7 @@
   source: {vendor: Brian, product: "locked office", url: "https://github.com/catolandingham/space-snack-quest"}
   date: 2026-11-20
   ships: true
-- path: assets/rooms/home-room-empty-closed-v5.png
+- path: assets/approved/home-room-empty-closed-v5.png
   origin: you
   source: {vendor: Brian, product: "locked home, wardrobe closed", url: "https://github.com/catolandingham/space-snack-quest"}
   date: 2026-11-20

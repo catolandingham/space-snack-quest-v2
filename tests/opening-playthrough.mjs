@@ -31,7 +31,14 @@ const ALLOWED = [
   '[line needed]',
   'Mops',
   'Squatch',
+  '!',
+  '♥',
 ];
+const GUESTS = ['teal', 'camera', 'backpack', 'stilt', 'octopus', 'robot'];
+const RULE = {
+  words: 'R1', bubble: 'R2', chip: 'R3', cone: 'R4', outline: 'R5', room: 'R6',
+  eyes: 'R7', heart: 'R8', bang: 'R9', guests: 'R10', hop: 'R11', mop: 'R12',
+};
 
 function serve() {
   const types = { '.html': 'text/html', '.js': 'text/javascript', '.png': 'image/png', '.yaml': 'text/yaml' };
@@ -56,6 +63,7 @@ async function readState(page) {
       beat: s.beat, room: s.room, scene: window.game.scene, song: s.song, chip: s.chip,
       words: s.words, bubbles: s.bubbles, cones: s.cones, heads: s.heads, hint: s.hint,
       eyes: s.eyes, hidden: s.hidden, mopProp: s.mopProp, look: s.look,
+      guests: s.guests, sparks: (s.sparks || []).map(p => ({ kind: p.kind, x: p.x, y: p.y, t: p.t })),
       close: s.close, restarted: s.restarted,
       sq: { x: s.sq.x, y: s.sq.y },
       mo: { x: s.mo.x, y: s.mo.y, hidden: s.mo.hidden },
@@ -69,50 +77,69 @@ function checkRules(s, label) {
   const problems = [];
   for (const w of s.words) {
     const ok = ALLOWED.includes(w) || ALLOWED.some(a => a.includes(w) && w.length > 2);
-    if (!ok) problems.push(fails(label + ' word', w));
+    if (!ok) problems.push(fails(RULE.words + ' ' + label + ' word', w));
   }
   const banned = /sneaky|sasquatch's|security|tourist|holding pen|click |press /i;
   for (const w of s.words) if (banned.test(w) && !/Sasquatch\./.test(w)) problems.push(fails(label + ' banned', w));
   for (const b of s.bubbles) {
     const h = b.head, box = b.box;
     const hit = box.x < h.x + h.w && box.x + box.w > h.x && box.y < h.y + h.h && box.y + box.h > h.y;
-    if (hit) problems.push(fails(label + ' bubble covers face', b.who + ' ' + b.text));
+    if (hit) problems.push(fails(RULE.bubble + ' ' + label + ' bubble covers face', b.who + ' ' + b.text));
     if (b.who === 'mops' && !b.text.includes('Mops') && s.words[0] !== 'x') {
       // the name tag is its own word; the bubble text must be Mops's line
     }
     if (b.who === 'sq' && b.text.startsWith('Morning')) problems.push(fails(label + ' wrong speaker', b.text));
   }
+  const coneBeats = ['morning', 'sing', 'sneak', 'hidden'];
+  if (coneBeats.includes(s.beat) && s.cones.length) {
+    if (s.cones.some(c => !c.dashed)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'a cone is not dashed'));
+    const lens = s.cones.map(c => c.len);
+    const halves = s.cones.map(c => c.half);
+    if (Math.min(...lens) < Math.max(...lens) * 0.85 || Math.min(...halves) < Math.max(...halves) * 0.85) {
+      problems.push(fails(RULE.cone + ' ' + label + ' cones', 'cone sizes differ by more than 15% ' + lens.join(',')));
+    }
+  }
   if (s.beat === 'morning' || s.beat === 'sing') {
     const c = s.cones[0];
-    if (s.cones.length !== 1 || !c || !c.dashed) problems.push(fails(label + ' cones', 'Mops needs one dashed cone'));
-    else if (Math.abs(c.len - 190) > 0.01 || Math.abs(c.half - 0.38) > 0.001) problems.push(fails(label + ' cones', 'Mops cone is ' + c.len + ' by ' + c.half));
+    if (s.cones.length !== 1 || !c) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'Mops needs one cone'));
     else {
       const mops = (s.heads || []).find(h => h.who === 'mops');
       const sq = (s.heads || []).find(h => h.who === 'sq');
       const inside = (box, x, y) => box && x > box.x && x < box.x + box.w && y > box.y && y < box.y + box.h;
-      if (inside(mops, c.x, c.y)) problems.push(fails(label + ' cones', 'the cone starts on Mops\'s face'));
-      if (inside(sq, c.x, c.y)) problems.push(fails(label + ' cones', 'the cone starts on Squatch\'s face'));
-      for (const b of s.bubbles) if (inside(b.box, c.x, c.y)) problems.push(fails(label + ' cones', 'the cone starts on a speech bubble'));
+      if (inside(mops, c.x, c.y)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'the cone starts on Mops\'s face'));
+      if (inside(sq, c.x, c.y)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'the cone starts on Squatch\'s face'));
+      for (const b of s.bubbles) if (inside(b.box, c.x, c.y)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'the cone starts on a speech bubble'));
+    }
+  }
+  const homeBeats = ['title', 'morning', 'sing', 'song', 'songwalk', 'leave', 'evening'];
+  if (homeBeats.includes(s.beat) && s.room !== 'home') problems.push(fails(RULE.room + ' ' + label + ' room', s.beat + ' is in the ' + s.room));
+  if (homeBeats.includes(s.beat) && s.mo && !s.mo.hidden && s.mo.x > 860) problems.push(fails(RULE.room + ' ' + label + ' room', 'Mops is outside the bedroom at x ' + s.mo.x));
+  if (['sneak', 'hidden', 'hop', 'jail'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
+  if ((s.beat === 'sneak' || s.beat === 'hidden' || s.beat === 'hop' || s.beat === 'jail') && s.hint) {
+    if (s.hint.kind !== 'planter' || s.hint.points.length < 8) problems.push(fails(RULE.outline + ' ' + label + ' hint', JSON.stringify(s.hint && s.hint.kind)));
+    if (s.hint.color !== '#ffcf33' || s.hint.width !== 6 || !s.hint.dashed) problems.push(fails(RULE.outline + ' ' + label + ' hint', 'outline is ' + s.hint.color + ' at ' + s.hint.width + ' dashed ' + s.hint.dashed));
+    if (!(s.hint.gap >= 8)) problems.push(fails(RULE.outline + ' ' + label + ' hint', 'the outline is not outside the bush'));
+    const inner = s.hint.inner || [];
+    if (inner.length === s.hint.points.length) {
+      for (let i = 0; i < inner.length; i++) {
+        const dx = s.hint.points[i][0] - inner[i][0], dy = s.hint.points[i][1] - inner[i][1];
+        if (Math.hypot(dx, dy) < 8) problems.push(fails(RULE.outline + ' ' + label + ' hint', 'a point sits on the bush'));
+      }
     }
   }
   if (s.beat === 'sneak' || s.beat === 'hidden') {
-    if (!s.cones.length) problems.push(fails(label + ' cones', 'nobody has a cone'));
-    if (s.cones.some(c => !c.dashed)) problems.push(fails(label + ' cones', 'a cone is not dashed'));
-    const watcher = s.cones.find(c => Math.abs(c.len - 190) < 0.01);
-    if (!watcher) problems.push(fails(label + ' cones', 'the guest cone is not the same length as Mops\'s'));
+    const kinds = s.guests || [];
+    if (kinds.some(g => !GUESTS.includes(g))) problems.push(fails(RULE.guests + ' ' + label + ' guests', kinds.join(',')));
+    if (s.beat === 'sneak' && GUESTS.some(g => !kinds.includes(g))) problems.push(fails(RULE.guests + ' ' + label + ' guests', 'missing ' + GUESTS.filter(g => !kinds.includes(g)).join(',')));
   }
-  const homeBeats = ['title', 'morning', 'sing', 'song', 'songwalk', 'leave', 'evening'];
-  if (homeBeats.includes(s.beat) && s.room !== 'home') problems.push(fails(label + ' room', s.beat + ' is in the ' + s.room));
-  if (homeBeats.includes(s.beat) && s.mo && !s.mo.hidden && s.mo.x > 860) problems.push(fails(label + ' room', 'Mops is outside the bedroom at x ' + s.mo.x));
-  if (['sneak', 'hidden', 'hop', 'jail'].includes(s.beat) && s.room !== 'hall') problems.push(fails(label + ' room', 'the sneak is not in the hall'));
-  if ((s.beat === 'sneak' || s.beat === 'hidden' || s.beat === 'hop' || s.beat === 'jail') && s.hint) {
-    if (s.hint.kind !== 'planter' || s.hint.points.length < 8) problems.push(fails(label + ' hint', JSON.stringify(s.hint && s.hint.kind)));
-    if (s.hint.color !== '#ffcf33' || s.hint.width !== 6) problems.push(fails(label + ' hint', 'outline is ' + s.hint.color + ' at ' + s.hint.width));
+  const handled = ['SING', 'HIDE', 'line', 'card', 'start', 'pause', 'mute'];
+  for (const c of s.controls || []) {
+    if (!handled.includes(c.id)) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'nothing handles ' + c.id));
   }
-  if (s.chip === 'HIDE' && !(s.beat === 'sneak' && s.close)) problems.push(fails(label + ' chip', 'HIDE before he can hide'));
-  if (s.chip === 'SING' && s.beat !== 'sing') problems.push(fails(label + ' chip', 'SING at the wrong time'));
-  if (s.bubbles.length && s.chip) problems.push(fails(label + ' chip', 'a chip is up during a line'));
-  if (s.mopProp) problems.push(fails(label + ' mop', 'a separate mop was drawn'));
+  if (s.chip === 'HIDE' && !(s.beat === 'sneak' && s.close)) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'HIDE before he can hide'));
+  if (s.chip === 'SING' && s.beat !== 'sing') problems.push(fails(RULE.chip + ' ' + label + ' chip', 'SING at the wrong time'));
+  if (s.bubbles.length && s.chip) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'a chip is up during a line'));
+  if (s.mopProp) problems.push(fails(RULE.mop + ' ' + label + ' mop', 'a separate mop was drawn'));
   const speakers = { 'Morning, Squatch.': 'mops', 'Big party in the hall tonight.': 'mops', 'Party?': 'sq', 'Stay in here.': 'mops', "I'm floating in space!": 'sq', 'Weeee-eenn-nnttt!': 'mops' };
   for (const b of s.bubbles) if (speakers[b.text] && speakers[b.text] !== b.who) problems.push(fails(label + ' speaker', b.text));
   return problems;
@@ -191,6 +218,18 @@ async function play(page, label) {
   s = await readState(page);
   problems.push(...checkRules(s, label + ' sing'));
 
+  await page.evaluate(() => {
+    const c = window.game.state.cones[0];
+    window.game.state.sq.x = c.x + Math.cos(c.face) * (c.len * 0.45);
+    window.game.state.sq.y = c.y + Math.sin(c.face) * (c.len * 0.45) + 16;
+    window.game.state.sq.target = null;
+  });
+  await waitFor(page, () => window.game.state.sparks.some(p => p.kind === 'heart'), 4000, 'hearts');
+  await shot(page, label + '-3-hearts');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' hearts'));
+  if (!s.sparks.some(p => p.kind === 'heart')) problems.push(fails(RULE.heart + ' ' + label + ' hearts', 'no hearts in Mops\'s cone'));
+
   await tapLit(page);
   await waitFor(page, () => window.game.state.beat === 'song' && window.game.state.words.includes("I'm floating in space!"), 8000, 'song');
   await shot(page, label + '-3-song');
@@ -222,8 +261,11 @@ async function play(page, label) {
 
   await tapLit(page);
   await waitFor(page, () => window.game.state.beat === 'sneak', 4000, 'sneak');
-  await new Promise(r => setTimeout(r, 300));
+  const parked = await page.evaluate(() => ({ x: window.game.state.sq.x, y: window.game.state.sq.y }));
+  await new Promise(r => setTimeout(r, 400));
   await shot(page, label + '-5-sneak');
+  s = await readState(page);
+  if (Math.hypot(s.sq.x - parked.x, s.sq.y - parked.y) > 3) problems.push(fails('R14 ' + label + ' walk', 'he walked without a tap'));
   fs.copyFileSync(path.join(shotDir, label + '-5-sneak.png'), path.join(artDir, label + '-outline.png'));
   s = await readState(page);
   problems.push(...checkRules(s, label + ' sneak'));
@@ -232,7 +274,11 @@ async function play(page, label) {
 
   // Walk into the look so he is seen.
   await clickLogical(page, 500, 590);
-  await waitFor(page, () => window.game.state.beat === 'jail', 14000, 'jail');
+  await waitFor(page, () => window.game.state.sparks.some(p => p.kind === 'bang'), 14000, 'bang');
+  await shot(page, label + '-7-bang');
+  s = await readState(page);
+  if (!s.sparks.some(p => p.kind === 'bang')) problems.push(fails(RULE.bang + ' ' + label + ' bang', 'no exclamation in a guest cone'));
+  await waitFor(page, () => window.game.state.beat === 'jail', 8000, 'jail');
   await shot(page, label + '-7-jail');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' jail'));
@@ -273,10 +319,12 @@ async function play(page, label) {
   fs.copyFileSync(path.join(shotDir, label + '-6-eyes.png'), path.join(artDir, label + '-eyes.png'));
   s = await readState(page);
   problems.push(...checkRules(s, label + ' eyes'));
-  const leaf = { x: 424, y: 498, w: 48, h: 16 };
-  if (!s.eyes.length) problems.push(fails(label + ' eyes', 'no eyes in the plant'));
+  const leaf = { x: 416, y: 492, w: 52, h: 20 };
+  if (s.eyes.length !== 2) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'expected two eyes'));
   for (const e of s.eyes) {
-    if (e.x < leaf.x || e.x > leaf.x + leaf.w || e.y < leaf.y || e.y > leaf.y + leaf.h) problems.push(fails(label + ' eyes', 'eyes are not low in the front leaves'));
+    if (e.x < leaf.x || e.x > leaf.x + leaf.w || e.y < leaf.y || e.y > leaf.y + leaf.h) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'eyes are not in the front leaves'));
+    if (!(e.r > 2.5 && e.r < 4.2)) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'eye radius ' + e.r));
+    if (!e.pupil || e.pupil.dx <= 0 || e.pupil.dy <= 0) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'pupil is not down-right'));
   }
   return problems;
 }
@@ -298,6 +346,30 @@ try {
     problems = problems.concat(await play(page, name));
     await page.close();
   }
+  const lineup = await browser.newPage();
+  await lineup.setViewport({ width: 1024, height: 768 });
+  await lineup.goto('http://127.0.0.1:' + port + '/?scene=lineup', { waitUntil: 'networkidle0' });
+  await lineup.waitForFunction(() => window.game && window.game.state.guests.length === 6, { timeout: 4000 });
+  await shot(lineup, 'guest-lineup');
+  const eyes = await lineup.evaluate(() => {
+    const c = document.createElement('canvas');
+    c.width = 420; c.height = 180;
+    const g = c.getContext('2d');
+    g.fillStyle = '#f4f1ea';
+    g.fillRect(0, 0, 420, 180);
+    g.fillStyle = '#1e2430';
+    g.font = '700 16px sans-serif';
+    g.textAlign = 'center';
+    g.fillText('Original eyes', 110, 24);
+    g.fillText('Scaled for this bush', 310, 24);
+    window.ART.eyes(g, 100, 100, 0, 1);
+    window.ART.eyes(g, 118, 100, 0, 1);
+    const k = window.ART.eyeScale;
+    window.ART.eyes(g, 300, 100, 0, k);
+    window.ART.eyes(g, 300 + 18 * k, 100, 0, k);
+    return c.toDataURL('image/png');
+  });
+  fs.writeFileSync(path.join(artDir, 'eyes-compare.png'), Buffer.from(eyes.split(',')[1], 'base64'));
 } finally {
   await browser.close();
   server.close();

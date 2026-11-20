@@ -3,6 +3,12 @@ name: Opening playthrough
 on:
   push:
   pull_request:
+  schedule:
+    - cron: '0 15 * * *'
+
+concurrency:
+  group: opening-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   play:
@@ -12,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check the rulebook
+        run: node tests/rulebook.mjs
       - name: Install Puppeteer
         run: npm install --prefix /tmp/pw puppeteer
       - name: Tap through the seven opening beats
