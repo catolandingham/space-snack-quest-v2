@@ -16,6 +16,7 @@
 <body>
 <canvas id="game"></canvas>
 <script src="config.js"></script>
+<script src="characters.js"></script>
 <script>
 'use strict';
 // PROTOTYPE - NOT FOR PRODUCTION
@@ -157,9 +158,14 @@ const LINE = {
   needed: '[line needed]',
 };
 // The planter's own shape, measured on the locked hall picture. An outline, not a circle or a box.
-const PLANTER = [[418, 508], [406, 486], [408, 462], [428, 446], [452, 443], [474, 456], [480, 478], [470, 504], [458, 516], [456, 538], [426, 540], [424, 518]];
+// Outer edge of the middle bush and its pot, measured on the locked hall picture.
+// The old game drew a circle here. This follows the leaves, the gap between the front clumps, and the pot.
+const PLANTER = [
+  [442, 443], [462, 454], [476, 472], [481, 488], [472, 506], [460, 516],
+  [460, 540], [425, 540], [423, 516], [410, 504], [403, 486], [412, 468], [426, 452],
+];
 const LEAF = { x: 424, y: 498, w: 48, h: 16 };
-const EYES = [{ x: 436, y: 510 }, { x: 454, y: 510 }];
+const EYES = [{ x: 431, y: 510 }, { x: 449, y: 510 }];
 const POT = { x: 442, y: 526 };
 const DOOR = { x: 300, y: 590 };
 const WATCH_FEET = { x: 640, y: 592 };
@@ -434,121 +440,26 @@ function scallop(x, y, rx, ry, n, fill) {
   fillStroke(fill, 2);
 }
 function drawSquatch(x, y, scale, opt) {
-  const f = opt.face || 1;
   const hop = opt.hop || 0;
   ctx.save();
-  ctx.translate(x, y - hop);
-  ctx.scale(scale * f, scale);
-  const swing = Math.sin(opt.walk || 0) * 0.55;
-  ctx.beginPath(); ctx.ellipse(0, 2, 16, 3.2, 0, 0, 7);
-  ctx.fillStyle = 'rgba(30,36,48,.16)'; ctx.fill();
-  limb(-3, -7, -3 + swing * 6, 0, 4.2, '#55351f');
-  limb(3, -7, 3 - swing * 6, 0, 4.2, '#55351f');
-  ctx.beginPath(); ctx.arc(-3 + swing * 6, 0, 2.4, 0, 7); ctx.fillStyle = '#f4c39a'; ctx.fill();
-  ctx.beginPath(); ctx.arc(3 - swing * 6, 0, 2.4, 0, 7); ctx.fill();
-  const arm = opt.sing ? 2.4 : 0.4 + swing * 0.35;
-  limb(-10, -18, -10 + Math.sin(-arm) * 12, -18 + Math.cos(-arm) * 12, 3.6, '#55351f');
-  scallop(0, -21, 12, 10, 11, '#6b4428');
-  limb(10, -18, 10 + Math.sin(arm) * 12, -18 + Math.cos(arm) * 12, 3.6, '#6b4428');
-  ctx.beginPath(); ctx.arc(-14, -40, 3.4, 0, 7); fillStroke('#d98c62', 2);
-  ctx.beginPath(); ctx.arc(14, -40, 3.4, 0, 7); fillStroke('#d98c62', 2);
-  scallop(0, -42, 14, 13, 14, '#6b4428');
-  ctx.beginPath();
-  ctx.moveTo(0, -34);
-  ctx.bezierCurveTo(-8, -40, -16, -30, -12, -24);
-  ctx.bezierCurveTo(-8, -16, -4, -18, 0, -20);
-  ctx.bezierCurveTo(4, -18, 8, -16, 12, -24);
-  ctx.bezierCurveTo(16, -30, 8, -40, 0, -34);
-  ctx.closePath();
-  fillStroke('#f4c39a', 1.5);
-  ctx.fillStyle = INK;
-  ctx.beginPath(); ctx.arc(-4, -40, 1.5, 0, 7); ctx.fill();
-  ctx.beginPath(); ctx.arc(4, -40, 1.5, 0, 7); ctx.fill();
-  if (opt.sing) {
-    ctx.beginPath(); ctx.ellipse(0, -34, 1.8, 2.4, 0, 0, 7); ctx.fill();
-  } else {
-    ctx.beginPath(); ctx.arc(0, -34, 2.2, 0.2, Math.PI - 0.2);
-    ctx.strokeStyle = INK; ctx.lineWidth = 1.2; ctx.stroke();
-  }
+  ctx.translate(0, -hop);
+  ART.squatch(ctx, x, y, scale, { f: opt.face || 1, walk: opt.walk || 0, singing: !!opt.sing, t: state.t });
   ctx.restore();
-  const head = { x: x - 18 * scale, y: y - hop - 56 * scale, w: 36 * scale, h: 30 * scale, who: 'sq' };
+  const head = { x: x - 16 * scale, y: y - hop - 52 * scale, w: 32 * scale, h: 34 * scale, who: 'sq' };
   state.heads.push(head);
   return head;
 }
 function drawMops(x, y, scale, opt) {
   const f = opt.face || 1;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale * f, scale);
-  if (opt.sway) ctx.rotate(opt.sway);
-  const swing = Math.sin(opt.walk || 0) * 2;
-  ctx.beginPath(); ctx.ellipse(0, 2, 22, 3.5, 0, 0, 7);
-  ctx.fillStyle = 'rgba(30,36,48,.15)'; ctx.fill();
-  [[-12, swing], [-6, -swing], [6, swing], [12, -swing]].forEach(([lx, s]) => limb(lx, -10, lx + s, 0, 3.4, '#cfd5dd'));
-  scallop(0, -17, 17, 9, 12, '#ffffff');
-  roundRect(-14, -24, 28, 14, 4); fillStroke('#3478f6', 1.2);
-  roundRect(-3, -16, 6, 4, 1); fillStroke('#2456b0', 1);
-  // The hanging white wool is his beard, and the beard is his mop. No separate mop.
-  ctx.beginPath();
-  ctx.moveTo(8, -22);
-  ctx.quadraticCurveTo(24, -8, 18, 2);
-  ctx.quadraticCurveTo(14, 10, 6, 6);
-  ctx.quadraticCurveTo(0, -4, 8, -22);
-  ctx.closePath();
-  fillStroke('#f7f7f7', 2);
-  ctx.strokeStyle = '#d5dbe3'; ctx.lineWidth = 1.2;
-  ctx.beginPath(); ctx.moveTo(12, -12); ctx.lineTo(14, 4); ctx.moveTo(16, -8); ctx.lineTo(17, 6); ctx.stroke();
-  scallop(17, -30, 7, 7, 10, '#ffffff');
-  ctx.strokeStyle = '#c9ad84'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(13, -36); ctx.quadraticCurveTo(8, -46, 4, -44);
-  ctx.moveTo(20, -36); ctx.quadraticCurveTo(26, -46, 28, -42);
-  ctx.stroke();
-  ctx.beginPath(); ctx.arc(20, -30, 1.5, 0, 7); ctx.fillStyle = INK; ctx.fill();
-  if (opt.sing) { ctx.beginPath(); ctx.ellipse(22, -26, 1.5, 2, 0, 0, 7); ctx.fill(); }
-  ctx.beginPath(); ctx.arc(24, -27, 1.1, 0, 7); ctx.fillStyle = '#f2a7b6'; ctx.fill();
-  ctx.beginPath(); ctx.arc(-2, -18, 3.2, 0, 7); fillStroke('#ffcf33', 1.2);
-  ctx.restore();
-  const hx = x + 16 * scale * f, hy = y - 32 * scale;
-  const head = { x: hx - 16 * scale, y: hy - 16 * scale, w: 34 * scale, h: 32 * scale, who: 'mops' };
+  ART.mops(ctx, x, y, scale, { f, walk: opt.walk || 0, sway: opt.sway || 0, mouth: opt.sing ? 'o' : '', t: state.t });
+  const hx = x + 17 * scale * f, hy = y - 36 * scale;
+  const head = { x: hx - 16 * scale, y: hy - 14 * scale, w: 34 * scale, h: 34 * scale, who: 'mops' };
   state.heads.push(head);
   return head;
 }
 function drawGuest(x, y, scale, kind, face) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale * (face < 0 ? -1 : 1), scale);
-  ctx.beginPath(); ctx.ellipse(0, 2, 16, 4, 0, 0, 7);
-  ctx.fillStyle = 'rgba(30,36,48,.16)'; ctx.fill();
-  let body = '#7ad0c8', skin = '#e7fff8';
-  if (kind === 'spots') { body = '#ffcf33'; skin = '#fff3c4'; }
-  if (kind === 'croc') { body = '#3f8f4a'; skin = '#d8f5c8'; }
-  limb(-6, -18, -7, 0, 5, '#3d4454');
-  limb(6, -18, 7, 0, 5, '#3d4454');
-  roundRect(-16, -52, 32, 36, 10); fillStroke(body, 3);
-  roundRect(-22, -46, 8, 18, 3); fillStroke(body, 2);
-  roundRect(14, -46, 8, 18, 2); fillStroke(body, 2);
-  ctx.beginPath(); ctx.arc(0, -66, 14, 0, 7); fillStroke(skin, 3);
-  ctx.fillStyle = INK;
-  ctx.beginPath(); ctx.arc(-5, -68, 1.8, 0, 7); ctx.fill();
-  ctx.beginPath(); ctx.arc(5, -68, 1.8, 0, 7); ctx.fill();
-  if (kind === 'spots') {
-    ctx.fillStyle = '#e0a020';
-    [[-8, -40], [6, -32], [0, -48], [10, -44]].forEach(([sx, sy]) => { ctx.beginPath(); ctx.arc(sx, sy, 2.4, 0, 7); ctx.fill(); });
-  }
-  if (kind === 'antenna') {
-    ctx.strokeStyle = INK; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(-6, -78); ctx.lineTo(-10, -92); ctx.moveTo(6, -78); ctx.lineTo(10, -92); ctx.stroke();
-    ctx.fillStyle = '#ffcf33';
-    ctx.beginPath(); ctx.arc(-10, -94, 3, 0, 7); ctx.fill();
-    ctx.beginPath(); ctx.arc(10, -94, 3, 0, 7); ctx.fill();
-  }
-  if (kind === 'croc') {
-    ctx.fillStyle = '#2f6d38';
-    ctx.beginPath(); ctx.ellipse(8, -62, 8, 4, 0, 0, 7); ctx.fill();
-  }
-  ctx.restore();
-  const head = { x: x - 16 * scale, y: y - 82 * scale, w: 32 * scale, h: 30 * scale, who: kind };
+  ART.alien(ctx, x, y, kind, scale, face, state.t);
+  const head = { x: x - 16 * scale, y: y - 86 * scale, w: 32 * scale, h: 32 * scale, who: kind };
   state.heads.push(head);
   return head;
 }
@@ -642,16 +553,13 @@ function drawCard(title, sub, lit) {
   if (lit) state.controls.push({ id: 'card', x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
 }
 function drawPlanterHint() {
-  const pulse = 0.5 + 0.5 * Math.sin(state.t * 4);
   ctx.save();
-  ctx.shadowColor = '#ffcf33';
-  ctx.shadowBlur = 10 + 12 * pulse;
   ctx.beginPath();
   PLANTER.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
   ctx.closePath();
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = '#e09000';
-  ctx.setLineDash([8, 6]);
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = '#1e2430';
+  ctx.setLineDash([4, 3]);
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.restore();
@@ -697,13 +605,9 @@ function drawIconButtons() {
   if (pulse) return;
 }
 function drawEyes() {
-  EYES.forEach(e => {
-    ctx.beginPath(); ctx.ellipse(e.x, e.y, 7, 5, 0, 0, 7);
-    ctx.fillStyle = '#fffdf8'; ctx.fill();
-    ctx.lineWidth = 2; ctx.strokeStyle = INK; ctx.stroke();
-    ctx.beginPath(); ctx.arc(e.x, e.y + 1, 2.2, 0, 7); ctx.fillStyle = INK; ctx.fill();
-  });
-  state.eyes = EYES.map(e => ({ x: e.x, y: e.y }));
+  // Same eye drawing as the live game (ga). Placed in the two lower clumps of this locked bush.
+  ART.eyes(ctx, 440, 510, state.t);
+  state.eyes = [{ x: 431, y: 510 }, { x: 449, y: 510 }];
 }
 function guestFace(kind, look) {
   if (kind === 'spots') return look.face > 1 ? -1 : look.face < -0.2 ? 1 : -1;
@@ -716,10 +620,6 @@ function drawPeople() {
     if (!state.mo.hidden) {
       const sway = state.beat === 'song' && state.mo.sing ? Math.sin(state.t * 6) * 0.06 : 0;
       drawMops(state.mo.x, state.mo.y, moScale, { face: state.mo.face, walk: state.mo.moving ? state.mo.walk : 0, sing: state.mo.sing, sway });
-      const hx = state.mo.x + 26 * moScale * state.mo.face;
-      const hy = state.mo.y - 30 * moScale;
-      const face = Math.atan2((state.sq.y - 50) - hy, state.sq.x - hx);
-      drawCone(hx, hy, face, 0.4, 64, false);
     }
     return sqHead;
   }

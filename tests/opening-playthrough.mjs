@@ -81,7 +81,10 @@ function checkRules(s, label) {
     }
     if (b.who === 'sq' && b.text.startsWith('Morning')) problems.push(fails(label + ' wrong speaker', b.text));
   }
-  if (s.beat === 'morning' || s.beat === 'sneak' || s.beat === 'sing' || s.beat === 'hidden') {
+  if (s.beat === 'morning' || s.beat === 'sing') {
+    if (s.cones.length) problems.push(fails(label + ' cones', 'Mops has a sight cone in the morning'));
+  }
+  if (s.beat === 'sneak' || s.beat === 'hidden') {
     if (!s.cones.length) problems.push(fails(label + ' cones', 'nobody has a cone'));
     if (s.cones.some(c => !c.dashed)) problems.push(fails(label + ' cones', 'a cone is not dashed'));
   }
