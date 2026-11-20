@@ -1,7 +1,63 @@
 // Fails if the game draws or loads something docs/RULEBOOK.md does not list.
 import fs from 'fs';
 import path from 'path';
+import zlib from 'zlib';
 import { fileURLToPath } from 'url';
+
+function pngSizeAndRows(file) {
+  const buf = fs.readFileSync(file);
+  if (buf.toString('ascii', 1, 4) !== 'PNG') throw new Error(file + ' is not a png');
+  let offset = 8;
+  let width = 0, height = 0, color = 0, depth = 0;
+  const idats = [];
+  while (offset < buf.length) {
+    const len = buf.readUInt32BE(offset);
+    const type = buf.toString('ascii', offset + 4, offset + 8);
+    const data = buf.subarray(offset + 8, offset + 8 + len);
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      depth = data[8];
+      color = data[9];
+    } else if (type === 'IDAT') idats.push(data);
+    else if (type === 'IEND') break;
+    offset += 12 + len;
+  }
+  if (depth !== 8 || color !== 6) throw new Error(file + ' is not 8-bit RGBA');
+  const raw = zlib.inflateSync(Buffer.concat(idats));
+  const stride = width * 4;
+  const rows = [];
+  let i = 0;
+  const paeth = (a, b, c) => {
+    const p = a + b - c;
+    const pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+    return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+  };
+  for (let y = 0; y < height; y++) {
+    const filter = raw[i++];
+    const row = Buffer.alloc(stride);
+    for (let x = 0; x < stride; x++) {
+      const v = raw[i++];
+      const left = x >= 4 ? row[x - 4] : 0;
+      const up = y > 0 ? rows[y - 1][x] : 0;
+      const ul = y > 0 && x >= 4 ? rows[y - 1][x - 4] : 0;
+      if (filter === 0) row[x] = v;
+      else if (filter === 1) row[x] = (v + left) & 255;
+      else if (filter === 2) row[x] = (v + up) & 255;
+      else if (filter === 3) row[x] = (v + ((left + up) >> 1)) & 255;
+      else if (filter === 4) row[x] = (v + paeth(left, up, ul)) & 255;
+      else throw new Error(file + ' has an unknown png filter');
+    }
+    rows.push(row);
+  }
+  return { width, height, rows };
+}
+
+function cornerAlphas(file) {
+  const { width, height, rows } = pngSizeAndRows(file);
+  const alpha = (x, y) => rows[y][x * 4 + 3];
+  return [alpha(0, 0), alpha(width - 1, 0), alpha(0, height - 1), alpha(width - 1, height - 1)];
+}
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const book = fs.readFileSync(path.join(root, 'docs', 'RULEBOOK.md'), 'utf8');
@@ -41,18 +97,10 @@ if (html.includes('nov8-six-approved-guests.png')) fail('R10', 'the game still p
 if (/assets\/rooms\//.test(html)) fail('R13', 'the game still points at assets/rooms');
 
 const guests = ['teal', 'camera', 'backpack', 'stilt', 'octopus', 'robot'];
-const { execFileSync } = await import('child_process');
 for (const kind of guests) {
   const imPath = path.join(root, 'prototypes', 'space-snack-quest', 'assets', 'approved', 'guests', kind + '.png');
-  const alpha = execFileSync('python3', ['-c', `
-from PIL import Image
-im = Image.open(${JSON.stringify(imPath)}).convert('RGBA')
-w, h = im.size
-px = im.load()
-corners = [px[0, 0][3], px[w - 1, 0][3], px[0, h - 1][3], px[w - 1, h - 1][3]]
-print(','.join(str(c) for c in corners))
-`], { encoding: 'utf8' }).trim();
-  if (alpha.split(',').some(n => n !== '0')) fail('R10', kind + ' sprite corners are not transparent (' + alpha + ')');
+  const alpha = cornerAlphas(imPath);
+  if (alpha.some(n => n !== 0)) fail('R10', kind + ' sprite corners are not transparent (' + alpha.join(',') + ')');
 }
 for (const kind of guests) {
   if (!book.includes(kind)) fail('R10', 'rulebook is missing guest ' + kind);
