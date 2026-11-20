@@ -135,7 +135,7 @@ function blip() { if (!audio) return; toneAt(520, audio.ac.currentTime, 0.06, 's
 const rooms = {};
 function loadRoom(id, file) {
   const img = new Image();
-  img.src = 'assets/rooms/' + file;
+  img.src = 'assets/approved/' + file;
   rooms[id] = img;
 }
 loadRoom('home', 'home-room-empty-closed-v5.png');
@@ -164,15 +164,28 @@ const PLANTER = [
   [442, 443], [462, 454], [476, 472], [481, 488], [472, 506], [460, 516],
   [460, 540], [425, 540], [423, 516], [410, 504], [403, 486], [412, 468], [426, 452],
 ];
-const LEAF = { x: 424, y: 498, w: 48, h: 16 };
-// Peeking from the front leaves. y=510 sat on the pot rim (the white circles reach 6px below this point).
-const EYES = [{ x: 431, y: 500 }, { x: 449, y: 500 }];
+const LEAF = { x: 416, y: 492, w: 52, h: 20 };
+// One scaled ga() eye in each front clump. y=500 is in the leaves, above the pot rim.
+const EYES = [{ x: 426, y: 500 }, { x: 454, y: 500 }];
+const BUSH_GAP = 18;
+const GUESTS = ['teal', 'camera', 'backpack', 'stilt', 'octopus', 'robot'];
+const GUEST_SCALE = 1.2;
 const POT = { x: 442, y: 526 };
 const DOOR = { x: 300, y: 590 };
 const WATCH_FEET = { x: 640, y: 592 };
 function watchEyes() {
-  return { x: WATCH_FEET.x, y: WATCH_FEET.y - 78 * tune.guest_scale };
+  return { x: WATCH_FEET.x, y: WATCH_FEET.y - 90 * GUEST_SCALE };
 }
+function outsideBush(points, gap) {
+  let cx = 0, cy = 0;
+  for (const p of points) { cx += p[0]; cy += p[1]; }
+  cx /= points.length; cy /= points.length;
+  return points.map(([x, y]) => {
+    const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy) || 1;
+    return [+(x + (dx / d) * gap).toFixed(2), +(y + (dy / d) * gap).toFixed(2)];
+  });
+}
+const BUSH_OUTLINE = outsideBush(PLANTER, BUSH_GAP);
 
 // ---- Cast ------------------------------------------------------------------------------
 let scene, state;
@@ -191,8 +204,9 @@ function reset() {
     line: 0, control: false, paused: false,
     restarted: 0, hidden: false, hopT: 0, lookT: 0,
     sq: c.sq, mo: c.mo,
-    words: [], bubbles: [], heads: [], cones: [], controls: [],
+    words: [], bubbles: [], heads: [], cones: [], controls: [], guests: [],
     hint: null, eyes: [], hopTrace: [], mopProp: false, look: 'away',
+    sparks: [], heartAt: -9, bangAt: -9,
   };
 }
 function blocker() {
@@ -352,6 +366,7 @@ function activateKey() {
 }
 
 function tickWorld(dt) {
+  tickSparks(dt);
   if (state.song === 'joe') pumpJoe();
   if (state.paused && (state.beat === 'sneak' || state.beat === 'sing')) return;
   const keys = state.control && (state.beat === 'sneak' || state.beat === 'sing');
@@ -470,8 +485,9 @@ function drawMops(x, y, scale, opt) {
   return head;
 }
 function drawGuest(x, y, scale, kind, face) {
-  ART.alien(ctx, x, y, kind, scale, face, state.t);
-  const head = { x: x - 16 * scale, y: y - 86 * scale, w: 32 * scale, h: 32 * scale, who: kind };
+  ART.guest(ctx, x, y, kind, scale, face, state.t);
+  state.guests.push(kind);
+  const head = { x: x - 18 * scale, y: y - 100 * scale, w: 36 * scale, h: 40 * scale, who: kind };
   state.heads.push(head);
   return head;
 }
@@ -565,23 +581,27 @@ function drawCard(title, sub, lit) {
   if (lit) state.controls.push({ id: 'card', x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
 }
 function drawPlanterHint() {
-  // The old game's goal mark is #ffcf33, 6px wide. That mark was a circle.
-  // This is the same yellow and the same thickness, drawn around the leaves and the pot.
+  // Same yellow and thickness as the old goal mark, dashed, and stepped out past the leaves.
   const pulse = 0.5 + 0.5 * Math.sin(state.t * 2.4);
   ctx.save();
   ctx.beginPath();
-  PLANTER.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+  BUSH_OUTLINE.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
   ctx.closePath();
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
   ctx.shadowColor = '#ffcf33';
-  ctx.shadowBlur = 4 + 10 * pulse;
+  ctx.shadowBlur = 3 + 8 * pulse;
   ctx.lineWidth = 6;
   ctx.strokeStyle = '#ffcf33';
-  ctx.setLineDash([]);
+  ctx.setLineDash([8, 6]);
   ctx.stroke();
   ctx.restore();
-  state.hint = { kind: 'planter', points: PLANTER.map(p => p.slice()), color: '#ffcf33', width: 6 };
+  state.hint = {
+    kind: 'planter',
+    points: BUSH_OUTLINE.map(p => p.slice()),
+    inner: PLANTER.map(p => p.slice()),
+    color: '#ffcf33', width: 6, dashed: true, gap: BUSH_GAP,
+  };
 }
 function drawChip(id, lit) {
   const box = { x: 16, y: 64, w: 210, h: 72 };
@@ -623,14 +643,34 @@ function drawIconButtons() {
   if (pulse) return;
 }
 function drawEyes() {
-  // Same eye drawing as the live game (ga). The circles are 6px across, so the
-  // center sits a little above the pot rim and the eyes peek from the front leaves.
-  ART.eyes(ctx, 440, 500, state.t);
-  state.eyes = EYES.map(p => ({ x: p.x, y: p.y }));
+  const k = ART.eyeScale;
+  for (const p of EYES) ART.eyes(ctx, p.x, p.y, state.t, k);
+  state.eyes = EYES.map(p => ({ x: p.x, y: p.y, r: 6 * k, pupil: { dx: k, dy: k } }));
 }
-function guestFace(kind, look) {
-  if (kind === 'spots') return look.face > 1 ? -1 : look.face < -0.2 ? 1 : -1;
-  return 1;
+function rise(kind, x, y) {
+  const wait = kind === 'heart' ? 2.5 : 2.2;
+  const key = kind === 'heart' ? 'heartAt' : 'bangAt';
+  if (state.t - state[key] < wait) return;
+  state[key] = state.t;
+  state.sparks.push({ x, y, t: kind === 'heart' ? 1.6 : 2.2, kind });
+}
+function tickSparks(dt) {
+  for (const s of state.sparks) { s.y -= 26 * dt; s.t -= dt; }
+  state.sparks = state.sparks.filter(s => s.t > 0);
+}
+function drawSparks() {
+  for (const s of state.sparks) {
+    const bob = s.kind === 'bang' ? Math.sin(s.t * 14) * 4 : 0;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, s.t * 2);
+    if (s.kind === 'bang') {
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y + bob, 26, 26, 0, 0, Math.PI * 2);
+      ctx.lineWidth = 4; ctx.strokeStyle = '#ffcf33'; ctx.stroke();
+      say('!', s.x, s.y + bob, 40, '#e5533d', 'center', 900);
+    } else say('♥', s.x, s.y, 26, '#e5533d', 'center', 900);
+    ctx.restore();
+  }
 }
 function drawPeople() {
   if (state.room === 'home') {
@@ -644,7 +684,9 @@ function drawPeople() {
       const aim = f < 0 ? Math.PI : 0;
       const ox = faceBox.x + faceBox.w / 2 + Math.cos(aim) * (faceBox.w / 2 + 10);
       const oy = faceBox.y + faceBox.h * 0.42;
-      drawCone(ox, oy, aim, tune.cone_half, tune.cone_len, false);
+      const hot = inCone(state.sq.x, state.sq.y - 16, ox, oy, aim, tune.cone_half, tune.cone_len);
+      drawCone(ox, oy, aim, tune.cone_half, tune.cone_len, hot);
+      if (hot) rise('heart', state.mo.x, hy - 10);
     }
     const sqHead = drawSquatch(state.sq.x, state.sq.y, sqScale, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, sing: state.sq.sing });
     if (!state.mo.hidden) {
@@ -659,16 +701,18 @@ function drawPeople() {
   state.watchEyes = eyes;
   const watchHot = !state.hidden && look.mode === 'look' && inCone(state.sq.x, state.sq.y - 16, eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len);
   drawCone(eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len, watchHot);
-  // Two more people, both looking at the stage. Their cones point up, away from the floor path.
-  [[250, 430, 'antenna'], [700, 445, 'croc']].forEach(([x, y, kind]) => {
-    const ox = x, oy = y - 70 * tune.guest_scale;
+  if (watchHot) rise('bang', eyes.x, eyes.y - 30);
+  // The other five approved guests look at the stage. Same cone size, pointed up.
+  [[160, 540, 'teal'], [250, 480, 'backpack'], [560, 580, 'stilt'], [800, 530, 'octopus'], [860, 500, 'robot']].forEach(([x, y, kind]) => {
+    const ox = x, oy = y - 90 * GUEST_SCALE;
     const face = -Math.PI / 2;
-    const hot = !state.hidden && inCone(state.sq.x, state.sq.y - 16, ox, oy, face, 0.4, 110);
-    drawCone(ox, oy, face, 0.4, 110, hot);
-    drawGuest(x, y, tune.guest_scale, kind, 1);
+    const hot = !state.hidden && inCone(state.sq.x, state.sq.y - 16, ox, oy, face, tune.cone_half, tune.cone_len);
+    drawCone(ox, oy, face, tune.cone_half, tune.cone_len, hot);
+    if (hot) rise('bang', ox, oy - 20);
+    drawGuest(x, y, GUEST_SCALE, kind, 1);
   });
   const watchFace = Math.cos(look.face) < 0 ? -1 : 1;
-  drawGuest(WATCH_FEET.x, WATCH_FEET.y, tune.guest_scale, 'spots', watchFace);
+  drawGuest(WATCH_FEET.x, WATCH_FEET.y, GUEST_SCALE, 'camera', watchFace);
   if (!state.hidden) {
     const hop = state.beat === 'hop' ? Math.sin(Math.min(1, state.hopT / tune.hop_time) * Math.PI) * tune.hop_height : 0;
     drawSquatch(state.sq.x, state.sq.y, tune.hall_sq, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, hop });
@@ -690,6 +734,7 @@ function drawPlay() {
   drawRoom(state.room === 'hall' ? 'hall' : 'home');
   if (state.beat === 'sneak' || state.beat === 'hop' || state.beat === 'hidden' || state.beat === 'jail') drawPlanterHint();
   drawPeople();
+  drawSparks();
   const line = currentLine();
   if (line && line.kind === 'intro') {
     const g = ctx.createRadialGradient(state.sq.x, state.sq.y - 70, 80, state.sq.x, state.sq.y - 40, 280);
@@ -736,21 +781,21 @@ function drawTitle() {
   state.hint = null;
 }
 
-function drawFigures() {
+function drawLineup() {
   clear('#f4f1ea');
-  drawSquatch(180, 460, 2.6, { face: 1, walk: state.t * 4 });
-  drawMops(400, 470, 2.2, { face: 1, walk: 0 });
-  drawGuest(620, 470, 1.5, 'spots', 1);
-  drawGuest(820, 470, 1.5, 'antenna', 1);
-  say('Squatch', 180, 520, 22, INK, 'center', 700);
-  say('Mops', 400, 520, 22, INK, 'center', 700);
-  say('Watcher', 620, 540, 22, INK, 'center', 700);
-  say('Guest', 820, 540, 22, INK, 'center', 700);
+  const names = ['Teal jacket', 'Camera', 'Backpack', 'Stilts', 'Octopus', 'Robot'];
+  GUESTS.forEach((kind, i) => {
+    const x = 100 + i * 145;
+    drawGuest(x, 430, 1.15, kind, 1);
+    say(names[i], x, 500, 18, INK, 'center', 700);
+  });
+  drawSquatch(80, 200, 1.75, { face: 1 });
+  say('Squatch', 80, 250, 16, INK, 'center', 700);
 }
 
 // ---- Scenes ----------------------------------------------------------------------------
 const scenes = {
-  figures: { update(dt) { state.t += dt; }, draw: drawFigures },
+  lineup: { update(dt) { state.t += dt; }, draw: drawLineup },
   title: {
     update(dt) { state.t += dt; if (pressed('Enter') || pressed('Space')) { beginStory(); scene = 'play'; } },
     draw: drawTitle,
@@ -787,6 +832,7 @@ function drawFrame() {
   state.heads = [];
   state.cones = [];
   state.controls = [];
+  state.guests = [];
   state.hint = null;
   state.eyes = [];
   state.mopProp = false;
@@ -806,7 +852,7 @@ window.game = {
   press(code) { hit.add(code); },
   hold(code, on) { on ? down.add(code) : down.delete(code); },
   get events() { return events; },
-  inCone, PLANTER, LEAF, EYES, POT, DOOR, WATCH_FEET, watchEyes, LINE,
+  inCone, PLANTER, BUSH_OUTLINE, LEAF, EYES, POT, DOOR, WATCH_FEET, watchEyes, LINE, GUESTS,
   roomsReady() {
     return Object.keys(rooms).length > 0 && Object.values(rooms).every(img => img.complete && img.naturalWidth);
   },

@@ -275,9 +275,114 @@ function drawCh1Alien(ax, ay, kind, sc, face) {
   else (m(-18, -46, 8, 18, 3), r("#e5533d", 2));
   e.restore();
 }
-function ga(l, o) {
+// One peeking eye from ga() in src/game/10-ch1.js at 4d1faa2 (decision C21, Brian t230).
+// White circle, 2px outline, pupil nudged down-right, and the same blink.
+// k scales the whole drawing. 1 is the original size on the original 40px front leaf.
+function ga(l, o, k) {
+  k = k || 1;
   let i = Math.sin(n.T * 2.3) > 0.94 ? 0.25 : 1;
-  for (let s of [-9, 9]) (X(l + s, o, 6, 6 * i), r("#ffffff", 2), F(l + s + 1, o + 1, 2.4, y));
+  X(l, o, 6 * k, 6 * k * i);
+  r("#ffffff", 2 * k);
+  F(l + k, o + k, 2.4 * k, y);
+}
+// The Nov 8 guests (C12). The sprite files were not in the repo, so these are drawn
+// from Brian's description of that set. Not the later eight code-drawn guests.
+function drawApprovedGuest(ax, ay, kind, sc, face) {
+  const f = face < 0 ? -1 : 1;
+  e.save();
+  e.translate(ax, ay);
+  e.scale((sc || 1) * f, sc || 1);
+  if (kind === "teal") drawTeal();
+  else if (kind === "camera") drawCameraGuest();
+  else if (kind === "backpack") drawBackpack();
+  else if (kind === "stilt") drawStilt();
+  else if (kind === "octopus") drawOctopusGuest();
+  else if (kind === "robot") drawRobotGuest();
+  e.restore();
+}
+function drawTeal() {
+  m(-10, -36, 8, 36, 2); r("#1e2430", 2);
+  m(2, -36, 8, 36, 2); r("#1e2430", 2);
+  m(-16, -72, 32, 40, 6); r("#1aa8a8", 2.5);
+  m(-8, -66, 16, 22, 3); r("#ffffff", 2);
+  m(-24, -68, 8, 22, 3); r("#8d5524", 2);
+  m(16, -68, 8, 22, 3); r("#8d5524", 2);
+  L(0, -88, 14); r("#8d5524", 2.5);
+  e.beginPath(); e.arc(0, -92, 14, Math.PI, 0); r("#1e2430", 2);
+  F(-5, -88, 1.6, y); F(5, -88, 1.6, y);
+  C([-4, -80, 0, -78, 4, -80], y, 1.4);
+  C([12, -100, 26, -114], y, 2.2);
+  F(28, -116, 4.2, y);
+}
+function drawCameraGuest() {
+  m(-10, -30, 8, 30, 2); r("#e0b07a", 2);
+  m(2, -30, 8, 30, 2); r("#e0b07a", 2);
+  m(-12, -42, 24, 16, 3); r("#2a3142", 2);
+  m(-16, -74, 32, 36, 6); r("#3478f6", 2.5);
+  F(-6, -60, 4, "#ffcf33"); F(6, -56, 3.4, "#ff8fb8");
+  m(-8, -64, 16, 12, 2); r("#1e2430", 2);
+  F(0, -58, 3, "#8fd0ff");
+  m(-24, -70, 8, 20, 3); r("#f3d2b0", 2);
+  m(16, -70, 8, 20, 3); r("#f3d2b0", 2);
+  L(0, -90, 14); r("#f3d2b0", 2.5);
+  e.beginPath(); e.arc(0, -94, 14, Math.PI, 0); r("#6b3a1c", 2);
+  F(-5, -90, 1.6, y); F(5, -90, 1.6, y);
+  C([-4, -82, 0, -80, 4, -82], y, 1.3);
+}
+function drawBackpack() {
+  m(-14, -10, 12, 10, 2); r("#8fd0e8", 2);
+  m(2, -10, 12, 10, 2); r("#8fd0e8", 2);
+  m(-8, -38, 7, 30, 2); r("#3d4c5c", 2);
+  m(2, -38, 7, 30, 2); r("#3d4c5c", 2);
+  m(12, -68, 16, 30, 4); r("#8b5a3c", 2);
+  m(-14, -72, 28, 38, 8); r("#3d4c5c", 2.5);
+  L(0, -90, 16); r("#7f93a8", 2.5);
+  F(-7, -90, 2.2, y); F(0, -96, 2.2, y); F(7, -90, 2.2, y);
+  C([-6, -104, -12, -120], y, 2);
+  C([6, -104, 12, -120], y, 2);
+  F(-12, -122, 2.6, y); F(12, -122, 2.6, y);
+}
+function drawStilt() {
+  C([-5, -78, -8, 0], "#2a3142", 3);
+  C([5, -78, 8, 0], "#2a3142", 3);
+  F(-8, -2, 4.2, "#9b6dff"); F(8, -2, 4.2, "#9b6dff");
+  m(-14, -108, 28, 32, 3); r("#ffcf33", 2.5);
+  C([-14, -100, -36, -70], "#2a3142", 2.4);
+  C([14, -100, 36, -70], "#2a3142", 2.4);
+  F(-36, -68, 4, "#9b6dff"); F(36, -68, 4, "#9b6dff");
+  L(0, -126, 14); r("#b48cff", 2.5);
+  F(-5, -126, 1.8, y); F(5, -126, 1.8, y);
+  C([-6, -138, -14, -156], y, 2);
+  C([6, -138, 14, -156], y, 2);
+  F(-14, -158, 3.6, "#b48cff"); F(14, -158, 3.6, "#b48cff");
+}
+function drawOctopusGuest() {
+  [[-18, -8], [-9, -3], [0, 2], [9, 5], [18, 3]].forEach(([x, lean]) => {
+    C([x, -42, x + lean, 0], "#ff8fb8", 4);
+    F(x + lean * 0.45, -20, 2.4, "#ffffff");
+  });
+  e.beginPath(); e.ellipse(0, -46, 18, 6, 0, 0, 7); r("#3478f6", 2.2);
+  L(0, -74, 22); r("#ff8fb8", 2.5);
+  F(-8, -76, 2.1, y); F(8, -76, 2.1, y);
+  C([-8, -64, 0, -58, 8, -64], y, 1.6);
+  m(-14, -98, 28, 8, 2); r("#ffcf33", 2);
+  m(-7, -110, 14, 14, 3); r("#ffcf33", 2);
+}
+function drawRobotGuest() {
+  m(-14, -10, 12, 10, 2); r("#1e2430", 2);
+  m(2, -10, 12, 10, 2); r("#1e2430", 2);
+  m(-8, -32, 7, 24, 2); r("#c5cad3", 2);
+  m(2, -32, 7, 24, 2); r("#c5cad3", 2);
+  m(-18, -70, 36, 40, 4); r("#dfe3ea", 2.5);
+  m(-11, -60, 22, 16, 2); r("#2bc48a", 2);
+  F(-5, -52, 1.7, "#ffcf33"); F(0, -52, 1.7, "#ffcf33"); F(5, -52, 1.7, "#ffcf33");
+  F(-24, -52, 5, "#3478f6"); F(24, -52, 5, "#3478f6");
+  m(-15, -102, 30, 28, 3); r("#eef1f6", 2.5);
+  m(-10, -94, 7, 7, 1); r("#3478f6", 1.4);
+  m(3, -94, 7, 7, 1); r("#3478f6", 1.4);
+  C([-6, -82, 0, -79, 6, -82], y, 1.4);
+  C([0, -102, 0, -118], "#e5533d", 2.6);
+  F(0, -120, 3.2, "#e5533d");
 }
 
   window.ART = {
@@ -289,13 +394,16 @@ function ga(l, o) {
       use(ctx, opt.t);
       Fe(x, yy, scale, { f: opt.f, walk: opt.walk, sway: opt.sway, mouth: opt.mouth, eyes: opt.eyes, headDown: opt.headDown });
     },
-    alien(ctx, x, yy, kind, scale, face, time) {
+    guest(ctx, x, yy, kind, scale, face, time) {
       use(ctx, time);
-      drawCh1Alien(x, yy, kind, scale, face);
+      drawApprovedGuest(x, yy, kind, scale, face);
     },
-    eyes(ctx, x, yy, time) {
+    eyes(ctx, x, yy, time, scale) {
       use(ctx, time);
-      ga(x, yy);
+      ga(x, yy, scale);
     },
+    // Original front leaf is a 40px clump. This locked bush's front clumps are about 22px.
+    eyeScale: 22 / 40,
+    guests: ["teal", "camera", "backpack", "stilt", "octopus", "robot"],
   };
 })();
