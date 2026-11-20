@@ -140,23 +140,6 @@ function loadRoom(id, file) {
 }
 loadRoom('home', 'home-room-empty-closed-v5.png');
 loadRoom('hall', 'hall-room-empty-v1.png');
-// The only guest picture. Each person is a slice of this sheet.
-const GUEST_SHEET_SRC = 'assets/approved/guests/nov8-six-approved-guests.png';
-const guestSheet = new Image();
-guestSheet.src = GUEST_SHEET_SRC;
-const GUEST_PX = 0.2;
-const GUEST_SLICE = {
-  teal: { x: 120, y: 165, w: 243, h: 618 },
-  camera: { x: 556, y: 216, w: 243, h: 567 },
-  backpack: { x: 985, y: 150, w: 219, h: 633 },
-  stilt: { x: 1430, y: 30, w: 243, h: 753 },
-  octopus: { x: 1867, y: 195, w: 249, h: 579 },
-  robot: { x: 2293, y: 165, w: 267, h: 618 },
-};
-function guestBox(kind, scale) {
-  const s = GUEST_SLICE[kind];
-  return { w: s.w * GUEST_PX * scale, h: s.h * GUEST_PX * scale };
-}
 function drawRoom(id) {
   const img = rooms[id];
   if (img && img.complete && img.naturalWidth) ctx.drawImage(img, 0, 0, W, H);
@@ -187,6 +170,19 @@ const EYES = [{ x: 426, y: 500 }, { x: 454, y: 500 }];
 const BUSH_GAP = 18;
 const GUESTS = ['teal', 'camera', 'backpack', 'stilt', 'octopus', 'robot'];
 const GUEST_SCALE = 1;
+const GUEST_PX = 0.2;
+const guestSprites = {};
+for (const kind of GUESTS) {
+  const img = new Image();
+  img.src = 'assets/approved/guests/' + kind + '.png';
+  guestSprites[kind] = img;
+}
+function guestBox(kind, scale) {
+  const img = guestSprites[kind];
+  const w = img && img.naturalWidth ? img.naturalWidth : 240;
+  const h = img && img.naturalHeight ? img.naturalHeight : 620;
+  return { w: w * GUEST_PX * scale, h: h * GUEST_PX * scale };
+}
 const POT = { x: 442, y: 526 };
 const DOOR = { x: 300, y: 590 };
 const WATCH_FEET = { x: 640, y: 592 };
@@ -504,13 +500,13 @@ function drawMops(x, y, scale, opt) {
 }
 function drawGuest(x, y, scale, kind, face) {
   state.guests.push(kind);
-  const slice = GUEST_SLICE[kind];
+  const img = guestSprites[kind];
   const box = guestBox(kind, scale);
-  if (guestSheet.complete && guestSheet.naturalWidth) {
+  if (img && img.complete && img.naturalWidth) {
     ctx.save();
     ctx.translate(x, y);
     if ((face || 1) < 0) ctx.scale(-1, 1);
-    ctx.drawImage(guestSheet, slice.x, slice.y, slice.w, slice.h, -box.w / 2, -box.h, box.w, box.h);
+    ctx.drawImage(img, -box.w / 2, -box.h, box.w, box.h);
     ctx.restore();
   }
   const head = { x: x - box.w * 0.28, y: y - box.h, w: box.w * 0.56, h: box.h * 0.24, who: kind };
@@ -879,7 +875,7 @@ window.game = {
   get events() { return events; },
   inCone, PLANTER, BUSH_OUTLINE, LEAF, EYES, POT, DOOR, WATCH_FEET, watchEyes, LINE, GUESTS,
   roomsReady() {
-    const imgs = [...Object.values(rooms), guestSheet];
+    const imgs = [...Object.values(rooms), ...Object.values(guestSprites)];
     return imgs.every(img => img.complete && img.naturalWidth);
   },
   step(n = 1, draw = true, alpha = 1) {

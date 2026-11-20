@@ -35,16 +35,25 @@ function pngs(dir) {
 for (const name of pngs(approvedDir)) {
   if (!book.includes(name)) fail('R20', 'approved folder has an unlisted picture: ' + name);
 }
-const sheet = 'assets/approved/guests/nov8-six-approved-guests.png';
-if (!html.includes(sheet)) fail('R10', 'the game does not load the approved guest sheet');
-if (!book.includes(sheet)) fail('R20', 'the rulebook does not name the guest sheet');
-const otherGuestLoads = [...html.matchAll(/assets\/approved\/guests\/[A-Za-z0-9_./-]+\.png/g)].map(m => m[0]);
-for (const file of otherGuestLoads) {
-  if (file !== sheet) fail('R10', 'guest art is loaded from ' + file + ' instead of the approved sheet');
-}
+if (!book.includes('nov8-six-approved-guests.png')) fail('R20', 'the rulebook does not name the guest sheet');
+if (!html.includes("'assets/approved/guests/' + kind + '.png'")) fail('R10', 'the game does not load the guest cuts');
+if (html.includes('nov8-six-approved-guests.png')) fail('R10', 'the game still paints the sheet, cream background included');
 if (/assets\/rooms\//.test(html)) fail('R13', 'the game still points at assets/rooms');
 
 const guests = ['teal', 'camera', 'backpack', 'stilt', 'octopus', 'robot'];
+const { execFileSync } = await import('child_process');
+for (const kind of guests) {
+  const imPath = path.join(root, 'prototypes', 'space-snack-quest', 'assets', 'approved', 'guests', kind + '.png');
+  const alpha = execFileSync('python3', ['-c', `
+from PIL import Image
+im = Image.open(${JSON.stringify(imPath)}).convert('RGBA')
+w, h = im.size
+px = im.load()
+corners = [px[0, 0][3], px[w - 1, 0][3], px[0, h - 1][3], px[w - 1, h - 1][3]]
+print(','.join(str(c) for c in corners))
+`], { encoding: 'utf8' }).trim();
+  if (alpha.split(',').some(n => n !== '0')) fail('R10', kind + ' sprite corners are not transparent (' + alpha + ')');
+}
 for (const kind of guests) {
   if (!book.includes(kind)) fail('R10', 'rulebook is missing guest ' + kind);
   if (!html.includes("'" + kind + "'")) fail('R10', 'the game does not place ' + kind);
