@@ -1,0 +1,28 @@
+L1	pass	evidence/beats/ipad-2-morning.png	The home is the locked picture. Squatch is a brown furry kid and Mops is a white goat whose beard hangs like a mop. No separate mop.
+L2	pass	evidence/nearest-game.txt	Sneaky Sasquatch is named only as the inspiration. The rooms, people and song are this game's.
+L3	pass	evidence/beats/ipad-5-sneak.png	The hall is one still locked picture filling the screen.
+F1	pass	evidence/beats/ipad-1-title.png	The title glows. The first tap starts an original tune.
+F2	pass	evidence/beats/ipad-2-morning.png	Mops's morning lines show one at a time, on him.
+F3	pass	evidence/beats/ipad-3-sing.png	SING lights up, they sing, and Mops leaves.
+F4	pass	evidence/beats/ipad-4-evening.png	The evening card shows, then the hall sneak.
+F5	pass	evidence/beats/ipad-6-hide.png	He walks to the outlined plant and HIDE lights up.
+F6	pass	evidence/beats/ipad-7-jail.png	A dashed cone fills, he hops, and the lockup card shows. The sneak then starts again.
+S1	pass	evidence/beats/ipad-3-sing.png	The next tap glows: the title, each line, SING, and HIDE.
+S2	pass	evidence/beats/ipad-5-sneak.png	Each person who can see has a dashed cone.
+S3	pass	evidence/beats/ipad-5-sneak.png	The player taps the floor to walk. Nothing walks him to the plant.
+S4	pass	evidence/beats/ipad-7-jail.png	Being seen hops him, shows the lockup card, and restarts that sneak.
+S5	pass	prototypes/space-snack-quest/index.html	Joe's song and the goodbye are original notes, not a known tune.
+M1	pass	evidence/beats/ipad-1-title.png	The title box glows.
+M2	pass	tests/opening-playthrough.mjs	The first tap sets the song to Joe's tune and opens the morning.
+M3	pass	evidence/beats/ipad-2-who-he-is.png	The card says who Squatch is.
+M4	pass	evidence/beats/ipad-2-morning.png	Mops says good morning, the party, and stay in here.
+M5	pass	evidence/beats/ipad-2-stay.png	Each line stays until a tap.
+M6	pass	evidence/beats/ipad-3-sing.png	SING is lit.
+M7	pass	evidence/beats/ipad-4-evening.png	They sing, Mops is gone, and the evening card is up.
+M8	pass	evidence/beats/ipad-5-sneak.png	Squatch starts on the hall floor, left of the plant.
+M9	pass	evidence/beats/ipad-5-sneak.png	The plant's own shape is outlined.
+M10	pass	tests/opening-playthrough.mjs	The playthrough walks him there with floor taps.
+C1	pass	evidence/beats/ipad-5-sneak.png	The yellow guest's cone sweeps between the stage and the floor.
+C2	pass	evidence/beats/ipad-7-jail.png	Standing in the cone shows the lockup card, then he is back at the start of the sneak.
+C3	pass	evidence/beats/ipad-6-eyes.png	His eyes sit low in the front leaves.
+C4	pass	docs/BRIEF.md	Later chapters are not in this build.
