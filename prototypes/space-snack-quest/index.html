@@ -140,6 +140,23 @@ function loadRoom(id, file) {
 }
 loadRoom('home', 'home-room-empty-closed-v5.png');
 loadRoom('hall', 'hall-room-empty-v1.png');
+// The only guest picture. Each person is a slice of this sheet.
+const GUEST_SHEET_SRC = 'assets/approved/guests/nov8-six-approved-guests.png';
+const guestSheet = new Image();
+guestSheet.src = GUEST_SHEET_SRC;
+const GUEST_PX = 0.2;
+const GUEST_SLICE = {
+  teal: { x: 120, y: 165, w: 243, h: 618 },
+  camera: { x: 556, y: 216, w: 243, h: 567 },
+  backpack: { x: 985, y: 150, w: 219, h: 633 },
+  stilt: { x: 1430, y: 30, w: 243, h: 753 },
+  octopus: { x: 1867, y: 195, w: 249, h: 579 },
+  robot: { x: 2293, y: 165, w: 267, h: 618 },
+};
+function guestBox(kind, scale) {
+  const s = GUEST_SLICE[kind];
+  return { w: s.w * GUEST_PX * scale, h: s.h * GUEST_PX * scale };
+}
 function drawRoom(id) {
   const img = rooms[id];
   if (img && img.complete && img.naturalWidth) ctx.drawImage(img, 0, 0, W, H);
@@ -169,12 +186,13 @@ const LEAF = { x: 416, y: 492, w: 52, h: 20 };
 const EYES = [{ x: 426, y: 500 }, { x: 454, y: 500 }];
 const BUSH_GAP = 18;
 const GUESTS = ['teal', 'camera', 'backpack', 'stilt', 'octopus', 'robot'];
-const GUEST_SCALE = 1.2;
+const GUEST_SCALE = 1;
 const POT = { x: 442, y: 526 };
 const DOOR = { x: 300, y: 590 };
 const WATCH_FEET = { x: 640, y: 592 };
 function watchEyes() {
-  return { x: WATCH_FEET.x, y: WATCH_FEET.y - 90 * GUEST_SCALE };
+  const h = guestBox('camera', GUEST_SCALE).h;
+  return { x: WATCH_FEET.x, y: WATCH_FEET.y - h * 0.84 };
 }
 function outsideBush(points, gap) {
   let cx = 0, cy = 0;
@@ -485,9 +503,17 @@ function drawMops(x, y, scale, opt) {
   return head;
 }
 function drawGuest(x, y, scale, kind, face) {
-  ART.guest(ctx, x, y, kind, scale, face, state.t);
   state.guests.push(kind);
-  const head = { x: x - 18 * scale, y: y - 100 * scale, w: 36 * scale, h: 40 * scale, who: kind };
+  const slice = GUEST_SLICE[kind];
+  const box = guestBox(kind, scale);
+  if (guestSheet.complete && guestSheet.naturalWidth) {
+    ctx.save();
+    ctx.translate(x, y);
+    if ((face || 1) < 0) ctx.scale(-1, 1);
+    ctx.drawImage(guestSheet, slice.x, slice.y, slice.w, slice.h, -box.w / 2, -box.h, box.w, box.h);
+    ctx.restore();
+  }
+  const head = { x: x - box.w * 0.28, y: y - box.h, w: box.w * 0.56, h: box.h * 0.24, who: kind };
   state.heads.push(head);
   return head;
 }
@@ -703,8 +729,9 @@ function drawPeople() {
   drawCone(eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len, watchHot);
   if (watchHot) rise('bang', eyes.x, eyes.y - 30);
   // The other five approved guests look at the stage. Same cone size, pointed up.
-  [[160, 540, 'teal'], [250, 480, 'backpack'], [560, 580, 'stilt'], [800, 530, 'octopus'], [860, 500, 'robot']].forEach(([x, y, kind]) => {
-    const ox = x, oy = y - 90 * GUEST_SCALE;
+  [[160, 540, 'teal'], [250, 500, 'backpack'], [520, 590, 'stilt'], [780, 540, 'octopus'], [860, 520, 'robot']].forEach(([x, y, kind]) => {
+    const box = guestBox(kind, GUEST_SCALE);
+    const ox = x, oy = y - box.h * 0.8;
     const face = -Math.PI / 2;
     const hot = !state.hidden && inCone(state.sq.x, state.sq.y - 16, ox, oy, face, tune.cone_half, tune.cone_len);
     drawCone(ox, oy, face, tune.cone_half, tune.cone_len, hot);
@@ -785,12 +812,10 @@ function drawLineup() {
   clear('#f4f1ea');
   const names = ['Teal jacket', 'Camera', 'Backpack', 'Stilts', 'Octopus', 'Robot'];
   GUESTS.forEach((kind, i) => {
-    const x = 100 + i * 145;
-    drawGuest(x, 430, 1.15, kind, 1);
-    say(names[i], x, 500, 18, INK, 'center', 700);
+    const x = 110 + i * 145;
+    drawGuest(x, 500, 1, kind, 1);
+    say(names[i], x, 540, 18, INK, 'center', 700);
   });
-  drawSquatch(80, 200, 1.75, { face: 1 });
-  say('Squatch', 80, 250, 16, INK, 'center', 700);
 }
 
 // ---- Scenes ----------------------------------------------------------------------------
@@ -854,7 +879,8 @@ window.game = {
   get events() { return events; },
   inCone, PLANTER, BUSH_OUTLINE, LEAF, EYES, POT, DOOR, WATCH_FEET, watchEyes, LINE, GUESTS,
   roomsReady() {
-    return Object.keys(rooms).length > 0 && Object.values(rooms).every(img => img.complete && img.naturalWidth);
+    const imgs = [...Object.values(rooms), guestSheet];
+    return imgs.every(img => img.complete && img.naturalWidth);
   },
   step(n = 1, draw = true, alpha = 1) {
     for (let i = 0; i < n; i++) step();

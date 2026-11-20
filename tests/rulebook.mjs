@@ -23,9 +23,24 @@ for (const name of names) {
   if (!fs.existsSync(full)) fail('R13', 'missing file ' + file);
 }
 const approvedDir = path.join(root, 'prototypes', 'space-snack-quest', 'assets', 'approved');
-for (const name of fs.readdirSync(approvedDir)) {
-  if (!name.endsWith('.png')) continue;
+function pngs(dir) {
+  const found = [];
+  for (const name of fs.readdirSync(dir)) {
+    const full = path.join(dir, name);
+    if (fs.statSync(full).isDirectory()) found.push(...pngs(full));
+    else if (name.endsWith('.png')) found.push(name);
+  }
+  return found;
+}
+for (const name of pngs(approvedDir)) {
   if (!book.includes(name)) fail('R20', 'approved folder has an unlisted picture: ' + name);
+}
+const sheet = 'assets/approved/guests/nov8-six-approved-guests.png';
+if (!html.includes(sheet)) fail('R10', 'the game does not load the approved guest sheet');
+if (!book.includes(sheet)) fail('R20', 'the rulebook does not name the guest sheet');
+const otherGuestLoads = [...html.matchAll(/assets\/approved\/guests\/[A-Za-z0-9_./-]+\.png/g)].map(m => m[0]);
+for (const file of otherGuestLoads) {
+  if (file !== sheet) fail('R10', 'guest art is loaded from ' + file + ' instead of the approved sheet');
 }
 if (/assets\/rooms\//.test(html)) fail('R13', 'the game still points at assets/rooms');
 

@@ -66,7 +66,7 @@ Drawn characters, from the live game's code at commit 4d1faa2 (17 Nov 2026), fil
 | Mops | function Fe. His beard is the mop. No mop prop. | Brian, 2026-11-20. |
 | Hidden eyes | function ga. White circle, dark outline, pupil down-right, with the blink. Scaled to 22/40 so the eye stays the same fraction of this bush's front leaf. One eye in each front clump. | Brian, 8 Nov 2026, decision C21, "These are the eyes." |
 
-Guests. Brian approved six on 8 Nov 2026 (decision C12, "We like these ones just fine, and actually the robot is fine as well"). The jelly in a sun hat and the furry alien are not guests. The later sheet of eight code-drawn guests is not approved. The sprite files were not in the old repo, so these six are drawn from his description of that set:
+Guests. Brian approved six on 8 Nov 2026 (decision C12, "We like these ones just fine, and actually the robot is fine as well"). The jelly in a sun hat and the furry alien are not guests. The later sheet of eight code-drawn guests is not approved. The picture is `assets/approved/guests/nov8-six-approved-guests.png`. The game loads that file and no other guest art. The cuts next to it (`teal.png`, `camera.png`, `backpack.png`, `stilt.png`, `octopus.png`, `robot.png`) are the same pixels, kept so each person can be checked. They are not a second drawing. Each person on screen is a slice of the sheet:
 
 1. Teal jacket. Brown skin, short black hair, one antenna with a black ball off to the side, teal jacket, white chest panel, black pants.
 2. Camera. Light skin, brown hair, blue shirt, yellow and pink badges, black camera, dark shorts, tan legs.
