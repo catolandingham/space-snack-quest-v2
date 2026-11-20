@@ -4,6 +4,10 @@ If it is not in this file, it is not decided.
 
 Every correction from Brian replaces the old line and adds or updates a check in the same change. This file does not keep old versions. Git does.
 
+## Play
+
+The game is at https://squatch.onrender.com. This is the only place that states that link.
+
 ## Beats, in order
 
 | Beat | Room | What happens |
@@ -101,6 +105,7 @@ Only these six may appear. Their names in the game are teal, camera, backpack, s
 | R18 | The six guests are flat cartoons and taller than Squatch and Mops. | Eyes, on the lineup |
 | R19 | Being seen restarts the sneak, not the whole story. | Automatic |
 | R20 | The code does not show a line, a picture, or a guest the rulebook does not list. | Automatic |
+| R21 | The play link is only in this file. | Automatic |
 
 ## Still needs Brian
 

@@ -130,6 +130,31 @@ for (const line of lines) {
   if (!book.includes(line)) fail('R20', 'approved line is not in the rulebook: ' + line);
 }
 
+const playHost = 'onrender' + '.com';
+const playLink = 'https://squatch.' + playHost;
+if (!book.includes(playLink)) fail('R21', 'the rulebook does not state the play link');
+function walk(dir, found) {
+  for (const name of fs.readdirSync(dir)) {
+    if (name === '.git' || name === 'node_modules') continue;
+    const full = path.join(dir, name);
+    const stat = fs.statSync(full);
+    if (stat.isDirectory()) walk(full, found);
+    else found.push(full);
+  }
+}
+const files = [];
+walk(root, files);
+const skip = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'zip', 'woff', 'woff2', 'ttf', 'ico']);
+for (const full of files) {
+  const rel = path.relative(root, full).split(path.sep).join('/');
+  if (rel === 'docs/RULEBOOK.md') continue;
+  const ext = path.extname(full).slice(1).toLowerCase();
+  if (skip.has(ext)) continue;
+  let text = '';
+  try { text = fs.readFileSync(full, 'utf8'); } catch { continue; }
+  if (text.includes(playHost)) fail('R21', 'play host is outside the rulebook: ' + rel);
+}
+
 if (problems.length) {
   console.log('RULEBOOK CHECK FAILED');
   for (const p of problems) console.log('- ' + p);
