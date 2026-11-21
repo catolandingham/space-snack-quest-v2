@@ -55,6 +55,7 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Forgot lunch | Squatch's room | "He forgot his lunch!" |
 | Lunch run | Party hall, then the hallway | A short walk. "I'll take Mops his lunch." The hallway is the locked picture assets/approved/hallway-room-empty-v6.png. |
 | Lunch hello | Hallway | Mops says "Squatch! You should be hiding." then "My lunch! You're the best." |
+| One snack | Party hall, at the counter | Back at the snack bar. Mops says "One snack. That's the rule." |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 

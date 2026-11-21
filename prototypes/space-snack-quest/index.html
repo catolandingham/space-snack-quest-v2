@@ -296,6 +296,7 @@ const LINE = {
   bring: "I'll take Mops his lunch.",
   hiding: 'Squatch! You should be hiding.',
   best: "My lunch! You're the best.",
+  one: "One snack. That's the rule.",
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const NEXT = [
@@ -306,6 +307,7 @@ const NEXT = [
   { room: 'hall', who: 'sq', text: LINE.bring, x: 500, y: 560 },
   { room: 'hallway', who: 'mops', text: LINE.hiding, mops: true, x: 280, y: 530 },
   { room: 'hallway', who: 'mops', text: LINE.best, mops: true, x: 280, y: 530 },
+  { room: 'hall', who: 'mops', text: LINE.one, mops: true, x: 620, y: 540, mx: 780, my: 500 },
 ];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
@@ -1575,6 +1577,7 @@ function drawPeople() {
     drawSquatch(state.sq.x, state.sq.y, tune.hall_sq, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, hop });
     drawWorn(state.sq.x, state.sq.y - hop, tune.hall_sq);
   } else drawEyes();
+  if (!state.mo.hidden) drawMops(state.mo.x, state.mo.y, tune.hall_sq, { face: state.mo.face || -1 });
 }
 function speakerCue() {
   if (state.beat === 'wake') return 'lines';

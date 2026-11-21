@@ -157,6 +157,7 @@ const lines = [
   "I'll take Mops his lunch.",
   'Squatch! You should be hiding.',
   "My lunch! You're the best.",
+  "One snack. That's the rule.",
   'hallway-room-empty-v6.png',
   'MY GARDIANS',
   'nick1-wookiee.mp3',
@@ -177,7 +178,7 @@ for (let n = 1; n <= 61; n++) {
 for (const word of ['built', 'not yet built', 'dropped', 'milling', 'ga()']) {
   if (!checklist.includes(word)) fail('R20', 'story checklist is missing ' + word);
 }
-if (html.includes('One snack. That')) fail('R1', 'the one-snack rule is said at the party');
+if (html.includes("beat === 'snack'")) fail('R1', 'the old party snack beat is back');
 if (html.includes('Nobody can live outside')) fail('R1', 'the cut no-fur speech is back');
 if (!book.includes('Day 2')) fail('R20', 'the rulebook does not keep the one-snack rule for later');
 for (const line of lines) {
