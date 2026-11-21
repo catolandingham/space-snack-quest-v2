@@ -29,15 +29,15 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 3 | That evening. Peek from the doorway. He does not walk out. Banner, muffled talk, "Robots?" once. | built |
 | 4 | Sneak to the middle plant while the door guest faces the stage. Soft outline only on that one next place. HIDE at the plant. Eyes low in the front leaves, one close pair. Jail card, then that sneak again. Two guests stroll. Only the door guest and the walkers have cones. | built |
 | 5 | Isfred's announcement and the robot poster. The lines are the ones in the old game. | built |
-| 6 | Croc Boys. Lights a little darker, no change to what anyone can see. The intro line is the one in the old game. | built |
-| 7 | Dress-up from the closet. He taps on the top hat, sunglasses, shirt, and boots from the old game. Dragging clothes, and drawing them onto him, was dropped. Both looked wrong. | built |
-| 8 | Into the party in the disguise. | not yet built |
+| 6 | Croc Boys on the stage. Lights a little darker. The guests robot-dance while he watches from the plant. | built |
+| 7 | Dress-up from the home closet. The hat, sunglasses, shirt, and boots show on him. Dragging them on is the next slice. | built |
+| 8 | He walks out of his own door into the party, dressed. | built |
 | 9 | A real party. Guests should mill about. | not yet built. The opening sneak now has two strolling guests. The rest of the party is later. |
-| 10 | Robot dance. A tiny tap game, misses do not end it. | built |
+| 10 | Robot dance in the circle after he is dressed. About thirty seconds. A miss does not end it. Taps only. | built |
 | 11 | Karaoke, the Moon Pie song. | not yet built |
 | 12 | Juke the octopus. | not yet built |
 | 13 | Photo corner. | not yet built |
-| 14 | Snack bar. One snack, then "...Nice gloves." and "Wait a second... fur!" The paw close-up and the pyramid chain were dropped. They need pictures this repo does not have. | built |
+| 14 | Snack bar. The one-snack rule is Day 2, not this party. The party still says "...Nice gloves." and "Wait a second... fur!" The paw close-up is later. | built |
 | 15 | Balloon. | dropped. Brian, 20 Nov 2026: it has never worked. Only a really simple version, and this one is not simple. |
 | 16 | The disguise comes off. "Thanks, I've never got to dance at a party" is the later approved story. The exact line is still pending in the old lines list. | not yet built |
 | 17 | FUR alarm. "…Nice gloves." then "Wait a second... fur!" | not yet built |
