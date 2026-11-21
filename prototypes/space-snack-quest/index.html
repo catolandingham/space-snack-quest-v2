@@ -1,0 +1,1187 @@
+<!doctype html>
+<!-- PROTOTYPE - NOT FOR PRODUCTION -->
+<!-- Question: Can a kid follow the opening with taps only? -->
+<!-- Date: 2026-11-20 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Space Snack Quest</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; touch-action: none; user-select: none; }
+  body { font-variant-numeric: tabular-nums; }
+  canvas { display: block; margin: 0 auto; touch-action: none; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<script src="config.js"></script>
+<script src="characters.js"></script>
+<script>
+'use strict';
+// PROTOTYPE - NOT FOR PRODUCTION
+// Question: Can a kid follow the opening with taps only?
+// Date: 2026-11-20
+
+// ---- Built to be checked ----------------------------------------------------------------
+const params = new URLSearchParams(location.search);
+const tune = new Proxy({}, { get: (_, k) => CONFIG[k].value });
+const STEP = 1 / 60;
+const W = 960, H = 640;
+const PIXEL = false;
+const FONT = 'sans-serif';
+const TITLE = 'Space Snack Quest';
+const clock = window.GAME_CLOCK || { now: () => performance.now() / 1000 };
+const CHEAP = params.get('render') === 'cheap';
+let seed;
+function rng() {
+  seed = (seed + 0x6D2B79F5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), seed | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+const events = [];
+
+// ---- Screen ---------------------------------------------------------------------------
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const INK = '#1e2430';
+function fit() {
+  const k = Math.min(innerWidth / W, innerHeight / H);
+  const s = PIXEL ? Math.max(1, Math.floor(k)) : k;
+  const r = PIXEL ? 1 : s * (devicePixelRatio || 1);
+  canvas.width = Math.round(W * r); canvas.height = Math.round(H * r);
+  canvas.style.width = Math.round(W * s) + 'px'; canvas.style.height = Math.round(H * s) + 'px';
+  canvas.style.marginTop = Math.max(0, Math.floor((innerHeight - H * s) / 2)) + 'px';
+  canvas.style.imageSmoothingEnabled = 'auto';
+  ctx.setTransform(r, 0, 0, r, 0, 0); ctx.imageSmoothingEnabled = !PIXEL;
+}
+addEventListener('resize', fit); fit();
+function clear(c) { ctx.fillStyle = c; ctx.fillRect(0, 0, W, H); }
+function say(s, x, y, size, c, align, weight) {
+  ctx.fillStyle = c;
+  ctx.font = (weight || 700) + ' ' + size + 'px ' + FONT;
+  ctx.textAlign = align || 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(s, x, y);
+}
+
+// ---- Input -----------------------------------------------------------------------------
+const down = new Set(), hit = new Set();
+const pressed = code => hit.has(code);
+addEventListener('keydown', e => {
+  startAudio();
+  if (!e.repeat) { down.add(e.code); hit.add(e.code); }
+  if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
+});
+addEventListener('keyup', e => down.delete(e.code));
+addEventListener('blur', () => down.clear());
+let pendingTap = null;
+function logicalPoint(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
+}
+canvas.addEventListener('pointerdown', e => {
+  startAudio();
+  pendingTap = logicalPoint(e);
+  e.preventDefault();
+});
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+// ---- Audio: original tunes, no borrowed melody ------------------------------------------
+let audio = null, muted = false;
+function startAudio() {
+  if (!audio) {
+    const ac = window.GAME_AUDIO || new (window.AudioContext || window.webkitAudioContext)();
+    const out = ac.createGain();
+    out.gain.value = muted ? 0 : tune.volume;
+    out.connect(ac.destination);
+    audio = { ac, out };
+  }
+  if (audio.ac.state === 'suspended') audio.ac.resume();
+}
+function setMuted(m) { muted = m; if (audio) audio.out.gain.value = m ? 0 : tune.volume; }
+addEventListener('tune', () => setMuted(muted));
+function toneAt(freq, when, dur, type, vol) {
+  if (!audio || muted) return;
+  const o = audio.ac.createOscillator(), g = audio.ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, when);
+  g.gain.exponentialRampToValueAtTime(0.001, when + dur);
+  o.connect(g).connect(audio.out); o.start(when); o.stop(when + dur);
+}
+// An original pentatonic phrase. Not a known song.
+const JOE = [262, 330, 392, 523, 392, 330, 349, 262, 220, 262, 330, 392, 330, 294, 262, 220];
+let joeNext = 0, joeIndex = 0;
+function pumpJoe() {
+  if (!audio || state.song !== 'joe') return;
+  const now = audio.ac.currentTime;
+  if (joeNext < now) joeNext = now + 0.05;
+  while (joeNext < now + 1.4) {
+    toneAt(JOE[joeIndex % JOE.length], joeNext, 0.32, 'triangle', 0.07);
+    joeIndex++;
+    joeNext += 0.36;
+  }
+}
+function goodbyeNotes(who) {
+  if (!audio) return;
+  const now = audio.ac.currentTime + 0.02;
+  const notes = who === 'sq' ? [330, 392, 494, 587] : [494, 440, 392, 330, 262];
+  notes.forEach((f, i) => toneAt(f, now + i * 0.22, 0.28, 'sine', 0.09));
+}
+function heartChime() {
+  if (!audio) return;
+  const now = audio.ac.currentTime;
+  [262, 330, 392, 523].forEach((f, i) => toneAt(f, now + i * 0.16, 0.28, 'triangle', 0.06));
+}
+function blip() { if (!audio) return; toneAt(520, audio.ac.currentTime, 0.06, 'square', 0.04); }
+
+// ---- Rooms: the locked pictures, drawn as-is -------------------------------------------
+const rooms = {};
+function loadRoom(id, file) {
+  const img = new Image();
+  img.src = 'assets/approved/' + file;
+  rooms[id] = img;
+}
+loadRoom('home', 'home-room-empty-closed-v5.png');
+loadRoom('hall', 'hall-room-empty-v1.png');
+let hallMasked = null;
+function maskedHall() {
+  if (hallMasked) return hallMasked;
+  const img = rooms.hall;
+  if (!img || !img.complete || !img.naturalWidth) return null;
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth;
+  c.height = img.naturalHeight;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, 0, 0);
+  const frame = g.getImageData(0, 0, c.width, c.height);
+  const d = frame.data;
+  const w = c.width;
+  const yellow = i => {
+    const r = d[i], gch = d[i + 1], b = d[i + 2];
+    return r > 210 && gch > 150 && gch < 240 && b < 110 && r - b > 110;
+  };
+  for (let y = 300; y < 720 && y < c.height; y++) {
+    for (let x = 1000; x < 1260 && x < w; x++) {
+      const i = (y * w + x) * 4;
+      if (!yellow(i)) continue;
+      let nr = d[i], ng = d[i + 1], nb = d[i + 2];
+      for (const [dx, dy] of [[-8, 0], [8, 0], [0, -8], [0, 8]]) {
+        const xx = x + dx, yy = y + dy;
+        if (xx < 0 || yy < 0 || xx >= w || yy >= c.height) continue;
+        const j = (yy * w + xx) * 4;
+        if (!yellow(j)) { nr = d[j]; ng = d[j + 1]; nb = d[j + 2]; break; }
+      }
+      d[i] = nr; d[i + 1] = ng; d[i + 2] = nb;
+    }
+  }
+  g.putImageData(frame, 0, 0);
+  hallMasked = c;
+  return c;
+}
+function drawRoom(id) {
+  const img = id === 'hall' ? (maskedHall() || rooms.hall) : rooms[id];
+  if (img && (img.complete === undefined || img.complete) && img.width) ctx.drawImage(img, 0, 0, W, H);
+  else { ctx.fillStyle = '#d7d1c6'; ctx.fillRect(0, 0, W, H); }
+}
+
+// ---- Lines already approved ------------------------------------------------------------
+const LINE = {
+  resort: 'Stormtop Cloud Resort, floating above Jupiter.',
+  intro: "This is Squatch. He's a Sasquatch.",
+  morning: [
+    'Morning, Squatch.',
+    'Good morning, Stormtop! Big party in the hall tonight!',
+    'Party?',
+    "Now here's a classic hit from Dog Zylan!",
+  ],
+  morningWho: ['mops', 'speaker', 'sq', 'speaker'],
+  stay: 'Stay in here.',
+  sqSong: "I'm floating in space!",
+  moSong: 'Weeee-eenn-nnttt!',
+  closet: "Mops's costumes. And my Guardian Box.",
+  bed: 'Not sleepy anymore.',
+  homework: 'DO · homework',
+  calendar: [
+    'MOONMUNCH',
+    'FUZZUARY',
+    'Sponsored by MOON PIES',
+    'Sock hunt',
+    'family Olympics night',
+    'Wash outside windows (remember space suit!)',
+    'Blanket fort night',
+  ],
+  evening: 'That evening\u2026',
+  peek: 'PEEK',
+  hide: 'HIDE · plant',
+  banner: 'ROBOTICS DELEGATION!',
+  mumble: 'Mmf mmf... mm-mmf... mmf!',
+  robots: 'Robots?',
+  lockup: 'LOCKUP',
+  saw: 'A guest saw Squatch!',
+};
+const HOME = {
+  calendar: { x: 108, y: 198, w: 96, h: 120 },
+  closet: { x: 40, y: 198, w: 70, h: 140 },
+  bed: { x: 100, y: 420, w: 190, h: 140 },
+};
+const SPEAKER = { x: 860, y: 140, w: 48, h: 34 };
+// The planter's own shape, measured on the locked hall picture. An outline, not a circle or a box.
+// Outer edge of the middle bush and its pot, measured on the locked hall picture.
+// The old game drew a circle here. This follows the leaves, the gap between the front clumps, and the pot.
+const PLANTER = [
+  [442, 443], [462, 454], [476, 472], [481, 488], [472, 506], [460, 516],
+  [460, 540], [425, 540], [423, 516], [410, 504], [403, 486], [412, 468], [426, 452],
+];
+const LEAF = { x: 416, y: 488, w: 56, h: 28 };
+// One close pair, the original ga() size, centered on the seam of the two front clumps.
+const EYE_PAIR = { x: 439, y: 498 };
+const EYES = [{ x: EYE_PAIR.x - 9, y: EYE_PAIR.y }, { x: EYE_PAIR.x + 9, y: EYE_PAIR.y }];
+const BUSH_GAP = 18;
+const GUESTS = ['teal', 'camera', 'backpack', 'stilt', 'octopus', 'robot'];
+const GUEST_SCALE = 1;
+const GUEST_PX = 0.2;
+const guestSprites = {};
+for (const kind of GUESTS) {
+  const img = new Image();
+  img.src = 'assets/approved/guests/' + kind + '.png';
+  guestSprites[kind] = img;
+}
+function guestBox(kind, scale) {
+  const img = guestSprites[kind];
+  const w = img && img.naturalWidth ? img.naturalWidth : 240;
+  const h = img && img.naturalHeight ? img.naturalHeight : 620;
+  return { w: w * GUEST_PX * scale, h: h * GUEST_PX * scale };
+}
+const POT = { x: 442, y: 526 };
+// The gap in the bottom wall of the locked hall picture.
+const DOOR = { x: 478, y: 596 };
+const WATCH_FEET = { x: 640, y: 590 };
+const WATCH_EYES = { x: 640, y: 500 };
+function watchEyes() { return { x: WATCH_EYES.x, y: WATCH_EYES.y }; }
+function freshWalkers() {
+  return [
+    { kind: 'teal', x: 720, y: 520, x0: 720, y0: 520, x1: 780, y1: 500, dir: 1, pause: 0, face: 0 },
+    { kind: 'octopus', x: 150, y: 460, x0: 150, y0: 460, x1: 240, y1: 440, dir: 1, pause: 0.6, face: 0 },
+  ];
+}
+const STANDING = [
+  { kind: 'backpack', x: 230, y: 500 },
+  { kind: 'stilt', x: 280, y: 450 },
+  { kind: 'robot', x: 200, y: 540 },
+];
+function outsideBush(points, gap) {
+  let cx = 0, cy = 0;
+  for (const p of points) { cx += p[0]; cy += p[1]; }
+  cx /= points.length; cy /= points.length;
+  return points.map(([x, y]) => {
+    const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy) || 1;
+    return [+(x + (dx / d) * gap).toFixed(2), +(y + (dy / d) * gap).toFixed(2)];
+  });
+}
+const BUSH_OUTLINE = outsideBush(PLANTER, BUSH_GAP);
+
+// ---- Cast ------------------------------------------------------------------------------
+let scene, state;
+function cast() {
+  return {
+    sq: { x: 400, y: 530, face: 1, walk: 0, moving: false, target: null, sing: false },
+    mo: { x: 500, y: 530, face: 1, walk: 0, moving: false, hidden: false, sing: false },
+  };
+}
+function reset() {
+  seed = Number(params.get('seed')) || CONFIG.seed;
+  const c = cast();
+  state = {
+    t: 0, score: 0, gained: '',
+    beat: 'title', room: 'home', song: 'off',
+    line: 0, control: false, paused: false,
+    restarted: 0, hidden: false, hopT: 0, lookT: 0,
+    sq: c.sq, mo: c.mo,
+    words: [], bubbles: [], heads: [], cones: [], controls: [], guests: [],
+    hint: null, eyes: [], hopTrace: [], mopProp: false, look: 'away',
+    sparks: [], heartAt: -9, bangAt: -9,
+    step: 0, look: '', bitten: false, flopT: 0, hwT: 0,
+    walkers: freshWalkers(),
+  };
+}
+function blocker() {
+  return state.room === 'hall' ? hallBlocked : homeBlocked;
+}
+function homeBlocked(x, y) {
+  if (x < 80 || x > 860 || y < 455 || y > 585) return true;
+  if (x > 100 && x < 300 && y > 470 && y < 565) return true; // the bed crate
+  return false;
+}
+function hallBlocked(x, y) {
+  if (x < 56 || x > 760 || y < 408 || y > 608) return true;
+  if (x > 420 && x < 470 && y > 500 && y < 548) return true; // the middle pot
+  if (x > 790 && y > 300 && y < 540) return true; // the snack bar
+  for (const b of guestFeet()) {
+    if (Math.abs(x - b.x) < 26 && y < b.y + 6 && y > b.y - 78) return true;
+  }
+  return false;
+}
+function guestFeet() {
+  const feet = STANDING.map(s => ({ x: s.x, y: s.y }));
+  feet.push({ x: WATCH_FEET.x, y: WATCH_FEET.y });
+  for (const w of (state && state.walkers) || []) feet.push({ x: w.x, y: w.y });
+  return feet;
+}
+function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+function walkToward(p, tx, ty, dt, free) {
+  const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
+  if (d < 4) { p.moving = false; return true; }
+  const step = Math.min(d, tune.walk_speed * dt);
+  p.face = dx < -1 ? -1 : dx > 1 ? 1 : p.face;
+  p.moving = true;
+  p.walk += dt * 9;
+  const nx = p.x + (dx / d) * step, ny = p.y + (dy / d) * step;
+  const block = free ? () => false : blocker();
+  if (!block(nx, ny)) { p.x = nx; p.y = ny; }
+  else if (!block(nx, p.y)) p.x = nx;
+  else if (!block(p.x, ny)) p.y = ny;
+  else p.moving = false;
+  return false;
+}
+function angNorm(a) { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; }
+function inCone(px, py, ox, oy, face, half, len) {
+  const dx = px - ox, dy = py - oy, d = Math.hypot(dx, dy);
+  if (d > len || d < 1) return false;
+  return Math.abs(angNorm(Math.atan2(dy, dx) - face)) < half;
+}
+function lookNow() {
+  const away = tune.safe_time, turn = tune.turn_time, look = tune.look_time;
+  const cyc = away + turn + look + turn;
+  const u = state.lookT % cyc;
+  const up = -Math.PI / 2, left = Math.PI - 0.55;
+  if (u < away) return { mode: 'away', face: up };
+  if (u < away + turn) return { mode: 'turn', face: up + angNorm(left - up) * ((u - away) / turn) };
+  if (u < away + turn + look) return { mode: 'look', face: left };
+  const k = (u - away - turn - look) / turn;
+  return { mode: 'turn', face: left + angNorm(up - left) * k };
+}
+
+// ---- Story steps -----------------------------------------------------------------------
+function beginStory() {
+  state.beat = 'resort';
+  state.room = 'home';
+  state.line = 0;
+  state.song = 'joe';
+  state.control = false;
+  joeNext = 0;
+  blip();
+}
+function advanceStory() {
+  if (state.beat === 'resort') { state.beat = 'intro'; blip(); return; }
+  if (state.beat === 'intro') { state.beat = 'morning'; state.line = 1; state.song = 'off'; blip(); return; }
+  if (state.beat === 'morning') {
+    state.line++;
+    if (state.line > LINE.morning.length) {
+      state.beat = 'sing';
+      state.control = true;
+      state.line = 0;
+    } else blip();
+    return;
+  }
+  if (state.beat === 'song') {
+    state.line++;
+    if (state.line >= 2) {
+      state.beat = 'stay';
+      state.mo.sing = false;
+      state.sq.sing = false;
+      state.mo.face = state.sq.x < state.mo.x ? -1 : 1;
+    } else { blip(); goodbyeNotes('mops'); state.sq.sing = false; state.mo.sing = true; }
+    return;
+  }
+  if (state.beat === 'stay') { state.beat = 'leave'; return; }
+  if (state.beat === 'evening') { state.beat = 'peekready'; return; }
+  if (state.beat === 'jail') { restartSneak(); return; }
+}
+function startSong() {
+  state.beat = 'songwalk';
+  state.control = false;
+  state.sq.target = null;
+  state.sq.sing = false;
+  state.mo.hidden = false;
+}
+function enterPeek() {
+  state.beat = 'peek';
+  state.room = 'hall';
+  state.control = false;
+  state.line = 0;
+  state.hidden = false;
+  state.lookT = 0;
+  state.walkers = freshWalkers();
+  state.sq.x = DOOR.x; state.sq.y = DOOR.y;
+  state.sq.target = null; state.sq.moving = false;
+  state.mo.hidden = true;
+}
+function enterSneak() {
+  state.beat = 'sneak';
+  state.room = 'hall';
+  state.control = true;
+  state.hidden = false;
+  state.lookT = 0;
+  state.walkers = freshWalkers();
+  state.sq.x = DOOR.x; state.sq.y = DOOR.y; state.sq.face = -1;
+  state.sq.target = null; state.sq.moving = false; state.sq.sing = false;
+  state.mo.hidden = true;
+  state.gained = '';
+}
+function restartSneak() {
+  state.restarted++;
+  state.beat = 'sneak';
+  state.control = true;
+  state.hidden = false;
+  state.hopT = 0;
+  state.lookT = 0;
+  state.walkers = freshWalkers();
+  state.sq.x = DOOR.x; state.sq.y = DOOR.y;
+  state.sq.target = null; state.sq.moving = false;
+  state.hopTrace = [];
+}
+function seenBySomeone(look) {
+  const bodyY = state.sq.y - 16;
+  if (look.mode === 'look') {
+    const eyes = watchEyes();
+    if (inCone(state.sq.x, bodyY, eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len)) return true;
+  }
+  for (const w of state.walkers) {
+    if (inCone(state.sq.x, bodyY, w.x, w.y - 70, w.face, tune.cone_half, tune.cone_len)) return true;
+  }
+  return false;
+}
+function tickWalkers(dt) {
+  for (const w of state.walkers) {
+    if (w.pause > 0) { w.pause -= dt; w.face = -Math.PI / 2; continue; }
+    const tx = w.dir > 0 ? w.x1 : w.x0, ty = w.dir > 0 ? w.y1 : w.y0;
+    const dx = tx - w.x, dy = ty - w.y, d = Math.hypot(dx, dy) || 1;
+    const step = Math.min(d, 55 * dt);
+    w.x += (dx / d) * step; w.y += (dy / d) * step;
+    w.face = dx >= 0 ? 0 : Math.PI;
+    if (d <= 55 * dt + 0.5) { w.x = tx; w.y = ty; w.dir *= -1; w.pause = 2.2; }
+  }
+}
+function caught() {
+  state.beat = 'hop';
+  state.control = false;
+  state.hopT = 0;
+  state.sq.target = null;
+  state.sq.moving = false;
+  state.hopTrace = [{ x: state.sq.x, y: state.sq.y }];
+  if (audio) toneAt(180, audio.ac.currentTime, 0.18, 'sawtooth', 0.06);
+}
+function doHide() {
+  state.beat = 'hidden';
+  state.hidden = true;
+  state.control = false;
+  state.sq.target = null;
+  state.sq.moving = false;
+  state.gained = 'hidden in the plant';
+  blip();
+}
+function hitControl(p, c) {
+  return p.x >= c.x && p.x <= c.x + c.w && p.y >= c.y && p.y <= c.y + c.h;
+}
+function onTap(p) {
+  const pause = state.controls.find(c => c.id === 'pause');
+  const mute = state.controls.find(c => c.id === 'mute');
+  if (pause && hitControl(p, pause)) { state.paused = !state.paused; return; }
+  if (mute && hitControl(p, mute)) { setMuted(!muted); return; }
+  if (scene === 'title' || state.beat === 'title') { beginStory(); scene = 'play'; return; }
+  if (state.beat === 'sing') {
+    const chip = state.controls.find(c => c.id === 'SING ALONG');
+    if (chip && hitControl(p, chip)) startSong();
+    else if (state.control) state.sq.target = { x: p.x, y: p.y };
+    return;
+  }
+  if (state.beat === 'alone') { tapAlone(p); return; }
+  if (state.beat === 'peekready') {
+    const chip = state.controls.find(c => c.id === 'PEEK');
+    if (chip && hitControl(p, chip)) enterPeek();
+    return;
+  }
+  if (state.beat === 'peek') {
+    state.line++;
+    if (state.line >= 2) enterSneak();
+    else blip();
+    return;
+  }
+  if (state.beat === 'sneak') {
+    const chip = state.controls.find(c => c.id === LINE.hide);
+    if (chip && hitControl(p, chip)) { doHide(); return; }
+    if (state.control && !state.paused) state.sq.target = { x: p.x, y: p.y };
+    return;
+  }
+  if (state.beat === 'morning' || state.beat === 'song' || state.beat === 'evening' || state.beat === 'jail' || state.beat === 'resort' || state.beat === 'intro' || state.beat === 'stay') advanceStory();
+}
+function tapAlone(p) {
+  if (state.look === 'closet' || state.look === 'bedline') {
+    state.look = '';
+    state.step++;
+    blip();
+    return;
+  }
+  if (state.look === 'calendar') {
+    const pie = state.controls.find(c => c.id === 'pie');
+    if (pie && hitControl(p, pie) && !state.bitten) { state.bitten = true; blip(); return; }
+    if (state.bitten) { state.look = ''; state.step++; blip(); }
+    return;
+  }
+  if (state.look === 'flop') return;
+  const spot = state.controls.find(c => c.id === 'look');
+  if (spot && hitControl(p, spot)) {
+    if (state.step === 0) state.look = 'calendar';
+    else if (state.step === 1) state.look = 'closet';
+    else if (state.step === 2) {
+      state.look = 'flop';
+      state.flopT = 0;
+      state.sq.x = 190;
+      state.sq.y = 530;
+    }
+    blip();
+    return;
+  }
+  const hw = state.controls.find(c => c.id === LINE.homework);
+  if (hw && hitControl(p, hw)) {
+    state.beat = 'homework';
+    state.hwT = 0;
+    state.look = '';
+    state.sq.x = 620;
+    state.sq.y = 500;
+  }
+}
+function activateKey() {
+  if (scene === 'title') { beginStory(); scene = 'play'; return; }
+  if (state.beat === 'sing') { startSong(); return; }
+  if (state.beat === 'peekready') { enterPeek(); return; }
+  if (state.beat === 'peek') { state.line++; if (state.line >= 2) enterSneak(); return; }
+  if (state.beat === 'sneak') {
+    if (dist(state.sq, POT) <= tune.hide_reach) doHide();
+    return;
+  }
+  if (state.beat === 'morning' || state.beat === 'song' || state.beat === 'evening' || state.beat === 'jail' || state.beat === 'resort' || state.beat === 'intro' || state.beat === 'stay') advanceStory();
+}
+
+function tickWorld(dt) {
+  tickSparks(dt);
+  if (state.song === 'joe') pumpJoe();
+  if (state.paused && (state.beat === 'sneak' || state.beat === 'sing')) return;
+  const keys = state.control && (state.beat === 'sneak' || state.beat === 'sing');
+  if (keys) {
+    let mx = 0, my = 0;
+    if (down.has('ArrowRight')) mx += 1;
+    if (down.has('ArrowLeft')) mx -= 1;
+    if (down.has('ArrowDown')) my += 1;
+    if (down.has('ArrowUp')) my -= 1;
+    if (mx || my) {
+      state.sq.target = null;
+      walkToward(state.sq, state.sq.x + mx * 48, state.sq.y + my * 48, dt);
+    }
+  }
+  if (state.beat === 'sing' && state.sq.target) walkToward(state.sq, state.sq.target.x, state.sq.target.y, dt);
+  // Morning, the song, and Mops leaving all stay in this room. The party hall
+  // is only the evening sneak (enterSneak). The old goodbye walked Mops to
+  // (930, 500) with the walls turned off, and treated x > 890 as "he is gone".
+  // The right wall of this picture is about x=925, so that walk carried him
+  // through the wall and off the picture. The hall is a different picture and
+  // was not drawn yet, but he had already left the room, and the next place
+  // the player stands is that hall.
+  if (state.beat !== 'peek' && state.beat !== 'sneak' && state.beat !== 'hop' && state.beat !== 'hidden' && state.beat !== 'jail') {
+    state.room = 'home';
+  }
+  if (state.beat === 'alone' && state.look === 'flop') {
+    state.flopT += dt;
+    if (state.flopT > 0.9) state.look = 'bedline';
+  }
+  if (state.beat === 'homework') {
+    state.hwT += dt;
+    if (state.hwT > 1.8) state.beat = 'evening';
+  }
+  if (state.beat === 'songwalk') {
+    const a = walkToward(state.mo, 760, 500, dt);
+    const b = walkToward(state.sq, 680, 510, dt);
+    state.mo.face = -1; state.sq.face = 1;
+    if (a && b) {
+      state.beat = 'song'; state.line = 0;
+      state.sq.sing = true; state.mo.sing = false;
+      goodbyeNotes('sq'); blip();
+    }
+  }
+  if (state.beat === 'leave') {
+    state.mo.face = 1; state.mo.sing = false;
+    // Just inside the right-wall doorway, still on the bedroom floor.
+    if (walkToward(state.mo, 820, 500, dt)) {
+      state.mo.hidden = true;
+      state.beat = 'alone';
+      state.step = 0;
+      state.look = '';
+      state.song = 'off';
+    }
+  }
+  if (state.beat === 'peek' || state.beat === 'sneak') {
+    if (!state.paused) { state.lookT += dt; tickWalkers(dt); }
+  }
+  if (state.beat === 'sneak') {
+    if (state.sq.target) walkToward(state.sq, state.sq.target.x, state.sq.target.y, dt);
+    const look = lookNow();
+    state.look = look.mode;
+    if (!state.hidden && seenBySomeone(look)) caught();
+  }
+  if (state.beat === 'hop') {
+    state.hopT += dt;
+    const k = Math.min(1, state.hopT / tune.hop_time);
+    const hop = Math.sin(k * Math.PI) * tune.hop_height;
+    state.hopTrace.push({ x: state.sq.x, y: state.sq.y - hop });
+    if (state.hopTrace.length > 50) state.hopTrace.shift();
+    if (state.hopT >= tune.hop_time) state.beat = 'jail';
+  }
+}
+
+// ---- Drawing ---------------------------------------------------------------------------
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function fillStroke(fill, width) {
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (width) { ctx.lineWidth = width; ctx.strokeStyle = INK; ctx.stroke(); }
+}
+function limb(x1, y1, x2, y2, width, color) {
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = INK; ctx.lineWidth = width + 4;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.strokeStyle = color; ctx.lineWidth = width;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+}
+function scallop(x, y, rx, ry, n, fill) {
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const px = x + Math.cos(a) * rx, py = y + Math.sin(a) * ry;
+    if (i === 0) ctx.moveTo(px, py);
+    else {
+      const b = ((i - 0.5) / n) * Math.PI * 2;
+      ctx.quadraticCurveTo(x + Math.cos(b) * (rx + 3), y + Math.sin(b) * (ry + 3), px, py);
+    }
+  }
+  ctx.closePath();
+  fillStroke(fill, 2);
+}
+function drawSquatch(x, y, scale, opt) {
+  const hop = opt.hop || 0;
+  ctx.save();
+  ctx.translate(0, -hop);
+  ART.squatch(ctx, x, y, scale, { f: opt.face || 1, walk: opt.walk || 0, singing: !!opt.sing, t: state.t });
+  ctx.restore();
+  const head = { x: x - 16 * scale, y: y - hop - 52 * scale, w: 32 * scale, h: 34 * scale, who: 'sq' };
+  state.heads.push(head);
+  return head;
+}
+function drawMops(x, y, scale, opt) {
+  const f = opt.face || 1;
+  ART.mops(ctx, x, y, scale, { f, walk: opt.walk || 0, sway: opt.sway || 0, mouth: opt.sing ? 'o' : '', t: state.t });
+  const hx = x + 17 * scale * f, hy = y - 36 * scale;
+  const head = { x: hx - 16 * scale, y: hy - 14 * scale, w: 34 * scale, h: 34 * scale, who: 'mops' };
+  state.heads.push(head);
+  return head;
+}
+function drawGuest(x, y, scale, kind, face) {
+  state.guests.push(kind);
+  const img = guestSprites[kind];
+  const box = guestBox(kind, scale);
+  if (img && img.complete && img.naturalWidth) {
+    ctx.save();
+    ctx.translate(x, y);
+    if ((face || 1) < 0) ctx.scale(-1, 1);
+    ctx.drawImage(img, -box.w / 2, -box.h, box.w, box.h);
+    ctx.restore();
+  }
+  const head = { x: x - box.w * 0.28, y: y - box.h, w: box.w * 0.56, h: box.h * 0.24, who: kind };
+  state.heads.push(head);
+  return head;
+}
+function drawCone(ox, oy, face, half, len, hot) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(ox, oy);
+  ctx.arc(ox, oy, len, face - half, face + half);
+  ctx.closePath();
+  if (hot) { ctx.fillStyle = 'rgba(255, 214, 80, 0.38)'; ctx.fill(); }
+  ctx.setLineDash([7, 6]);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = hot ? '#8a5a08' : '#2a3142';
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+  state.cones.push({ x: ox, y: oy, face, half, len, dashed: true, hot });
+}
+function wrap(text, size, max) {
+  ctx.font = '700 ' + size + 'px ' + FONT;
+  const words = text.split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w => {
+    const next = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(next).width > max && cur) { lines.push(cur); cur = w; }
+    else cur = next;
+  });
+  if (cur) lines.push(cur);
+  return lines;
+}
+function rectHit(a, b, gap) {
+  return a.x < b.x + b.w + gap && a.x + a.w + gap > b.x && a.y < b.y + b.h + gap && a.y + a.h + gap > b.y;
+}
+function drawBubble(who, text, head) {
+  const size = 26;
+  const lines = wrap(text, size, 380);
+  const w = Math.min(440, Math.max(160, ...lines.map(l => {
+    ctx.font = '700 ' + size + 'px ' + FONT;
+    return ctx.measureText(l).width;
+  })) + 36);
+  const h = 28 + lines.length * 32;
+  let x = head.x + head.w / 2 - w / 2;
+  let y = head.y - h - 16;
+  if (y < 12) y = head.y + head.h + 16;
+  x = Math.max(12, Math.min(W - w - 12, x));
+  let box = { x, y, w, h };
+  if (rectHit(box, head, 8)) {
+    y = Math.max(12, head.y - h - 20);
+    box = { x, y, w, h };
+  }
+  if (rectHit(box, head, 4)) {
+    x = head.x + head.w + 14;
+    if (x + w > W - 8) x = head.x - w - 14;
+    y = Math.max(12, head.y - h / 2);
+    box = { x, y, w, h };
+  }
+  const pulse = 0.5 + 0.5 * Math.sin(state.t * 5);
+  ctx.save();
+  ctx.shadowColor = 'rgba(255, 196, 70, ' + (0.35 + 0.4 * pulse) + ')';
+  ctx.shadowBlur = 12 + 10 * pulse;
+  roundRect(box.x, box.y, box.w, box.h, 16);
+  ctx.fillStyle = '#fffdf8'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.restore();
+  if (who !== 'speaker') {
+    const tag = who === 'mops' ? 'Mops' : who === 'isfred' ? 'Isfred' : 'Squatch';
+    const tagW = tag.length * 11 + 18;
+    roundRect(box.x + 12, box.y - 12, tagW, 22, 10);
+    ctx.fillStyle = who === 'mops' ? '#1f7a4d' : who === 'isfred' ? '#3478f6' : '#6b4428'; ctx.fill();
+    say(tag, box.x + 12 + tagW / 2, box.y - 1, 14, '#fff', 'center', 700);
+  }
+  lines.forEach((l, i) => say(l, box.x + box.w / 2, box.y + 26 + i * 32, size, INK, 'center', 700));
+  state.bubbles.push({ who, text, box, head: { x: head.x, y: head.y, w: head.w, h: head.h } });
+  state.controls.push({ id: 'line', x: box.x, y: box.y - 14, w: box.w, h: box.h + 14, lit: true });
+}
+function drawCard(title, sub, lit) {
+  ctx.fillStyle = 'rgba(18, 22, 32, 0.45)';
+  ctx.fillRect(0, 0, W, H);
+  const size = sub ? 40 : 32;
+  const lines = wrap(title, size, 580);
+  const box = { x: 150, y: 150, w: 660, h: 70 + lines.length * 44 + (sub ? 56 : 20) };
+  const pulse = 0.5 + 0.5 * Math.sin(state.t * 5);
+  ctx.save();
+  ctx.shadowColor = 'rgba(255, 196, 70, ' + (0.45 + 0.4 * pulse) + ')';
+  ctx.shadowBlur = 18;
+  roundRect(box.x, box.y, box.w, box.h, 22);
+  ctx.fillStyle = '#fff8ee'; ctx.fill();
+  ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.restore();
+  lines.forEach((l, i) => say(l, W / 2, box.y + 48 + i * 44, size, INK, 'center', 800));
+  if (sub) say(sub, W / 2, box.y + box.h - 42, 28, INK, 'center', 700);
+  if (lit) state.controls.push({ id: 'card', x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
+}
+function drawPlanterHint() {
+  // Same yellow and thickness as the old goal mark, dashed, and stepped out past the leaves.
+  const pulse = 0.5 + 0.5 * Math.sin(state.t * 2.4);
+  ctx.save();
+  ctx.beginPath();
+  BUSH_OUTLINE.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+  ctx.closePath();
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.shadowColor = '#ffcf33';
+  ctx.shadowBlur = 3 + 8 * pulse;
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = '#ffcf33';
+  ctx.setLineDash([8, 6]);
+  ctx.stroke();
+  ctx.restore();
+  state.hint = {
+    kind: 'planter',
+    points: BUSH_OUTLINE.map(p => p.slice()),
+    inner: PLANTER.map(p => p.slice()),
+    color: '#ffcf33', width: 6, dashed: true, gap: BUSH_GAP,
+  };
+}
+function drawBanner() {
+  roundRect(248, 168, 400, 34, 8);
+  ctx.fillStyle = '#3478f6'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke();
+  say(LINE.banner, 448, 185, 18, '#ffffff', 'center', 800);
+}
+function drawHomeSpot(box) {
+  const pulse = 0.5 + 0.5 * Math.sin(state.t * 3);
+  ctx.save();
+  ctx.shadowColor = '#ffcf33';
+  ctx.shadowBlur = 8 + 8 * pulse;
+  ctx.setLineDash([8, 6]);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#ffcf33';
+  roundRect(box.x, box.y, box.w, box.h, 12);
+  ctx.stroke();
+  ctx.restore();
+  state.controls.push({ id: 'look', x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
+}
+function drawCalendar() {
+  const box = { x: 180, y: 70, w: 600, h: 500 };
+  roundRect(box.x, box.y, box.w, box.h, 18);
+  ctx.fillStyle = '#fff8ee'; ctx.fill();
+  ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
+  say(LINE.calendar[0], box.x + box.w / 2, box.y + 48, 36, INK, 'center', 800);
+  say(LINE.calendar[1], box.x + box.w / 2, box.y + 88, 22, INK, 'center', 700);
+  LINE.calendar.slice(2).forEach((text, i) => say(text, box.x + 36, box.y + 150 + i * 36, 22, INK, 'left', 700));
+  const pie = { x: box.x + box.w - 150, y: box.y + 300, w: 90, h: 90 };
+  ctx.beginPath();
+  ctx.arc(pie.x + 45, pie.y + 45, 36, state.bitten ? 0.6 : 0, Math.PI * 2);
+  ctx.fillStyle = '#e0b040'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+  if (!state.bitten) {
+    const pulse = 0.5 + 0.5 * Math.sin(state.t * 4);
+    ctx.save();
+    ctx.shadowColor = '#ffcf33';
+    ctx.shadowBlur = 10 + 8 * pulse;
+    ctx.beginPath();
+    ctx.arc(pie.x + 45, pie.y + 45, 42, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffcf33';
+    ctx.stroke();
+    ctx.restore();
+  }
+  state.controls.push({ id: 'pie', x: pie.x, y: pie.y, w: pie.w, h: pie.h, lit: !state.bitten });
+  if (state.bitten) state.controls.push({ id: 'card', x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
+}
+function drawHomework() {
+  const x = 560, y = 250;
+  for (let i = 0; i < 3; i++) {
+    const shift = Math.sin(state.hwT * 6 + i) * 8;
+    roundRect(x + i * 14 + shift, y, 70, 90, 4);
+    ctx.fillStyle = i === 2 ? '#fff' : '#efe8d8'; ctx.fill();
+    ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke();
+  }
+}
+function drawChip(id, lit) {
+  ctx.font = '800 28px ' + FONT;
+  const box = { x: 16, y: 64, w: Math.max(180, ctx.measureText(id).width + 40), h: 72 };
+  const pulse = lit ? 0.5 + 0.5 * Math.sin(state.t * 6) : 0;
+  ctx.save();
+  if (lit) { ctx.shadowColor = '#ffcf33'; ctx.shadowBlur = 16 + 14 * pulse; }
+  roundRect(box.x, box.y, box.w, box.h, 18);
+  ctx.fillStyle = lit ? '#fff4cc' : '#f4f1ea'; ctx.fill();
+  ctx.lineWidth = lit ? 5 : 3;
+  ctx.strokeStyle = lit ? '#e09000' : INK;
+  ctx.stroke();
+  ctx.restore();
+  say(id, box.x + box.w / 2, box.y + box.h / 2, 28, INK, 'center', 800);
+  state.controls.push({ id, x: box.x, y: box.y, w: box.w, h: box.h, lit });
+}
+function drawIconButtons() {
+  const pulse = 0;
+  [[ 'pause', 844 ], [ 'mute', 900 ]].forEach(([id, x]) => {
+    roundRect(x, 12, 48, 48, 12);
+    ctx.fillStyle = '#fffdf8'; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.fillStyle = INK;
+    if (id === 'pause') {
+      ctx.fillRect(x + 14, 22, 6, 28); ctx.fillRect(x + 28, 22, 6, 28);
+    } else if (muted) {
+      ctx.fillRect(x + 14, 28, 8, 12);
+      ctx.beginPath(); ctx.moveTo(x + 22, 28); ctx.lineTo(x + 30, 22); ctx.lineTo(x + 30, 46); ctx.lineTo(x + 22, 40); ctx.fill();
+      ctx.strokeStyle = '#e5533d'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x + 16, 20); ctx.lineTo(x + 36, 44); ctx.stroke();
+    } else {
+      ctx.fillRect(x + 14, 28, 8, 12);
+      ctx.beginPath(); ctx.moveTo(x + 22, 28); ctx.lineTo(x + 30, 22); ctx.lineTo(x + 30, 46); ctx.lineTo(x + 22, 40); ctx.fill();
+      ctx.strokeStyle = INK; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x + 33, 36, 6, -0.7, 0.7); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + 33, 36, 10, -0.6, 0.6); ctx.stroke();
+    }
+    state.controls.push({ id, x, y: 12, w: 48, h: 48, lit: false });
+  });
+  if (pulse) return;
+}
+function drawEyes() {
+  for (const p of EYES) ART.eyes(ctx, p.x, p.y, state.t, 1);
+  state.eyes = EYES.map(p => ({ x: p.x, y: p.y, r: 6, pupil: { dx: 1, dy: 1 } }));
+}
+function rise(kind, x, y) {
+  const wait = kind === 'heart' ? 2.5 : 2.2;
+  const key = kind === 'heart' ? 'heartAt' : 'bangAt';
+  if (state.t - state[key] < wait) return;
+  state[key] = state.t;
+  state.sparks.push({ x, y, t: kind === 'heart' ? 1.6 : 2.2, kind });
+  if (kind === 'heart') heartChime();
+}
+function tickSparks(dt) {
+  for (const s of state.sparks) { s.y -= 26 * dt; s.t -= dt; }
+  state.sparks = state.sparks.filter(s => s.t > 0);
+}
+function drawSparks() {
+  for (const s of state.sparks) {
+    const bob = s.kind === 'bang' ? Math.sin(s.t * 14) * 4 : 0;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, s.t * 2);
+    if (s.kind === 'bang') {
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y + bob, 26, 26, 0, 0, Math.PI * 2);
+      ctx.lineWidth = 4; ctx.strokeStyle = '#ffcf33'; ctx.stroke();
+      say('!', s.x, s.y + bob, 40, '#e5533d', 'center', 900);
+    } else say('♥', s.x, s.y, 26, '#e5533d', 'center', 900);
+    ctx.restore();
+  }
+}
+function drawPeople() {
+  if (state.room === 'home') {
+    const sqScale = tune.home_sq, moScale = tune.home_mo;
+    // While he walks out, he faces the door. A cone there would leave the picture.
+    if (!state.mo.hidden && state.beat !== 'leave') {
+      const f = state.mo.face || 1;
+      const hx = state.mo.x + 17 * moScale * f;
+      const hy = state.mo.y - 36 * moScale;
+      const faceBox = { x: hx - 16 * moScale, y: hy - 14 * moScale, w: 34 * moScale, h: 34 * moScale };
+      const aim = f < 0 ? Math.PI : 0;
+      const ox = faceBox.x + faceBox.w / 2 + Math.cos(aim) * (faceBox.w / 2 + 10);
+      const oy = faceBox.y + faceBox.h * 0.42;
+      const hot = inCone(state.sq.x, state.sq.y - 16, ox, oy, aim, tune.cone_half, tune.cone_len);
+      drawCone(ox, oy, aim, tune.cone_half, tune.cone_len, hot);
+      if (hot) rise('heart', state.mo.x, hy - 10);
+    }
+    const flop = state.look === 'flop' ? Math.sin(Math.min(1, state.flopT / 0.9) * Math.PI) * -18 : 0;
+    const sqHead = drawSquatch(state.sq.x, state.sq.y + flop, sqScale, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, sing: state.sq.sing });
+    if (!state.mo.hidden) {
+      const sway = (state.beat === 'morning' || (state.beat === 'song' && state.mo.sing)) ? Math.sin(state.t * 4) * 0.08 : 0;
+      drawMops(state.mo.x, state.mo.y, moScale, { face: state.mo.face, walk: state.mo.moving ? state.mo.walk : 0, sing: state.mo.sing, sway });
+    }
+    drawSpeaker();
+    return sqHead;
+  }
+  const look = lookNow();
+  state.look = look.mode;
+  const eyes = watchEyes();
+  state.watchEyes = eyes;
+  if (look.mode === 'look') {
+    const hot = state.beat !== 'peek' && !state.hidden && inCone(state.sq.x, state.sq.y - 16, eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len);
+    drawCone(eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len, hot);
+    if (hot) rise('bang', eyes.x, eyes.y - 30);
+  }
+  for (const w of state.walkers) {
+    const bob = Math.sin(state.t * 3 + w.x) * 2;
+    const hot = state.beat !== 'peek' && !state.hidden && inCone(state.sq.x, state.sq.y - 16, w.x, w.y - 70, w.face, tune.cone_half, tune.cone_len);
+    drawCone(w.x, w.y - 70, w.face, tune.cone_half, tune.cone_len, hot);
+    if (hot) rise('bang', w.x, w.y - 100);
+    drawGuest(w.x, w.y + bob, GUEST_SCALE, w.kind, Math.cos(w.face) < 0 ? -1 : 1);
+  }
+  for (const s of STANDING) {
+    const bob = Math.sin(state.t * 2 + s.x) * 2;
+    drawGuest(s.x, s.y + bob, GUEST_SCALE, s.kind, 1);
+  }
+  const watchFace = Math.cos(look.face) < 0 ? -1 : 1;
+  drawGuest(WATCH_FEET.x, WATCH_FEET.y + Math.sin(state.t * 2) * 1.5, GUEST_SCALE, 'camera', watchFace);
+  if (state.beat === 'peek') {
+    state.heads.push({ x: DOOR.x - 20, y: 560, w: 40, h: 30, who: 'sq' });
+    state.heads.push({ x: 400, y: 250, w: 50, h: 36, who: 'isfred' });
+    return;
+  }
+  if (!state.hidden) {
+    const hop = state.beat === 'hop' ? Math.sin(Math.min(1, state.hopT / tune.hop_time) * Math.PI) * tune.hop_height : 0;
+    drawSquatch(state.sq.x, state.sq.y, tune.hall_sq, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, hop });
+  } else drawEyes();
+}
+function drawSpeaker() {
+  const s = SPEAKER;
+  roundRect(s.x, s.y, s.w, s.h, 6);
+  ctx.fillStyle = '#8b5a3c'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(s.x + s.w / 2, s.y + s.h / 2, 8, 0, Math.PI * 2);
+  ctx.stroke();
+  state.heads.push({ x: s.x, y: s.y, w: s.w, h: s.h, who: 'speaker' });
+}
+function currentLine() {
+  if (state.beat === 'resort') return { kind: 'card', text: LINE.resort };
+  if (state.beat === 'intro') return { kind: 'card', text: LINE.intro };
+  if (state.beat === 'morning') return { kind: 'line', who: LINE.morningWho[state.line - 1], text: LINE.morning[state.line - 1] };
+  if (state.beat === 'stay') return { kind: 'line', who: 'mops', text: LINE.stay };
+  if (state.beat === 'song' && state.line === 0) return { kind: 'line', who: 'sq', text: LINE.sqSong };
+  if (state.beat === 'song') return { kind: 'line', who: 'mops', text: LINE.moSong };
+  if (state.beat === 'alone' && state.look === 'closet') return { kind: 'line', who: 'sq', text: LINE.closet };
+  if (state.beat === 'alone' && state.look === 'bedline') return { kind: 'line', who: 'sq', text: LINE.bed };
+  if (state.beat === 'alone' && state.look === 'calendar') return { kind: 'calendar' };
+  if (state.beat === 'evening') return { kind: 'evening' };
+  if (state.beat === 'peek' && state.line === 0) return { kind: 'line', who: 'isfred', text: LINE.mumble };
+  if (state.beat === 'peek') return { kind: 'line', who: 'sq', text: LINE.robots };
+  if (state.beat === 'jail') return { kind: 'jail' };
+  return null;
+}
+function headFor(who) {
+  return state.heads.find(h => h.who === who) || state.heads[0];
+}
+function drawPlay() {
+  if (state.beat === 'resort') {
+    clear('#1b2436');
+    drawCard(LINE.resort, '', true);
+    drawIconButtons();
+    return;
+  }
+  drawRoom(state.room === 'hall' ? 'hall' : 'home');
+  if (state.room === 'hall') drawBanner();
+  if (state.beat === 'peek' || state.beat === 'sneak' || state.beat === 'hop' || state.beat === 'hidden' || state.beat === 'jail') drawPlanterHint();
+  drawPeople();
+  drawSparks();
+  const line = currentLine();
+  if (line && (line.kind === 'card' || line.kind === 'intro')) {
+    const g = ctx.createRadialGradient(state.sq.x, state.sq.y - 70, 80, state.sq.x, state.sq.y - 40, 280);
+    g.addColorStop(0, 'rgba(12,16,28,0)');
+    g.addColorStop(1, 'rgba(12,16,28,0.62)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    drawCard(line.text || LINE.intro, '', true);
+  } else if (line && line.kind === 'line') {
+    const head = headFor(line.who);
+    if (head) drawBubble(line.who, line.text, head);
+  } else if (line && line.kind === 'calendar') drawCalendar();
+  else if (line && line.kind === 'evening') drawCard(LINE.evening, '', true);
+  else if (line && line.kind === 'jail') drawCard(LINE.lockup, LINE.saw, true);
+  if (state.beat === 'homework') drawHomework();
+  const close = state.room === 'hall' && dist(state.sq, POT) <= tune.hide_reach;
+  if (state.beat === 'sing') drawChip('SING ALONG', true);
+  if (state.beat === 'alone' && !state.look && state.step < 3) drawHomeSpot(state.step === 0 ? HOME.calendar : state.step === 1 ? HOME.closet : HOME.bed);
+  if (state.beat === 'alone' && !state.look && state.step === 3) drawChip(LINE.homework, true);
+  if (state.beat === 'peekready') drawChip('PEEK', true);
+  if (state.beat === 'sneak' && close && !state.hidden) drawChip(LINE.hide, true);
+  drawIconButtons();
+  if (state.paused) {
+    ctx.fillStyle = 'rgba(12,16,28,.35)'; ctx.fillRect(0, 0, W, H);
+    roundRect(W / 2 - 36, H / 2 - 40, 24, 80, 6); ctx.fillStyle = '#fff'; ctx.fill();
+    roundRect(W / 2 + 12, H / 2 - 40, 24, 80, 6); ctx.fill();
+  }
+}
+function drawTitle() {
+  clear('#1b2436');
+  ctx.fillStyle = '#f4f1ea';
+  for (let i = 0; i < 18; i++) {
+    const x = (i * 97) % W, y = (i * 53) % 180;
+    ctx.fillRect(x, y, 2, 2);
+  }
+  say(TITLE, W / 2, 78, 46, '#fff8ee', 'center', 800);
+  const pulse = 0.5 + 0.5 * Math.sin(state.t * 3);
+  ctx.save();
+  ctx.shadowColor = '#ffcf33';
+  ctx.shadowBlur = 16 + 18 * pulse;
+  roundRect(250, 200, 460, 280, 28);
+  ctx.strokeStyle = '#ffcf33'; ctx.lineWidth = 6; ctx.stroke();
+  ctx.restore();
+  drawSquatch(380, 430, 2.5, { face: 1, walk: state.t * 6 });
+  drawMops(600, 440, 2.2, { face: -1, walk: state.t * 5, sway: Math.sin(state.t * 2) * 0.04 });
+  ctx.fillStyle = '#fff8ee';
+  ctx.beginPath(); ctx.moveTo(470, 250); ctx.lineTo(470, 300); ctx.lineTo(512, 275); ctx.closePath(); ctx.fill();
+  state.controls.push({ id: 'start', x: 250, y: 200, w: 460, h: 280, lit: true });
+  state.hint = null;
+}
+
+function drawLineup() {
+  clear('#f4f1ea');
+  const names = ['Teal jacket', 'Camera', 'Backpack', 'Stilts', 'Octopus', 'Robot'];
+  GUESTS.forEach((kind, i) => {
+    const x = 110 + i * 145;
+    drawGuest(x, 500, 1, kind, 1);
+    say(names[i], x, 540, 18, INK, 'center', 700);
+  });
+}
+
+// ---- Scenes ----------------------------------------------------------------------------
+const scenes = {
+  lineup: { update(dt) { state.t += dt; }, draw: drawLineup },
+  title: {
+    update(dt) { state.t += dt; if (pressed('Enter') || pressed('Space')) { beginStory(); scene = 'play'; } },
+    draw: drawTitle,
+  },
+  play: {
+    update(dt) {
+      state.t += dt;
+      if (pressed('KeyP')) state.paused = !state.paused;
+      if (pressed('KeyM')) setMuted(!muted);
+      if (pressed('Enter') || pressed('Space')) activateKey();
+      tickWorld(dt);
+    },
+    draw: drawPlay,
+  },
+};
+
+// ---- Loop ------------------------------------------------------------------------------
+function step() {
+  if (pendingTap) { const p = pendingTap; pendingTap = null; onTap(p); }
+  scenes[scene].update(STEP);
+  hit.clear();
+}
+let last, acc = 0, ALPHA = 1;
+function tick() {
+  const now = clock.now();
+  acc += Math.min(now - last, 0.25); last = now;
+  while (acc >= STEP) { step(); acc -= STEP; }
+  ALPHA = acc / STEP;
+  drawFrame();
+}
+function drawFrame() {
+  state.words = [];
+  state.bubbles = [];
+  state.heads = [];
+  state.cones = [];
+  state.controls = [];
+  state.guests = [];
+  state.hint = null;
+  state.eyes = [];
+  state.mopProp = false;
+  const orig = ctx.fillText.bind(ctx);
+  ctx.fillText = (text, x, y, max) => { state.words.push(String(text)); return orig(text, x, y, max); };
+  scenes[scene].draw();
+  ctx.fillText = orig;
+  state.chip = (state.controls.find(c => c.id === 'SING ALONG' || c.id === LINE.hide || c.id === 'PEEK' || c.id === LINE.homework) || {}).id || '';
+  state.close = state.room === 'hall' && dist(state.sq, POT) <= tune.hide_reach;
+}
+function frame() { tick(); requestAnimationFrame(frame); }
+function timer() { if (document.visibilityState === 'visible' && clock.now() - last > 0.1) tick(); }
+
+window.game = {
+  get scene() { return scene; },
+  get state() { return state; },
+  press(code) { hit.add(code); },
+  hold(code, on) { on ? down.add(code) : down.delete(code); },
+  get events() { return events; },
+  inCone, PLANTER, BUSH_OUTLINE, LEAF, EYES, POT, DOOR, WATCH_FEET, watchEyes, LINE, GUESTS, HOME, SPEAKER,
+  roomsReady() {
+    const imgs = [...Object.values(rooms), ...Object.values(guestSprites)];
+    return imgs.every(img => img.complete && img.naturalWidth);
+  },
+  step(n = 1, draw = true, alpha = 1) {
+    for (let i = 0; i < n; i++) step();
+    if (draw) { ALPHA = alpha; drawFrame(); }
+  },
+};
+
+reset();
+scene = params.get('scene') || 'title';
+if (scene === 'play') beginStory();
+last = clock.now();
+if (params.get('manual') === '1') drawFrame();
+else { requestAnimationFrame(frame); setInterval(timer, 50); }
+</script>
+</body>
+</html>

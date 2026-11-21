@@ -1,0 +1,31 @@
+time	2026-11-20 21:02:52
+keep	lines	0	pinned	0
+checklist	L1	pass	evidence/beats/ipad-2-morning.png	Look: the locked room pictures stay as they are, flat and outlined, with Squatch a brown furry kid and Mops a white goat whose beard is his mop. Dashed sight cones. The planter's own shape glows. Every figure drawn, no emoji, no plain circles.	The home is the locked picture. Squatch is a brown furry kid and Mops is a white goat whose beard hangs like a mop. No separate mop.
+checklist	L2	pass	evidence/nearest-game.txt	References: Sneaky Sasquatch is inspiration only (a small character sneaking past cones). This game keeps its own rooms, people, song and story.	Sneaky Sasquatch is named only as the inspiration. The rooms, people and song are this game's.
+checklist	L3	pass	evidence/beats/ipad-5-sneak.png	View: 2D · Camera: one locked room, still, filling the screen. *(you said: the locked pictures)*	The hall is one still locked picture filling the screen.
+checklist	F1	pass	evidence/beats/ipad-1-title.png	Title and an original song for Joe's song	The title glows. The first tap starts an original tune.
+checklist	F2	pass	evidence/beats/ipad-2-morning.png	Mops's morning lines, one at a time	Mops's morning lines show one at a time, on him.
+checklist	F3	pass	evidence/beats/ipad-3-sing.png	SING for the goodbye, then Mops leaves	SING lights up, they sing, and Mops leaves.
+checklist	F4	pass	evidence/beats/ipad-4-evening.png	The evening card, then the sneak	The evening card shows, then the hall sneak.
+checklist	F5	pass	evidence/beats/ipad-6-hide.png	Walk to the planter and HIDE	He walks to the outlined plant and HIDE lights up.
+checklist	F6	pass	evidence/beats/ipad-7-jail.png	Dashed cones, a hop, and the lockup card that restarts the sneak	A dashed cone fills, he hops, and the lockup card shows. The sneak then starts again.
+checklist	S1	pass	evidence/beats/ipad-3-sing.png	Lit next tap · in the slice	The next tap glows: the title, each line, SING, and HIDE.
+checklist	S2	pass	evidence/beats/ipad-5-sneak.png	Dashed sight cones · in the slice	Each person who can see has a dashed cone.
+checklist	S3	pass	evidence/beats/ipad-5-sneak.png	Tap-to-walk sneak · in the slice	The player taps the floor to walk. Nothing walks him to the plant.
+checklist	S4	pass	evidence/beats/ipad-7-jail.png	Catch, hop, lockup card, restart the beat · in the slice	Being seen hops him, shows the lockup card, and restarts that sneak.
+checklist	S5	noevidence	prototypes/space-snack-quest/index.html	Original music · in the slice	Joe's song and the goodbye are original notes, not a known tune.
+checklist	M1	pass	evidence/beats/ipad-1-title.png	The title glows.	The title box glows.
+checklist	M2	noevidence	tests/opening-playthrough.mjs	A tap starts Joe's song, an original tune, and the morning.	The first tap sets the song to Joe's tune and opens the morning.
+checklist	M3	pass	evidence/beats/ipad-2-who-he-is.png	A card says who Squatch is.	The card says who Squatch is.
+checklist	M4	pass	evidence/beats/ipad-2-morning.png	Mops says good morning, mentions the party, and tells him to stay.	Mops says good morning, the party, and stay in here.
+checklist	M5	pass	evidence/beats/ipad-2-stay.png	Each line waits for a tap.	Each line stays until a tap.
+checklist	M6	pass	evidence/beats/ipad-3-sing.png	SING lights up.	SING is lit.
+checklist	M7	pass	evidence/beats/ipad-4-evening.png	They sing the goodbye, Mops leaves, and a card says that evening.	They sing, Mops is gone, and the evening card is up.
+checklist	M8	pass	evidence/beats/ipad-5-sneak.png	Squatch is in the hall doorway.	Squatch starts on the hall floor, left of the plant.
+checklist	M9	pass	evidence/beats/ipad-5-sneak.png	The planter's shape glows.	The plant's own shape is outlined.
+checklist	M10	noevidence	tests/opening-playthrough.mjs	He walks there himself.	The playthrough walks him there with floor taps.
+checklist	C1	pass	evidence/beats/ipad-5-sneak.png	On the way to the plant a guest looks across the floor, then looks away, on a steady loop.	The yellow guest's cone sweeps between the stage and the floor.
+checklist	C2	pass	evidence/beats/ipad-7-jail.png	Step in the dashed cone while he is looking and Squatch hops, the lockup card shows, and the sneak starts again at the doorway.	Standing in the cone shows the lockup card, then he is back at the start of the sneak.
+checklist	C3	pass	evidence/beats/ipad-6-eyes.png	Hiding in the plant, eyes low in the front leaves, is the way through.	His eyes sit low in the front leaves.
+checklist	C4	noevidence	docs/BRIEF.md	Later chapters are not in this build.	Later chapters are not in this build.
+not_assessed	scripted run	the run did not finish (one-shot-run.sh exit 0, no done row)
