@@ -44,7 +44,7 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 18 | He runs home and hides under the bed. A guard searches the room and leaves. If he is seen, that part starts again. | built |
 | 19 | Mops comes home. "Everyone out there has someone." / "You have me." | built |
 | 20 | Wookiee TV, full screen, three pictures: "Fur in the scrubber.", a red !, "Onto the ship." Nick's processed growl plays. The old "Nobody can live outside" line stays cut. | built |
-| 21 | Bedtime story. Why Moon Pies. No parents in the words or the pictures. | not yet built |
+| 21 | Bedtime story, right after the TV. "You came to me in a Moon Pie crate. You've loved Moon Pies ever since." Squatch is asleep. No parents. | built |
 | 22 | A gift from the Guardians. Toy rocket and a note. Into the Guardian Box. | not yet built |
 | 23 | Calendar delivery day. The morning calendar is the setup. | not yet built |
 | 24 | Mops forgot his lunch. | not yet built |
