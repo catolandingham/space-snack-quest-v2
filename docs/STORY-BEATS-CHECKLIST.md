@@ -30,7 +30,7 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 4 | Sneak to the middle plant while the door guest faces the stage. Soft outline only on that one next place. HIDE at the plant. Eyes low in the front leaves, one close pair. Jail card, then that sneak again. Two guests stroll. Only the door guest and the walkers have cones. | built |
 | 5 | Isfred's announcement and the robot poster. The lines are the ones in the old game. | built |
 | 6 | Croc Boys on the stage. Lights a little darker. The guests robot-dance while he watches from the plant. | built |
-| 7 | Dress-up from the home closet. The hat, sunglasses, shirt, and boots show on him. Dragging them on is the next slice. | built |
+| 7 | Dress-up from the home closet. Drag the hat, sunglasses, shirt, and boots onto him. They show on him. | built |
 | 8 | He walks out of his own door into the party, dressed. | built |
 | 9 | A real party. Guests should mill about. | not yet built. The opening sneak now has two strolling guests. The rest of the party is later. |
 | 10 | Robot dance in the circle after he is dressed. About thirty seconds. A miss does not end it. Taps only. | built |

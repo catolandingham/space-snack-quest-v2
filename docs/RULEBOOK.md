@@ -40,7 +40,7 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Robot dance | Party hall | The guests robot-dance while the eyes watch from the plant. |
 | Wish | Party hall, still in the plant | A thought from the plant: he has never gotten to dance at a party. |
 | Sneak home | Party hall | He walks from the plant to his door. He is not moved there. |
-| Dress | Squatch's room | The closet is open. He puts on a top hat, sunglasses, a shirt, and boots, and they show on him. |
+| Dress | Squatch's room | The closet is open. He drags a top hat, sunglasses, a shirt, and boots onto himself, like dressing a doll. Each piece shows on him. |
 | Walk out | His room, then the hall door | He walks to his own door, then into the hall from that door. |
 | Dance | Party hall | He is in the dance circle, dressed. One arrow at a time, about thirty seconds. A miss does not end it. Taps only. |
 | Snack | Later, on Day 2 | "One snack. That's the rule." is Mops's rule for later. It is not said at this party. The person by the bar still says nice gloves, then sees the fur. |
