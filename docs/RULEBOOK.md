@@ -51,6 +51,8 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | TV | Full screen | Three pictures: "Fur in the scrubber.", a red !, and "Onto the ship." Nick's growl, nick1-wookiee.mp3, plays. The line "Nobody can live outside" stays cut. |
 | Bedtime | Squatch's room | Right after the show, Mops says "You came to me in a Moon Pie crate." then "You've loved Moon Pies ever since." Squatch is asleep in bed. No parents. |
 
+A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
+
 ## Approved lines
 
 These are the only words the game may show, plus the reaction marks below.
@@ -108,7 +110,6 @@ These are the only words the game may show, plus the reaction marks below.
 - shirt
 - boots
 - One snack. That's the rule. This line is for Day 2. The party does not say it.
-- ...Nice gloves.
 - Wait a second... fur!
 - FUR! Security!
 - Mops

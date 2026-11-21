@@ -37,7 +37,7 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 11 | Karaoke, the Moon Pie song. | not yet built |
 | 12 | Juke the octopus. | not yet built |
 | 13 | Photo corner. | not yet built |
-| 14 | Snack bar. The one-snack rule is Day 2, not this party. The party still says "...Nice gloves." and "Wait a second... fur!" The paw close-up is later. | built |
+| 14 | Snack bar at the party. The one-snack rule is Day 2, not this party. The dance shows the fur, then "Wait a second... fur!" The old gloves line is gone. | built |
 | 15 | Balloon. | dropped. Brian, 20 Nov 2026: it has never worked. Only a really simple version, and this one is not simple. |
 | 16 | The disguise comes off at the dance because his fur shows. "Wait a second... fur!" | built |
 | 17 | Someone pulls the red FUR alarm. "FUR! Security!" Guards come in. | built |

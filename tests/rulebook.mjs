@@ -152,7 +152,6 @@ const lines = [
   "You've loved Moon Pies ever since.",
   'nick1-wookiee.mp3',
   "I've never gotten to dance at a party.",
-  '...Nice gloves.',
   'Wait a second... fur!',
   'FUR! Security!',
   'SPACE MATH',
