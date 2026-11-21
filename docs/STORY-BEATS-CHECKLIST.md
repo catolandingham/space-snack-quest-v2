@@ -8,7 +8,7 @@ Newer words from Brian's 20 Nov 2026 digest replace older lines. The gameplay re
 
 The title says where this is and who Squatch is. Mops says good morning and wrings his beard. The wall speaker, not Mops, says there is a party tonight and puts on a song. They sing at the doorway. Mops faces Squatch, tells him to stay, and leaves. Squatch looks at the calendar, the closet, and the bed, then does homework, and the evening card comes up. He peeks and sees the party and the banner before he steps out. Then he sneaks from his doorway to the plant while two guests stroll and the door guest looks away.
 
-The poster on the wall already says to stay in here, and Mops says it too. The calendar's Moon Pie bite pays off on delivery day, which is later and still not built. The Guardian Box is named now and opened in a later beat.
+The poster on the wall already says to stay in here, and Mops says it too. The calendar's Moon Pie bite pays off on delivery day. The Guardian Box is named, and at the end it goes in the crate.
 
 ## How the older game did the sneak
 
@@ -72,19 +72,19 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 46 | "Didn't a copy get sucked into the vent?" | built |
 | 47 | Sneak to the vent. Eyes only. | built |
 | 48 | Vent desk is a stand-in. No locked picture. The note says they will always be with him. | built |
-| 49 | Grab the pink slip. | not yet built |
-| 50 | The office keypad. | not yet built |
-| 51 | Return the empty crate. | not yet built |
-| 52 | Take all the snacks. Leave some for the Guardians. | not yet built |
-| 53 | Packing the crate. Guardian Box inside, bucket on top. | not yet built |
-| 54 | The robots open a crate. | not yet built |
-| 55 | Mops warns him. | not yet built |
-| 56 | The goat costume. | not yet built |
-| 57 | Last walk. POP and the keepsake. | not yet built. The balloon pop is not this walk until beat 15 is rebuilt, and beat 15 is dropped. |
-| 58 | Through the scanner. | not yet built |
-| 59 | Where's Mops? | not yet built |
-| 60 | The security tapes. | not yet built |
-| 61 | The call to the ship. | not yet built |
+| 49 | "Hurry. Pink slip. Got it!" | built |
+| 50 | The office door opens. Locked office picture. | built |
+| 51 | "Order a new box. Return the empty crate." | built |
+| 52 | Take all the snacks. Leave some for the Guardians. | built |
+| 53 | Guardian Box inside. Bucket on top. | built |
+| 54 | Pickup day. "Get out. They're checking a crate." Locked pickup picture. | built |
+| 55 | "Quick, home." | built |
+| 56 | "The spare jacket. The beard. And the horns." "More bleat. Less roar." | built |
+| 57 | He takes the drawing. The balloon stays dropped. | built |
+| 58 | "HAIR... PROBABLY. PROCEED." | built |
+| 59 | The office asks for Mops. "Get me the security tapes." | built |
+| 60 | "Later that evening." "REC" | built |
+| 61 | The ship interior is a stand-in. "The base called the ship. It has to stop." | built |
 
 ## Dropped or replaced on purpose
 

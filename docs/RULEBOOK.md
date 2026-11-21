@@ -71,7 +71,14 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Night one | Loading bay at night | The locked picture assets/approved/delivery-room-empty-night-v2.png. He posts the order. "Mail scanned. Pawature accepted." Then "The vent took the pink sheet." Only his eyes show by the vent. |
 | Six days | Squatch's room | "Six days later." The robots tease his beard. He learns he will be replaced. "The manager was lying to me." |
 | Pancake plan | Squatch's room | "The new robots come tomorrow. Let's find that pancake place." "Didn't a copy get sucked into the vent?" |
-| Vent desk | Stand-in | No locked picture. A plain desk in a duct. "I hope Mops doesn't notice." "We'll always be with you." |
+| Vent desk | Stand-in | No locked picture. A plain desk in a duct. "I hope Mops doesn't notice." "We'll always be with you." "Hurry. Pink slip. Got it!" |
+| Office | Hallway, then the office | "Get it before he sees it." "The office door opens." The locked picture assets/approved/office-room-empty-v2.png. "Order a new box. Return the empty crate." |
+| All the snacks | Party hall, then home | "This time, take all the snacks you want." "I'll leave the Guardians some food." "Guardian Box inside. Bucket on top." |
+| Pickup | Loading bay | The locked picture assets/approved/delivery-room-empty-pickup-v3.png. "Get out. They're checking a crate." "Quick, home." |
+| Goat clothes | Squatch's room | "The spare jacket. The beard. And the horns." "More bleat. Less roar." He takes "Tied together forever." |
+| Scanner | Loading bay | "HAIR... PROBABLY. PROCEED." |
+| Tapes | Office | "Send in Mops for his photo." "Mops isn't here." "He can't live off the station!" "Get me the security tapes." "Later that evening." "REC" |
+| The ship | Stand-in | No locked picture. A plain window. "The base called the ship. It has to stop." |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 
@@ -178,6 +185,26 @@ These are the only words the game may show, plus the reaction marks below.
 - Into the vent.
 - I hope Mops doesn't notice.
 - We'll always be with you.
+- Hurry. Pink slip. Got it!
+- Get it before he sees it.
+- The office door opens.
+- Order a new box. Return the empty crate.
+- This time, take all the snacks you want.
+- I'll leave the Guardians some food.
+- Guardian Box inside. Bucket on top.
+- Get out. They're checking a crate.
+- Quick, home.
+- The spare jacket. The beard. And the horns.
+- More bleat. Less roar.
+- HAIR... PROBABLY. PROCEED.
+- Send in Mops for his photo.
+- Mops isn't here.
+- He can't live off the station!
+- Get me the security tapes.
+- Later that evening.
+- REC
+- The base called the ship. It has to stop.
+The office is the locked picture assets/approved/office-room-empty-v2.png. Pickup day uses assets/approved/delivery-room-empty-pickup-v3.png. The ship interior is a simple stand-in window. There is no locked picture of the ship.
 The inside of the vent is a simple stand-in desk. There is no locked picture of that room.
 - ORDER MORE ROBOTS
 - Wait a second... fur!
