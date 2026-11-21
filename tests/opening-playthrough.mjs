@@ -17,15 +17,27 @@ fs.mkdirSync(artDir, { recursive: true });
 
 const ALLOWED = [
   'Space Snack Quest',
+  'Stormtop Cloud Resort, floating above Jupiter.',
   "This is Squatch. He's a Sasquatch.",
   'Morning, Squatch.',
-  'Big party in the hall tonight.',
+  'Good morning, Stormtop! Big party in the hall tonight!',
   'Party?',
+  "Now here's a classic hit from Dog Zylan!",
   'Stay in here.',
   "I'm floating in space!",
   'Weeee-eenn-nnttt!',
+  'MOONMUNCH',
+  'FUZZUARY',
+  'Sponsored by MOON PIES',
+  'Sock hunt',
+  'family Olympics night',
+  'Wash outside windows (remember space suit!)',
+  'Blanket fort night',
+  "Mops's costumes. And my Guardian Box.",
+  'Not sleepy anymore.',
+  'DO \u00b7 homework',
   'That evening\u2026',
-  'SING',
+  'SING ALONG',
   'HIDE',
   'LOCKUP',
   '[line needed]',
@@ -64,7 +76,7 @@ async function readState(page) {
       words: s.words, bubbles: s.bubbles, cones: s.cones, heads: s.heads, hint: s.hint,
       eyes: s.eyes, hidden: s.hidden, mopProp: s.mopProp, look: s.look,
       guests: s.guests, sparks: (s.sparks || []).map(p => ({ kind: p.kind, x: p.x, y: p.y, t: p.t })),
-      close: s.close, restarted: s.restarted,
+      close: s.close, restarted: s.restarted, step: s.step, home: s.look,
       sq: { x: s.sq.x, y: s.sq.y },
       mo: { x: s.mo.x, y: s.mo.y, hidden: s.mo.hidden },
       hop: s.hopTrace.map(p => ({ x: p.x, y: p.y })),
@@ -111,7 +123,7 @@ function checkRules(s, label) {
       for (const b of s.bubbles) if (inside(b.box, c.x, c.y)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'the cone starts on a speech bubble'));
     }
   }
-  const homeBeats = ['title', 'morning', 'sing', 'song', 'songwalk', 'leave', 'evening'];
+  const homeBeats = ['title', 'resort', 'intro', 'morning', 'sing', 'song', 'songwalk', 'stay', 'leave', 'alone', 'homework', 'evening'];
   if (homeBeats.includes(s.beat) && s.room !== 'home') problems.push(fails(RULE.room + ' ' + label + ' room', s.beat + ' is in the ' + s.room));
   if (homeBeats.includes(s.beat) && s.mo && !s.mo.hidden && s.mo.x > 860) problems.push(fails(RULE.room + ' ' + label + ' room', 'Mops is outside the bedroom at x ' + s.mo.x));
   if (['sneak', 'hidden', 'hop', 'jail'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
@@ -132,15 +144,26 @@ function checkRules(s, label) {
     if (kinds.some(g => !GUESTS.includes(g))) problems.push(fails(RULE.guests + ' ' + label + ' guests', kinds.join(',')));
     if (s.beat === 'sneak' && GUESTS.some(g => !kinds.includes(g))) problems.push(fails(RULE.guests + ' ' + label + ' guests', 'missing ' + GUESTS.filter(g => !kinds.includes(g)).join(',')));
   }
-  const handled = ['SING', 'HIDE', 'line', 'card', 'start', 'pause', 'mute'];
+  const handled = ['SING ALONG', 'HIDE', 'DO \u00b7 homework', 'look', 'pie', 'line', 'card', 'start', 'pause', 'mute'];
   for (const c of s.controls || []) {
     if (!handled.includes(c.id)) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'nothing handles ' + c.id));
   }
   if (s.chip === 'HIDE' && !(s.beat === 'sneak' && s.close)) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'HIDE before he can hide'));
-  if (s.chip === 'SING' && s.beat !== 'sing') problems.push(fails(RULE.chip + ' ' + label + ' chip', 'SING at the wrong time'));
+  if (s.chip === 'SING ALONG' && s.beat !== 'sing') problems.push(fails(RULE.chip + ' ' + label + ' chip', 'SING ALONG at the wrong time'));
+  if (s.chip === 'DO \u00b7 homework' && !(s.beat === 'alone' && s.step === 3)) problems.push(fails('R22 ' + label + ' homework', 'homework is offered too early'));
   if (s.bubbles.length && s.chip) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'a chip is up during a line'));
   if (s.mopProp) problems.push(fails(RULE.mop + ' ' + label + ' mop', 'a separate mop was drawn'));
-  const speakers = { 'Morning, Squatch.': 'mops', 'Big party in the hall tonight.': 'mops', 'Party?': 'sq', 'Stay in here.': 'mops', "I'm floating in space!": 'sq', 'Weeee-eenn-nnttt!': 'mops' };
+  const speakers = {
+    'Morning, Squatch.': 'mops',
+    'Good morning, Stormtop! Big party in the hall tonight!': 'speaker',
+    'Party?': 'sq',
+    "Now here's a classic hit from Dog Zylan!": 'speaker',
+    'Stay in here.': 'mops',
+    "I'm floating in space!": 'sq',
+    'Weeee-eenn-nnttt!': 'mops',
+    "Mops's costumes. And my Guardian Box.": 'sq',
+    'Not sleepy anymore.': 'sq',
+  };
   for (const b of s.bubbles) if (speakers[b.text] && speakers[b.text] !== b.who) problems.push(fails(label + ' speaker', b.text));
   return problems;
 }
@@ -191,29 +214,40 @@ async function play(page, label) {
   await shot(page, label + '-1-title');
 
   await tapLit(page);
-  await waitFor(page, () => window.game.state.beat === 'morning' && window.game.state.song === 'joe', 4000, 'start');
+  await waitFor(page, () => window.game.state.beat === 'resort' && window.game.state.song === 'joe', 4000, 'resort');
+  await shot(page, label + '-1-resort');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' resort'));
+  if (!s.words.some(w => w.includes('Stormtop'))) problems.push(fails('R22 ' + label + ' resort', 'missing the Stormtop card'));
+
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'intro', 4000, 'intro');
   await shot(page, label + '-2-who-he-is');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' intro'));
   if (!s.words.some(w => w.includes('Sasquatch'))) problems.push(fails(label + ' intro', 'missing the Squatch card'));
 
   await tapLit(page);
-  await waitFor(page, () => window.game.state.words.includes('Morning, Squatch.'), 4000, 'morning');
+  await waitFor(page, () => window.game.state.beat === 'morning' && window.game.state.song === 'off' && window.game.state.words.includes('Morning, Squatch.'), 4000, 'morning');
   await shot(page, label + '-2-morning');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' morning'));
   if (!s.bubbles.some(b => b.who === 'mops' && b.text === 'Morning, Squatch.')) problems.push(fails(label + ' morning', 'Mops is not saying good morning'));
 
-  for (const line of ['Big party in the hall tonight.', 'Party?', 'Stay in here.']) {
+  for (const line of [
+    ['Good morning, Stormtop! Big party in the hall tonight!', 'speaker'],
+    ['Party?', 'sq'],
+    ["Now here's a classic hit from Dog Zylan!", 'speaker'],
+  ]) {
     await tapLit(page);
-    await page.waitForFunction(text => window.game.state.bubbles.some(b => b.text === text), { timeout: 4000 }, line);
+    await page.waitForFunction(text => window.game.state.bubbles.some(b => b.text === text), { timeout: 4000 }, line[0]);
     s = await readState(page);
-    problems.push(...checkRules(s, label + ' ' + line));
+    problems.push(...checkRules(s, label + ' ' + line[0]));
+    if (!s.bubbles.some(b => b.who === line[1] && b.text === line[0])) problems.push(fails('R22 ' + label + ' speaker', line[0] + ' is not said by ' + line[1]));
   }
-  await shot(page, label + '-2-stay');
 
   await tapLit(page);
-  await waitFor(page, () => window.game.state.beat === 'sing' && window.game.state.chip === 'SING', 4000, 'sing');
+  await waitFor(page, () => window.game.state.beat === 'sing' && window.game.state.chip === 'SING ALONG', 4000, 'sing');
   await shot(page, label + '-3-sing');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' sing'));
@@ -242,6 +276,18 @@ async function play(page, label) {
   problems.push(...checkRules(s, label + ' mops song'));
 
   await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'stay' && window.game.state.words.includes('Stay in here.'), 4000, 'stay');
+  await shot(page, label + '-2-stay');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' stay'));
+  if (!s.bubbles.some(b => b.who === 'mops' && b.text === 'Stay in here.')) problems.push(fails('R22 ' + label + ' stay', 'Mops does not say to stay after the song'));
+  const facing = await page.evaluate(() => {
+    const s = window.game.state;
+    return s.mo.face === (s.sq.x < s.mo.x ? -1 : 1);
+  });
+  if (!facing) problems.push(fails('R22 ' + label + ' stay', 'Mops is not facing Squatch'));
+
+  await tapLit(page);
   let sawLeave = false;
   const leaveStart = Date.now();
   while (Date.now() - leaveStart < 8000) {
@@ -250,10 +296,33 @@ async function play(page, label) {
       sawLeave = true;
       await shot(page, label + '-3-goodbye');
     }
-    if (beat === 'evening') break;
+    if (beat === 'alone') break;
     await new Promise(r => setTimeout(r, 40));
   }
-  await waitFor(page, () => window.game.state.beat === 'evening', 2000, 'evening');
+  await waitFor(page, () => window.game.state.beat === 'alone' && window.game.state.step === 0, 2000, 'alone');
+  await shot(page, label + '-4-calendar');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.words.includes('MOONMUNCH'), 4000, 'calendar');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' calendar'));
+  if (!s.words.includes('Sponsored by MOON PIES')) problems.push(fails('R22 ' + label + ' calendar', 'the calendar copy is missing'));
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.bitten, 4000, 'bite');
+  await shot(page, label + '-4-bite');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.step === 1 && window.game.state.look === '', 4000, 'closet spot');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.bubbles.some(b => b.text === "Mops's costumes. And my Guardian Box."), 4000, 'closet');
+  await shot(page, label + '-4-closet');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.step === 2, 4000, 'bed spot');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.bubbles.some(b => b.text === 'Not sleepy anymore.'), 4000, 'bed');
+  await shot(page, label + '-4-bed');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.chip === 'DO \u00b7 homework', 4000, 'homework chip');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'evening', 6000, 'evening');
   await shot(page, label + '-4-evening');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' evening'));

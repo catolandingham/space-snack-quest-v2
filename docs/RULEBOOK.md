@@ -13,11 +13,14 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Beat | Room | What happens |
 | --- | --- | --- |
 | Title | Squatch's room is not on screen yet | The title glows. Nothing plays until the first tap. |
-| Who he is | Squatch's room | A card says who Squatch is. |
-| Morning lines | Squatch's room | Mops talks, one line at a time. Each line waits for a tap. |
-| SING | Squatch's room | SING lights up. Squatch walks only where the player taps. |
-| Song | Squatch's room | They sing the goodbye. That walk plays on its own. |
+| Where he lives | Squatch's room is not on screen yet | A card says Stormtop Cloud Resort, floating above Jupiter. Joe's theme plays. |
+| Who he is | Squatch's room | A card says who Squatch is. The theme is still playing. |
+| Morning lines | Squatch's room | The room is quiet. Mops wrings his beard over the bucket. The wall speaker, not Mops, says there is a party. Each line waits for a tap. |
+| SING ALONG | Squatch's room | SING ALONG lights up. Squatch walks only where the player taps. |
+| Song | Squatch's room | They meet at the doorway and sing the goodbye. The theme stops while they sing. That walk plays on its own. |
+| Stay | Squatch's room | Mops turns to face Squatch and says to stay in here. |
 | Mops leaves | Squatch's room | Mops walks to the doorway and leaves from inside the room. |
+| Home alone | Squatch's room | Calendar, then the closet, then the bed, then homework. One at a time. |
 | That evening | Squatch's room | The card waits for a tap. The hall is not on screen yet. |
 | Sneak | Party hall | Squatch starts at the doorway. He walks only where the player taps. The bush outline shows the way. |
 | Hide | Party hall | HIDE lights up only when he is close. His eyes peek from the front leaves. |
@@ -28,15 +31,27 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 These are the only words the game may show, plus the reaction marks below.
 
 - Space Snack Quest
+- Stormtop Cloud Resort, floating above Jupiter.
 - This is Squatch. He's a Sasquatch.
 - Morning, Squatch.
-- Big party in the hall tonight.
+- Good morning, Stormtop! Big party in the hall tonight!
 - Party?
+- Now here's a classic hit from Dog Zylan!
 - Stay in here.
 - I'm floating in space!
 - Weeee-eenn-nnttt!
+- MOONMUNCH
+- FUZZUARY
+- Sponsored by MOON PIES
+- Sock hunt
+- family Olympics night
+- Wash outside windows (remember space suit!)
+- Blanket fort night
+- Mops's costumes. And my Guardian Box.
+- Not sleepy anymore.
+- DO · homework
 - That evening…
-- SING
+- SING ALONG
 - HIDE
 - LOCKUP
 - [line needed]
@@ -101,11 +116,14 @@ Only these six may appear. Their names in the game are teal, camera, backpack, s
 | R14 | Squatch does not walk to the bush by himself. | Automatic |
 | R15 | Play is taps only, on a phone-sized screen and an iPad-sized screen. | Automatic for both screen sizes. Eyes for "nothing else is required." |
 | R16 | A stage direction becomes movement or a sound, not words. | Eyes |
-| R17 | The music is a new tune. No copied melody. Joe's own recording is not in this build. | Eyes |
+| R17 | The room is quiet until the goodbye song. A new theme plays on the title cards and when hearts show. It stops while they sing. No copied melody. Joe's own recording is not in this build. | Automatic for when it plays. Eyes for the tune. |
 | R18 | The six guests are flat cartoons and taller than Squatch and Mops. | Eyes, on the lineup |
 | R19 | Being seen restarts the sneak, not the whole story. | Automatic |
 | R20 | The code does not show a line, a picture, or a guest the rulebook does not list. | Automatic |
 | R21 | The play link is only in this file. | Automatic |
+| R22 | The wall speaker says the party line and the song title. Mops does not. After the song he faces Squatch, says to stay, and leaves. Then the calendar, the closet, the bed, and homework, in that order, and only then the evening card. | Automatic |
+
+The sneak, the guests, and the hidden eyes are not changed in this pass. Brian said those are wrong, and the gameplay reference was not in yet. See `docs/STORY-BEATS-CHECKLIST.md`.
 
 ## Still needs Brian
 

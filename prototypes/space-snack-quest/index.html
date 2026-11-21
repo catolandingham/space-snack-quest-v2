@@ -129,6 +129,11 @@ function goodbyeNotes(who) {
   const notes = who === 'sq' ? [330, 392, 494, 587] : [494, 440, 392, 330, 262];
   notes.forEach((f, i) => toneAt(f, now + i * 0.22, 0.28, 'sine', 0.09));
 }
+function heartChime() {
+  if (!audio) return;
+  const now = audio.ac.currentTime;
+  [262, 330, 392, 523].forEach((f, i) => toneAt(f, now + i * 0.16, 0.28, 'triangle', 0.06));
+}
 function blip() { if (!audio) return; toneAt(520, audio.ac.currentTime, 0.06, 'square', 0.04); }
 
 // ---- Rooms: the locked pictures, drawn as-is -------------------------------------------
@@ -148,15 +153,40 @@ function drawRoom(id) {
 
 // ---- Lines already approved ------------------------------------------------------------
 const LINE = {
+  resort: 'Stormtop Cloud Resort, floating above Jupiter.',
   intro: "This is Squatch. He's a Sasquatch.",
-  morning: ['Morning, Squatch.', 'Big party in the hall tonight.', 'Party?', 'Stay in here.'],
-  morningWho: ['mops', 'mops', 'sq', 'mops'],
+  morning: [
+    'Morning, Squatch.',
+    'Good morning, Stormtop! Big party in the hall tonight!',
+    'Party?',
+    "Now here's a classic hit from Dog Zylan!",
+  ],
+  morningWho: ['mops', 'speaker', 'sq', 'speaker'],
+  stay: 'Stay in here.',
   sqSong: "I'm floating in space!",
   moSong: 'Weeee-eenn-nnttt!',
+  closet: "Mops's costumes. And my Guardian Box.",
+  bed: 'Not sleepy anymore.',
+  homework: 'DO · homework',
+  calendar: [
+    'MOONMUNCH',
+    'FUZZUARY',
+    'Sponsored by MOON PIES',
+    'Sock hunt',
+    'family Olympics night',
+    'Wash outside windows (remember space suit!)',
+    'Blanket fort night',
+  ],
   evening: 'That evening\u2026',
   lockup: 'LOCKUP',
   needed: '[line needed]',
 };
+const HOME = {
+  calendar: { x: 108, y: 198, w: 96, h: 120 },
+  closet: { x: 40, y: 198, w: 70, h: 140 },
+  bed: { x: 100, y: 420, w: 190, h: 140 },
+};
+const SPEAKER = { x: 860, y: 140, w: 48, h: 34 };
 // The planter's own shape, measured on the locked hall picture. An outline, not a circle or a box.
 // Outer edge of the middle bush and its pot, measured on the locked hall picture.
 // The old game drew a circle here. This follows the leaves, the gap between the front clumps, and the pot.
@@ -206,7 +236,7 @@ let scene, state;
 function cast() {
   return {
     sq: { x: 400, y: 530, face: 1, walk: 0, moving: false, target: null, sing: false },
-    mo: { x: 690, y: 535, face: -1, walk: 0, moving: false, hidden: false, sing: false },
+    mo: { x: 500, y: 530, face: 1, walk: 0, moving: false, hidden: false, sing: false },
   };
 }
 function reset() {
@@ -221,6 +251,7 @@ function reset() {
     words: [], bubbles: [], heads: [], cones: [], controls: [], guests: [],
     hint: null, eyes: [], hopTrace: [], mopProp: false, look: 'away',
     sparks: [], heartAt: -9, bangAt: -9,
+    step: 0, look: '', bitten: false, flopT: 0, hwT: 0,
   };
 }
 function blocker() {
@@ -272,7 +303,7 @@ function lookNow() {
 
 // ---- Story steps -----------------------------------------------------------------------
 function beginStory() {
-  state.beat = 'morning';
+  state.beat = 'resort';
   state.room = 'home';
   state.line = 0;
   state.song = 'joe';
@@ -281,6 +312,8 @@ function beginStory() {
   blip();
 }
 function advanceStory() {
+  if (state.beat === 'resort') { state.beat = 'intro'; blip(); return; }
+  if (state.beat === 'intro') { state.beat = 'morning'; state.line = 1; state.song = 'off'; blip(); return; }
   if (state.beat === 'morning') {
     state.line++;
     if (state.line > LINE.morning.length) {
@@ -292,10 +325,15 @@ function advanceStory() {
   }
   if (state.beat === 'song') {
     state.line++;
-    if (state.line >= 2) { state.beat = 'leave'; state.mo.sing = false; state.sq.sing = false; }
-    else { blip(); goodbyeNotes('mops'); state.sq.sing = false; state.mo.sing = true; }
+    if (state.line >= 2) {
+      state.beat = 'stay';
+      state.mo.sing = false;
+      state.sq.sing = false;
+      state.mo.face = state.sq.x < state.mo.x ? -1 : 1;
+    } else { blip(); goodbyeNotes('mops'); state.sq.sing = false; state.mo.sing = true; }
     return;
   }
+  if (state.beat === 'stay') { state.beat = 'leave'; return; }
   if (state.beat === 'evening') { enterSneak(); return; }
   if (state.beat === 'jail') { restartSneak(); return; }
 }
@@ -356,18 +394,55 @@ function onTap(p) {
   if (mute && hitControl(p, mute)) { setMuted(!muted); return; }
   if (scene === 'title' || state.beat === 'title') { beginStory(); scene = 'play'; return; }
   if (state.beat === 'sing') {
-    const chip = state.controls.find(c => c.id === 'SING');
+    const chip = state.controls.find(c => c.id === 'SING ALONG');
     if (chip && hitControl(p, chip)) startSong();
     else if (state.control) state.sq.target = { x: p.x, y: p.y };
     return;
   }
+  if (state.beat === 'alone') { tapAlone(p); return; }
   if (state.beat === 'sneak') {
     const chip = state.controls.find(c => c.id === 'HIDE');
     if (chip && hitControl(p, chip)) { doHide(); return; }
     if (state.control && !state.paused) state.sq.target = { x: p.x, y: p.y };
     return;
   }
-  if (state.beat === 'morning' || state.beat === 'song' || state.beat === 'evening' || state.beat === 'jail') advanceStory();
+  if (state.beat === 'morning' || state.beat === 'song' || state.beat === 'evening' || state.beat === 'jail' || state.beat === 'resort' || state.beat === 'intro' || state.beat === 'stay') advanceStory();
+}
+function tapAlone(p) {
+  if (state.look === 'closet' || state.look === 'bedline') {
+    state.look = '';
+    state.step++;
+    blip();
+    return;
+  }
+  if (state.look === 'calendar') {
+    const pie = state.controls.find(c => c.id === 'pie');
+    if (pie && hitControl(p, pie) && !state.bitten) { state.bitten = true; blip(); return; }
+    if (state.bitten) { state.look = ''; state.step++; blip(); }
+    return;
+  }
+  if (state.look === 'flop') return;
+  const spot = state.controls.find(c => c.id === 'look');
+  if (spot && hitControl(p, spot)) {
+    if (state.step === 0) state.look = 'calendar';
+    else if (state.step === 1) state.look = 'closet';
+    else if (state.step === 2) {
+      state.look = 'flop';
+      state.flopT = 0;
+      state.sq.x = 190;
+      state.sq.y = 530;
+    }
+    blip();
+    return;
+  }
+  const hw = state.controls.find(c => c.id === LINE.homework);
+  if (hw && hitControl(p, hw)) {
+    state.beat = 'homework';
+    state.hwT = 0;
+    state.look = '';
+    state.sq.x = 620;
+    state.sq.y = 500;
+  }
 }
 function activateKey() {
   if (scene === 'title') { beginStory(); scene = 'play'; return; }
@@ -376,7 +451,7 @@ function activateKey() {
     if (dist(state.sq, POT) <= tune.hide_reach) doHide();
     return;
   }
-  if (state.beat === 'morning' || state.beat === 'song' || state.beat === 'evening' || state.beat === 'jail') advanceStory();
+  if (state.beat === 'morning' || state.beat === 'song' || state.beat === 'evening' || state.beat === 'jail' || state.beat === 'resort' || state.beat === 'intro' || state.beat === 'stay') advanceStory();
 }
 
 function tickWorld(dt) {
@@ -406,9 +481,17 @@ function tickWorld(dt) {
   if (state.beat !== 'sneak' && state.beat !== 'hop' && state.beat !== 'hidden' && state.beat !== 'jail') {
     state.room = 'home';
   }
+  if (state.beat === 'alone' && state.look === 'flop') {
+    state.flopT += dt;
+    if (state.flopT > 0.9) state.look = 'bedline';
+  }
+  if (state.beat === 'homework') {
+    state.hwT += dt;
+    if (state.hwT > 1.8) state.beat = 'evening';
+  }
   if (state.beat === 'songwalk') {
-    const a = walkToward(state.mo, 790, 490, dt);
-    const b = walkToward(state.sq, 450, 490, dt);
+    const a = walkToward(state.mo, 760, 500, dt);
+    const b = walkToward(state.sq, 680, 510, dt);
     state.mo.face = -1; state.sq.face = 1;
     if (a && b) {
       state.beat = 'song'; state.line = 0;
@@ -421,7 +504,10 @@ function tickWorld(dt) {
     // Just inside the right-wall doorway, still on the bedroom floor.
     if (walkToward(state.mo, 820, 500, dt)) {
       state.mo.hidden = true;
-      state.beat = 'evening';
+      state.beat = 'alone';
+      state.step = 0;
+      state.look = '';
+      state.song = 'off';
     }
   }
   if (state.beat === 'sneak') {
@@ -575,11 +661,13 @@ function drawBubble(who, text, head) {
   ctx.fillStyle = '#fffdf8'; ctx.fill();
   ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
   ctx.restore();
-  const tag = who === 'mops' ? 'Mops' : 'Squatch';
-  const tagW = tag.length * 11 + 18;
-  roundRect(box.x + 12, box.y - 12, tagW, 22, 10);
-  ctx.fillStyle = who === 'mops' ? '#1f7a4d' : '#6b4428'; ctx.fill();
-  say(tag, box.x + 12 + tagW / 2, box.y - 1, 14, '#fff', 'center', 700);
+  if (who !== 'speaker') {
+    const tag = who === 'mops' ? 'Mops' : 'Squatch';
+    const tagW = tag.length * 11 + 18;
+    roundRect(box.x + 12, box.y - 12, tagW, 22, 10);
+    ctx.fillStyle = who === 'mops' ? '#1f7a4d' : '#6b4428'; ctx.fill();
+    say(tag, box.x + 12 + tagW / 2, box.y - 1, 14, '#fff', 'center', 700);
+  }
   lines.forEach((l, i) => say(l, box.x + box.w / 2, box.y + 26 + i * 32, size, INK, 'center', 700));
   state.bubbles.push({ who, text, box, head: { x: head.x, y: head.y, w: head.w, h: head.h } });
   state.controls.push({ id: 'line', x: box.x, y: box.y - 14, w: box.w, h: box.h + 14, lit: true });
@@ -625,8 +713,58 @@ function drawPlanterHint() {
     color: '#ffcf33', width: 6, dashed: true, gap: BUSH_GAP,
   };
 }
+function drawHomeSpot(box) {
+  const pulse = 0.5 + 0.5 * Math.sin(state.t * 3);
+  ctx.save();
+  ctx.shadowColor = '#ffcf33';
+  ctx.shadowBlur = 8 + 8 * pulse;
+  ctx.setLineDash([8, 6]);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = '#ffcf33';
+  roundRect(box.x, box.y, box.w, box.h, 12);
+  ctx.stroke();
+  ctx.restore();
+  state.controls.push({ id: 'look', x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
+}
+function drawCalendar() {
+  const box = { x: 180, y: 70, w: 600, h: 500 };
+  roundRect(box.x, box.y, box.w, box.h, 18);
+  ctx.fillStyle = '#fff8ee'; ctx.fill();
+  ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
+  say(LINE.calendar[0], box.x + box.w / 2, box.y + 48, 36, INK, 'center', 800);
+  say(LINE.calendar[1], box.x + box.w / 2, box.y + 88, 22, INK, 'center', 700);
+  LINE.calendar.slice(2).forEach((text, i) => say(text, box.x + 36, box.y + 150 + i * 36, 22, INK, 'left', 700));
+  const pie = { x: box.x + box.w - 150, y: box.y + 300, w: 90, h: 90 };
+  ctx.beginPath();
+  ctx.arc(pie.x + 45, pie.y + 45, 36, state.bitten ? 0.6 : 0, Math.PI * 2);
+  ctx.fillStyle = '#e0b040'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+  if (!state.bitten) {
+    const pulse = 0.5 + 0.5 * Math.sin(state.t * 4);
+    ctx.save();
+    ctx.shadowColor = '#ffcf33';
+    ctx.shadowBlur = 10 + 8 * pulse;
+    ctx.beginPath();
+    ctx.arc(pie.x + 45, pie.y + 45, 42, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffcf33';
+    ctx.stroke();
+    ctx.restore();
+  }
+  state.controls.push({ id: 'pie', x: pie.x, y: pie.y, w: pie.w, h: pie.h, lit: !state.bitten });
+  if (state.bitten) state.controls.push({ id: 'card', x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
+}
+function drawHomework() {
+  const x = 560, y = 250;
+  for (let i = 0; i < 3; i++) {
+    const shift = Math.sin(state.hwT * 6 + i) * 8;
+    roundRect(x + i * 14 + shift, y, 70, 90, 4);
+    ctx.fillStyle = i === 2 ? '#fff' : '#efe8d8'; ctx.fill();
+    ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke();
+  }
+}
 function drawChip(id, lit) {
-  const box = { x: 16, y: 64, w: 210, h: 72 };
+  ctx.font = '800 28px ' + FONT;
+  const box = { x: 16, y: 64, w: Math.max(180, ctx.measureText(id).width + 40), h: 72 };
   const pulse = lit ? 0.5 + 0.5 * Math.sin(state.t * 6) : 0;
   ctx.save();
   if (lit) { ctx.shadowColor = '#ffcf33'; ctx.shadowBlur = 16 + 14 * pulse; }
@@ -636,7 +774,7 @@ function drawChip(id, lit) {
   ctx.strokeStyle = lit ? '#e09000' : INK;
   ctx.stroke();
   ctx.restore();
-  say(id, box.x + box.w / 2, box.y + box.h / 2, 32, INK, 'center', 800);
+  say(id, box.x + box.w / 2, box.y + box.h / 2, 28, INK, 'center', 800);
   state.controls.push({ id, x: box.x, y: box.y, w: box.w, h: box.h, lit });
 }
 function drawIconButtons() {
@@ -675,6 +813,7 @@ function rise(kind, x, y) {
   if (state.t - state[key] < wait) return;
   state[key] = state.t;
   state.sparks.push({ x, y, t: kind === 'heart' ? 1.6 : 2.2, kind });
+  if (kind === 'heart') heartChime();
 }
 function tickSparks(dt) {
   for (const s of state.sparks) { s.y -= 26 * dt; s.t -= dt; }
@@ -710,11 +849,13 @@ function drawPeople() {
       drawCone(ox, oy, aim, tune.cone_half, tune.cone_len, hot);
       if (hot) rise('heart', state.mo.x, hy - 10);
     }
-    const sqHead = drawSquatch(state.sq.x, state.sq.y, sqScale, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, sing: state.sq.sing });
+    const flop = state.look === 'flop' ? Math.sin(Math.min(1, state.flopT / 0.9) * Math.PI) * -18 : 0;
+    const sqHead = drawSquatch(state.sq.x, state.sq.y + flop, sqScale, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, sing: state.sq.sing });
     if (!state.mo.hidden) {
-      const sway = state.beat === 'song' && state.mo.sing ? Math.sin(state.t * 6) * 0.06 : 0;
+      const sway = (state.beat === 'morning' || (state.beat === 'song' && state.mo.sing)) ? Math.sin(state.t * 4) * 0.08 : 0;
       drawMops(state.mo.x, state.mo.y, moScale, { face: state.mo.face, walk: state.mo.moving ? state.mo.walk : 0, sing: state.mo.sing, sway });
     }
+    drawSpeaker();
     return sqHead;
   }
   const look = lookNow();
@@ -741,11 +882,26 @@ function drawPeople() {
     drawSquatch(state.sq.x, state.sq.y, tune.hall_sq, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, hop });
   } else drawEyes();
 }
+function drawSpeaker() {
+  const s = SPEAKER;
+  roundRect(s.x, s.y, s.w, s.h, 6);
+  ctx.fillStyle = '#8b5a3c'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(s.x + s.w / 2, s.y + s.h / 2, 8, 0, Math.PI * 2);
+  ctx.stroke();
+  state.heads.push({ x: s.x, y: s.y, w: s.w, h: s.h, who: 'speaker' });
+}
 function currentLine() {
-  if (state.beat === 'morning' && state.line === 0) return { kind: 'intro' };
+  if (state.beat === 'resort') return { kind: 'card', text: LINE.resort };
+  if (state.beat === 'intro') return { kind: 'card', text: LINE.intro };
   if (state.beat === 'morning') return { kind: 'line', who: LINE.morningWho[state.line - 1], text: LINE.morning[state.line - 1] };
+  if (state.beat === 'stay') return { kind: 'line', who: 'mops', text: LINE.stay };
   if (state.beat === 'song' && state.line === 0) return { kind: 'line', who: 'sq', text: LINE.sqSong };
   if (state.beat === 'song') return { kind: 'line', who: 'mops', text: LINE.moSong };
+  if (state.beat === 'alone' && state.look === 'closet') return { kind: 'line', who: 'sq', text: LINE.closet };
+  if (state.beat === 'alone' && state.look === 'bedline') return { kind: 'line', who: 'sq', text: LINE.bed };
+  if (state.beat === 'alone' && state.look === 'calendar') return { kind: 'calendar' };
   if (state.beat === 'evening') return { kind: 'evening' };
   if (state.beat === 'jail') return { kind: 'jail' };
   return null;
@@ -754,25 +910,35 @@ function headFor(who) {
   return state.heads.find(h => h.who === who) || state.heads[0];
 }
 function drawPlay() {
+  if (state.beat === 'resort') {
+    clear('#1b2436');
+    drawCard(LINE.resort, '', true);
+    drawIconButtons();
+    return;
+  }
   drawRoom(state.room === 'hall' ? 'hall' : 'home');
   if (state.beat === 'sneak' || state.beat === 'hop' || state.beat === 'hidden' || state.beat === 'jail') drawPlanterHint();
   drawPeople();
   drawSparks();
   const line = currentLine();
-  if (line && line.kind === 'intro') {
+  if (line && (line.kind === 'card' || line.kind === 'intro')) {
     const g = ctx.createRadialGradient(state.sq.x, state.sq.y - 70, 80, state.sq.x, state.sq.y - 40, 280);
     g.addColorStop(0, 'rgba(12,16,28,0)');
     g.addColorStop(1, 'rgba(12,16,28,0.62)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
-    drawCard(LINE.intro, '', true);
+    drawCard(line.text || LINE.intro, '', true);
   } else if (line && line.kind === 'line') {
     const head = headFor(line.who);
     if (head) drawBubble(line.who, line.text, head);
-  } else if (line && line.kind === 'evening') drawCard(LINE.evening, '', true);
+  } else if (line && line.kind === 'calendar') drawCalendar();
+  else if (line && line.kind === 'evening') drawCard(LINE.evening, '', true);
   else if (line && line.kind === 'jail') drawCard(LINE.lockup, LINE.needed, true);
+  if (state.beat === 'homework') drawHomework();
   const close = state.room === 'hall' && dist(state.sq, POT) <= tune.hide_reach;
-  if (state.beat === 'sing') drawChip('SING', true);
+  if (state.beat === 'sing') drawChip('SING ALONG', true);
+  if (state.beat === 'alone' && !state.look && state.step < 3) drawHomeSpot(state.step === 0 ? HOME.calendar : state.step === 1 ? HOME.closet : HOME.bed);
+  if (state.beat === 'alone' && !state.look && state.step === 3) drawChip(LINE.homework, true);
   if (state.beat === 'sneak' && close && !state.hidden) drawChip('HIDE', true);
   drawIconButtons();
   if (state.paused) {
@@ -861,7 +1027,7 @@ function drawFrame() {
   ctx.fillText = (text, x, y, max) => { state.words.push(String(text)); return orig(text, x, y, max); };
   scenes[scene].draw();
   ctx.fillText = orig;
-  state.chip = (state.controls.find(c => c.id === 'SING' || c.id === 'HIDE') || {}).id || '';
+  state.chip = (state.controls.find(c => c.id === 'SING ALONG' || c.id === 'HIDE' || c.id === LINE.homework) || {}).id || '';
   state.close = state.room === 'hall' && dist(state.sq, POT) <= tune.hide_reach;
 }
 function frame() { tick(); requestAnimationFrame(frame); }
@@ -873,7 +1039,7 @@ window.game = {
   press(code) { hit.add(code); },
   hold(code, on) { on ? down.add(code) : down.delete(code); },
   get events() { return events; },
-  inCone, PLANTER, BUSH_OUTLINE, LEAF, EYES, POT, DOOR, WATCH_FEET, watchEyes, LINE, GUESTS,
+  inCone, PLANTER, BUSH_OUTLINE, LEAF, EYES, POT, DOOR, WATCH_FEET, watchEyes, LINE, GUESTS, HOME, SPEAKER,
   roomsReady() {
     const imgs = [...Object.values(rooms), ...Object.values(guestSprites)];
     return imgs.every(img => img.complete && img.naturalWidth);

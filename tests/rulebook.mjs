@@ -112,19 +112,38 @@ for (const banned of ['antenna', 'croc', 'spots', 'jelly', 'furry']) {
 
 const lines = [
   'Space Snack Quest',
+  'Stormtop Cloud Resort, floating above Jupiter.',
   "This is Squatch. He's a Sasquatch.",
   'Morning, Squatch.',
-  'Big party in the hall tonight.',
+  'Good morning, Stormtop! Big party in the hall tonight!',
   'Party?',
+  "Now here's a classic hit from Dog Zylan!",
   'Stay in here.',
   "I'm floating in space!",
   'Weeee-eenn-nnttt!',
+  'MOONMUNCH',
+  'FUZZUARY',
+  'Sponsored by MOON PIES',
+  'Sock hunt',
+  'family Olympics night',
+  'Wash outside windows (remember space suit!)',
+  'Blanket fort night',
+  "Mops's costumes. And my Guardian Box.",
+  'Not sleepy anymore.',
+  'DO \u00b7 homework',
   'That evening',
-  'SING',
+  'SING ALONG',
   'HIDE',
   'LOCKUP',
   '[line needed]',
 ];
+const checklist = fs.readFileSync(path.join(root, 'docs', 'STORY-BEATS-CHECKLIST.md'), 'utf8');
+for (let n = 1; n <= 61; n++) {
+  if (!checklist.includes('| ' + n + ' |')) fail('R20', 'story checklist is missing beat ' + n);
+}
+for (const word of ['built', 'not yet built', 'dropped', 'milling', 'ga()']) {
+  if (!checklist.includes(word)) fail('R20', 'story checklist is missing ' + word);
+}
 for (const line of lines) {
   if (!html.includes(line)) fail('R1', 'the game dropped an approved line: ' + line);
   if (!book.includes(line)) fail('R20', 'approved line is not in the rulebook: ' + line);
