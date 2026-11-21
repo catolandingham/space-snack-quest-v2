@@ -57,9 +57,9 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 31 | "We love you here. Visitors always love you." | built |
 | 32 | Three paper copies. Isfred is called to a damaged crate. | built |
 | 33 | "I'll take care of it." then "Delicious." | built |
-| 34 | Gumbling. | not yet built |
-| 35 | Spit into the bin. | not yet built |
-| 36 | Walk home past the robots. | not yet built |
+| 34 | "Mmf mrrf!" / "You're gumbling!" | built |
+| 35 | "Ptoo!" | built |
+| 36 | Walk home. Fur or hair? "Paperwork." | built |
 | 37 | Employee of the Month wall. | not yet built |
 | 38 | Missing Moon Pies and a pancake brochure. | not yet built |
 | 39 | Other Sasquatches? | not yet built |

@@ -62,6 +62,8 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | The promise | Loading bay | "We love you here. Visitors always love you." |
 | Paper order | Loading bay | Three copies. "So futuristic, and we still order on paper." Then "Isfred! A crate is damaged in the mail room." |
 | The other copies | Loading bay | "What do I do with the other two?" Mops says "I'll take care of it." then "Delicious." |
+| Gumbling | Loading bay | "Mmf mrrf!" Squatch says "You're gumbling!" Mops says "Ptoo!" |
+| Fur or hair | Hallway | On the walk home: "We got to watch out for these robots." "What's the difference between fur and hair?" "Paperwork." |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 
@@ -141,6 +143,12 @@ These are the only words the game may show, plus the reaction marks below.
 - What do I do with the other two?
 - I'll take care of it.
 - Delicious.
+- Mmf mrrf!
+- You're gumbling!
+- Ptoo!
+- We got to watch out for these robots.
+- What's the difference between fur and hair?
+- Paperwork.
 - ORDER MORE ROBOTS
 - Wait a second... fur!
 - FUR! Security!
