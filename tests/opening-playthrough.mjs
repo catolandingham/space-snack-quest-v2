@@ -76,6 +76,12 @@ const ALLOWED = [
   'What do I do with the other two?',
   "I'll take care of it.",
   'Delicious.',
+  'Mmf mrrf!',
+  "You're gumbling!",
+  'Ptoo!',
+  'We got to watch out for these robots.',
+  "What's the difference between fur and hair?",
+  'Paperwork.',
   'ORDER MORE ROBOTS',
   'MY GARDIANS',
   "I've never gotten to dance at a party.",
@@ -610,6 +616,12 @@ async function play(page, label) {
     'the other two?',
     "I'll take care of it.",
     'Delicious.',
+    'Mmf mrrf!',
+    "You're gumbling!",
+    'Ptoo!',
+    'watch out for these robots.',
+    'fur and hair?',
+    'Paperwork.',
   ]) {
     await tapLit(page);
     await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, line);
