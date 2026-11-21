@@ -30,20 +30,20 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 4 | Sneak to the middle plant while the door guest faces the stage. Soft outline only on that one next place. HIDE at the plant. Eyes low in the front leaves, one close pair. Jail card, then that sneak again. Two guests stroll. Only the door guest and the walkers have cones. | built |
 | 5 | Isfred's announcement and the robot poster. The lines are the ones in the old game. | built |
 | 6 | Croc Boys. Lights a little darker, no change to what anyone can see. The intro line is the one in the old game. | built |
-| 7 | Dress-up from the closet. The lines for it are not approved. | not yet built |
+| 7 | Dress-up from the closet. He taps on the top hat, sunglasses, shirt, and boots from the old game. Dragging clothes, and drawing them onto him, was dropped. Both looked wrong. | built |
 | 8 | Into the party in the disguise. | not yet built |
 | 9 | A real party. Guests should mill about. | not yet built. The opening sneak now has two strolling guests. The rest of the party is later. |
 | 10 | Robot dance. A tiny tap game, misses do not end it. | built |
 | 11 | Karaoke, the Moon Pie song. | not yet built |
 | 12 | Juke the octopus. | not yet built |
 | 13 | Photo corner. | not yet built |
-| 14 | Snack bar, paw close-up, snack pyramid. | not yet built |
+| 14 | Snack bar. One snack, then "...Nice gloves." and "Wait a second... fur!" The paw close-up and the pyramid chain were dropped. They need pictures this repo does not have. | built |
 | 15 | Balloon. | dropped. Brian, 20 Nov 2026: it has never worked. Only a really simple version, and this one is not simple. |
 | 16 | The disguise comes off. "Thanks, I've never got to dance at a party" is the later approved story. The exact line is still pending in the old lines list. | not yet built |
 | 17 | FUR alarm. "…Nice gloves." then "Wait a second... fur!" | not yet built |
 | 18 | Run home. Security searches. No security in the opening. | not yet built |
 | 19 | Mops comes home. "Everyone out there has someone." / "You have me." | built |
-| 20 | Wookiee TV, full screen. The tour, the shed, the scrubbers, the walk to the ship, the no-fur rule. The captions are the old game's words. | built |
+| 20 | Wookiee TV, full screen. The tour, the shed, the scrubbers, the walk to the ship, the no-fur rule. The captions are the old game's words. Nick's growl files are not in the old repo, not in its history, and not in this store as short clips. The show stays silent. | built |
 | 21 | Bedtime story. Why Moon Pies. No parents in the words or the pictures. | not yet built |
 | 22 | A gift from the Guardians. Toy rocket and a note. Into the Guardian Box. | not yet built |
 | 23 | Calendar delivery day. The morning calendar is the setup. | not yet built |
@@ -97,6 +97,8 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 
 ## Not clean enough to force in
 
-- Isfred's welcome lines, the Croc Boys' name, and "COMING SOON!" are still pending in the old lines list. Those beats stay wordless-or-unbuilt rather than getting new words.
+- Isfred's welcome, the Croc Boys line, and COMING SOON are the old game's words. They are in the game now.
 - Mops cannot pick up the painted bucket. It is part of the locked room picture, and that picture is not redrawn. He leaves through the doorway. The bucket stays in the picture.
-- The hall picture has a painted yellow outline. It is not edited out, because the room picture is locked.
+- The yellow box around the snack bar was painted into the locked hall picture. The file was not redrawn. The stroke is covered when the hall is shown.
+- Nick's growl recordings are not in the old repo's history, its releases, or this store as short clips. The television stays silent.
+- The next day and the ship need rooms that are not in the approved pictures. Those beats stay unbuilt rather than inventing rooms. Karaoke, the photo corner, the security chase, and the office are the same.

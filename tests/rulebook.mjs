@@ -148,6 +148,10 @@ const lines = [
   'You have me.',
   'A Wookie tour group came to visit Stormtop.',
   'NO FUR.',
+  "I've never gotten to dance at a party.",
+  'One snack',
+  '...Nice gloves.',
+  'Wait a second... fur!',
 ];
 const checklist = fs.readFileSync(path.join(root, 'docs', 'STORY-BEATS-CHECKLIST.md'), 'utf8');
 for (let n = 1; n <= 61; n++) {

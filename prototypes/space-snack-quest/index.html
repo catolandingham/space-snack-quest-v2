@@ -227,6 +227,10 @@ const LINE = {
   poster: 'COMING SOON!',
   someone: 'Everyone out there has someone.',
   have: 'You have me.',
+  wish: "I've never gotten to dance at a party.",
+  snack: "One snack. That's the rule.",
+  gloves: '...Nice gloves.',
+  fur: 'Wait a second... fur!',
   tv: [
     'Years ago, on Stormtop...',
     'A Wookie tour group came to visit Stormtop.',
@@ -236,6 +240,7 @@ const LINE = {
     'Onto the ship.',
   ],
 };
+const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
   calendar: { x: 108, y: 198, w: 96, h: 120 },
@@ -319,7 +324,7 @@ function reset() {
     hint: null, eyes: [], hopTrace: [], mopProp: false, look: 'away',
     sparks: [], heartAt: -9, bangAt: -9,
     step: 0, look: '', bitten: false, flopT: 0, hwT: 0,
-    walkers: freshWalkers(),
+    walkers: freshWalkers(), worn: [],
   };
 }
 function blocker() {
@@ -548,6 +553,11 @@ function onTap(p) {
   if (state.beat === 'poster') { state.beat = 'band'; state.dim = true; blip(); return; }
   if (state.beat === 'band') { state.beat = 'dance'; state.line = 0; state.dim = true; return; }
   if (state.beat === 'dance') { tapDance(p); return; }
+  if (state.beat === 'wish') { state.beat = 'dress'; state.room = 'home'; state.hidden = false; state.worn = []; state.sq.x = 480; state.sq.y = 530; blip(); return; }
+  if (state.beat === 'dress') { tapDress(p); return; }
+  if (state.beat === 'snack') { state.beat = 'gloves'; blip(); return; }
+  if (state.beat === 'gloves') { state.beat = 'furryline'; blip(); return; }
+  if (state.beat === 'furryline') { comeHome(); return; }
   if (state.beat === 'miss' || state.beat === 'have' || state.beat === 'tv') { advanceHome(); return; }
   if (state.beat === 'morning' || state.beat === 'song' || state.beat === 'evening' || state.beat === 'jail' || state.beat === 'resort' || state.beat === 'intro' || state.beat === 'stay') advanceStory();
 }
@@ -556,7 +566,26 @@ function tapDance(p) {
   if (pad && hitControl(p, pad)) {
     state.line++;
     blip();
-    if (state.line >= DANCE.length) comeHome();
+    if (state.line >= DANCE.length) {
+      state.beat = 'wish';
+      state.dim = false;
+      state.hidden = true;
+      state.room = 'hall';
+    }
+  }
+}
+function tapDress(p) {
+  const piece = state.controls.find(c => c.id === 'wear' && hitControl(p, c));
+  if (!piece || state.worn.includes(piece.label)) return;
+  state.worn.push(piece.label);
+  blip();
+  if (state.worn.length >= CLOTHES.length) {
+    state.beat = 'snack';
+    state.room = 'hall';
+    state.hidden = false;
+    state.sq.x = 700;
+    state.sq.y = 540;
+    state.sq.face = 1;
   }
 }
 function comeHome() {
@@ -654,7 +683,7 @@ function tickWorld(dt) {
   // through the wall and off the picture. The hall is a different picture and
   // was not drawn yet, but he had already left the room, and the next place
   // the player stands is that hall.
-  const hallBeat = ['peek', 'sneak', 'hop', 'hidden', 'jail', 'announce', 'poster', 'band', 'dance'].includes(state.beat);
+  const hallBeat = ['peek', 'sneak', 'hop', 'hidden', 'jail', 'announce', 'poster', 'band', 'dance', 'wish', 'snack', 'gloves', 'furryline'].includes(state.beat);
   if (!hallBeat) state.room = 'home';
   if (state.beat === 'alone' && state.look === 'flop') {
     state.flopT += dt;
@@ -685,7 +714,7 @@ function tickWorld(dt) {
       state.song = 'off';
     }
   }
-  if (['peek', 'sneak', 'hidden', 'announce', 'poster', 'band', 'dance'].includes(state.beat)) {
+  if (['peek', 'sneak', 'hidden', 'announce', 'poster', 'band', 'dance', 'wish', 'snack', 'gloves', 'furryline'].includes(state.beat)) {
     if (!state.paused) { state.lookT += dt; tickWalkers(dt); }
   }
   if (state.beat === 'return' && walkToward(state.mo, 620, 520, dt)) state.beat = 'miss';
@@ -835,7 +864,7 @@ function drawBubble(who, text, head) {
   ctx.fillStyle = '#fffdf8'; ctx.fill();
   ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
   ctx.restore();
-  if (who !== 'speaker') {
+  if (who !== 'speaker' && who !== 'bar') {
     const tag = who === 'mops' ? 'Mops' : who === 'isfred' ? 'Isfred' : 'Squatch';
     const tagW = tag.length * 11 + 18;
     roundRect(box.x + 12, box.y - 12, tagW, 22, 10);
@@ -1095,6 +1124,10 @@ function currentLine() {
   if (state.beat === 'announce') return { kind: 'line', who: 'isfred', text: [LINE.welcome, LINE.hello, LINE.soon][state.line] || LINE.soon };
   if (state.beat === 'poster') return { kind: 'poster' };
   if (state.beat === 'band') return { kind: 'line', who: 'isfred', text: LINE.croc };
+  if (state.beat === 'wish') return { kind: 'line', who: 'sq', text: LINE.wish };
+  if (state.beat === 'snack') return { kind: 'line', who: 'sq', text: LINE.snack };
+  if (state.beat === 'gloves') return { kind: 'line', who: 'bar', text: LINE.gloves };
+  if (state.beat === 'furryline') return { kind: 'line', who: 'bar', text: LINE.fur };
   if (state.beat === 'miss') return { kind: 'line', who: 'sq', text: LINE.someone };
   if (state.beat === 'have') return { kind: 'line', who: 'mops', text: LINE.have };
   if (state.beat === 'tv') return { kind: 'tv' };
@@ -1116,6 +1149,46 @@ function drawPoster() {
   ctx.fillStyle = '#ffcf33'; ctx.fill(); ctx.stroke();
   say(LINE.poster, 480, 390, 28, '#e5533d', 'center', 800);
   state.controls.push({ id: 'card', x: 300, y: 160, w: 360, h: 280, lit: true });
+}
+function drawClothes() {
+  CLOTHES.forEach((name, i) => {
+    const on = state.worn.includes(name);
+    const box = { x: 36, y: 70 + i * 78, w: 230, h: 64 };
+    roundRect(box.x, box.y, box.w, box.h, 16);
+    ctx.fillStyle = on ? '#d9f5df' : '#fff4cc';
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+    say(name, box.x + box.w / 2, box.y + 32, 22, INK, 'center', 800);
+    if (!on) state.controls.push({ id: 'wear', label: name, x: box.x, y: box.y, w: box.w, h: box.h, lit: true });
+  });
+}
+function drawWorn() {
+  if (!state.worn || !state.worn.length || state.hidden) return;
+  const x = state.sq.x, y = state.sq.y;
+  ctx.save();
+  if (state.worn.includes('top hat')) {
+    roundRect(x - 16, y - 92, 32, 10, 2);
+    ctx.fillStyle = '#1e2430'; ctx.fill();
+    roundRect(x - 10, y - 112, 20, 22, 2);
+    ctx.fill();
+  }
+  if (state.worn.includes('sunglasses')) {
+    ctx.fillStyle = '#1e2430';
+    ctx.fillRect(x - 16, y - 78, 12, 8);
+    ctx.fillRect(x + 4, y - 78, 12, 8);
+  }
+  if (state.worn.includes('shirt')) {
+    ctx.fillStyle = '#3478f6';
+    ctx.fillRect(x - 18, y - 48, 36, 22);
+  }
+  if (state.worn.includes('boots')) {
+    ctx.fillStyle = '#6b4428';
+    ctx.fillRect(x - 16, y - 8, 12, 8);
+    ctx.fillRect(x + 4, y - 8, 12, 8);
+  }
+  ctx.restore();
 }
 function drawDance() {
   const spots = [[240, 500], [400, 500], [560, 500], [720, 500]];
@@ -1166,6 +1239,8 @@ function drawPlay() {
   if (state.beat === 'announce' || state.beat === 'band' || state.beat === 'poster') {
     state.heads.push({ x: 400, y: 248, w: 50, h: 36, who: 'isfred' });
   }
+  if (state.beat === 'wish') state.heads.push({ x: 420, y: 520, w: 40, h: 30, who: 'sq' });
+  if (state.beat === 'gloves' || state.beat === 'furryline') state.heads.push({ x: 600, y: 430, w: 50, h: 40, who: 'bar' });
   drawSparks();
   const line = currentLine();
   if (line && (line.kind === 'card' || line.kind === 'intro')) {
@@ -1189,6 +1264,8 @@ function drawPlay() {
   if (state.beat === 'alone' && !state.look && state.step === 3) drawChip(LINE.homework, true);
   if (state.beat === 'hidden') state.controls.push({ id: 'line', x: 400, y: 460, w: 120, h: 90, lit: true });
   if (state.beat === 'dance') drawDance();
+  if (state.beat === 'dress') drawClothes();
+  if (state.beat === 'snack') state.controls.push({ id: 'line', x: 720, y: 430, w: 70, h: 80, lit: true });
   if (state.beat === 'peekready') drawChip('PEEK', true);
   if (state.beat === 'sneak' && close && !state.hidden) drawChip(LINE.hide, true);
   drawIconButtons();
