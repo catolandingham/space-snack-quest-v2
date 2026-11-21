@@ -28,12 +28,12 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 2 | They sing at the doorway. Theme stops while they sing. Mops faces Squatch, says stay, and leaves. | built |
 | 3 | That evening. Peek from the doorway. He does not walk out. Banner, muffled talk, "Robots?" once. | built |
 | 4 | Sneak to the middle plant while the door guest faces the stage. Soft outline only on that one next place. HIDE at the plant. Eyes low in the front leaves, one close pair. Jail card, then that sneak again. Two guests stroll. Only the door guest and the walkers have cones. | built |
-| 5 | Isfred's announcement and the robot poster. The spoken lines are not approved. | not yet built |
-| 6 | Croc Boys. Lights a little darker, no change to what anyone can see. The band's words are not approved. | not yet built |
+| 5 | Isfred's announcement and the robot poster. The lines are the ones in the old game. | built |
+| 6 | Croc Boys. Lights a little darker, no change to what anyone can see. The intro line is the one in the old game. | built |
 | 7 | Dress-up from the closet. The lines for it are not approved. | not yet built |
 | 8 | Into the party in the disguise. | not yet built |
 | 9 | A real party. Guests should mill about. | not yet built. The opening sneak now has two strolling guests. The rest of the party is later. |
-| 10 | Robot dance. Only a tiny tap game, or it is dropped. Not dropped yet, because the party around it is not in. | not yet built |
+| 10 | Robot dance. A tiny tap game, misses do not end it. | built |
 | 11 | Karaoke, the Moon Pie song. | not yet built |
 | 12 | Juke the octopus. | not yet built |
 | 13 | Photo corner. | not yet built |
@@ -42,8 +42,8 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 16 | The disguise comes off. "Thanks, I've never got to dance at a party" is the later approved story. The exact line is still pending in the old lines list. | not yet built |
 | 17 | FUR alarm. "…Nice gloves." then "Wait a second... fur!" | not yet built |
 | 18 | Run home. Security searches. No security in the opening. | not yet built |
-| 19 | Mops comes home. "you have me." | not yet built. It happens after the party, so it is not played early. |
-| 20 | Wookiee TV, full screen. Nick's growls. The shed, the scrubbers, the walk to the ship, the no-fur rule. | not yet built. Same reason as 19. Brian said to keep this show. |
+| 19 | Mops comes home. "Everyone out there has someone." / "You have me." | built |
+| 20 | Wookiee TV, full screen. The tour, the shed, the scrubbers, the walk to the ship, the no-fur rule. The captions are the old game's words. | built |
 | 21 | Bedtime story. Why Moon Pies. No parents in the words or the pictures. | not yet built |
 | 22 | A gift from the Guardians. Toy rocket and a note. Into the Guardian Box. | not yet built |
 | 23 | Calendar delivery day. The morning calendar is the setup. | not yet built |
