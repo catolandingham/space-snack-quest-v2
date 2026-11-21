@@ -30,6 +30,9 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Poster | Party hall | A poster of robots says COMING SOON! |
 | Croc Boys | Party hall | Isfred introduces the band. The lights get a little darker. What people can see does not change. |
 | Dance | Party hall | Four big buttons. A miss does not end it. Taps only. |
+| Wish | Party hall, still in the plant | He says he has never gotten to dance at a party. |
+| Dress | Squatch's room | He taps on a top hat, sunglasses, a shirt, and boots. |
+| Snack | Party hall | One snack. The person by the bar says nice gloves, then sees the fur. |
 | Homecoming | Squatch's room | Mops comes home. Squatch says everyone out there has someone. Mops says you have me. |
 | TV | Full screen | The Wookiee tour, the shed, the scrubbers, the walk to the ship, and the no-fur rule. |
 
@@ -80,6 +83,14 @@ These are the only words the game may show, plus the reaction marks below.
 - The fur clogged the air scrubbers. Everyone gasped for air!
 - Nobody can live outside. The scrubbers keep us breathing. NO FUR.
 - Onto the ship.
+- I've never gotten to dance at a party.
+- top hat
+- sunglasses
+- shirt
+- boots
+- One snack. That's the rule.
+- ...Nice gloves.
+- Wait a second... fur!
 - Mops
 - Squatch
 - Teal jacket
