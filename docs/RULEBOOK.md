@@ -4,6 +4,8 @@ If it is not in this file, it is not decided.
 
 Every correction from Brian replaces the old line and adds or updates a check in the same change. This file does not keep old versions. Git does.
 
+The ideas got better over time. The latest refined decision is what to build. The making of it got worse over time. The early game, around 7 Nov 2026, commit ee59f4a, and the early gameplay videos, is the quality bar for how a beat looks, feels, and plays: a clean sneak, guests who walk a loop, the close pair of eyes in the bush, and simple polish. Build the newest concept to that early standard. Do not put an older idea back just because it is older. A check compares the code with this file.
+
 ## Play
 
 The game is at https://squatch.onrender.com. This is the only place that states that link.
@@ -15,13 +17,19 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Title | Squatch's room is not on screen yet | The title glows. Nothing plays until the first tap. |
 | Where he lives | Squatch's room is not on screen yet | A card says Stormtop Cloud Resort, floating above Jupiter. Joe's theme plays. |
 | Who he is | Squatch's room | A card says who Squatch is. The theme is still playing. |
-| Morning lines | Squatch's room | The room is quiet. Mops wrings his beard over the bucket. The wall speaker, not Mops, says there is a party. Each line waits for a tap. |
-| SING ALONG | Squatch's room | SING ALONG lights up. Squatch walks only where the player taps. |
-| Song | Squatch's room | They meet at the doorway and sing the goodbye. The theme stops while they sing. That walk plays on its own. |
-| Stay | Squatch's room | Mops turns to face Squatch and says to stay in here. |
-| Mops leaves | Squatch's room | Mops walks to the doorway and leaves from inside the room. |
-| Home alone | Squatch's room | Calendar, then the closet, then the bed, then homework. One at a time. |
-| That evening | Squatch's room | The card waits for a tap. The hall is not on screen yet. |
+| Asleep | Squatch's room | Squatch starts asleep in his bed. Mops is already up, mopping with his beard, facing the way he walks. |
+| Wake | Squatch's room | The speaker shows sound lines and says good morning and the party. Squatch says "Party?" |
+| Mops hello | Squatch's room | Mops stops to the right of the bucket, faces Squatch, and says good morning. He does not rock. |
+| Wring | Full screen | A close-up of Mops wringing his beard into the bucket. No new words. |
+| Song on | Squatch's room | The speaker shows a music note and names Dog Zylan. Brian's own recording, floating-in-space.mp3, starts and loops softly the whole time Squatch is in his room. It ducks while they sing. |
+| Out of bed | Squatch's room | Squatch hops out of bed. Mops says "That's our song." |
+| SING ALONG | Squatch's room | SING ALONG lights up. On tap, Mops goes to the door and Squatch stops beside him with a gap. |
+| Song | Squatch's room | They sing. The room song ducks while the bubbles are up. |
+| Off to work | Squatch's room | Mops says he has to go to work, then the party line, then "Stay in here." He faces Squatch. |
+| Mops leaves | Squatch's room | Mops walks to the doorway and leaves from inside the room. The bucket stays. It is painted into the locked picture. |
+| Home alone | Squatch's room | Only the desk is outlined. The calendar, closet, and bed can be tapped and have no yellow outline. |
+| Homework | Squatch's room | Tapping the desk opens the sheet. The header is SPACE MATH. The name line is Name: Squatch, in wobbly letters, with a paw smudge. |
+| That evening | Squatch's room | The card waits for a tap. Party noise comes through the door. PEEK lights up on the door. |
 | Peek | Party hall, from the doorway | PEEK shows the hall. Squatch is not drawn yet. The banner, the guests, and the cones are on screen. Isfred mumbles. Squatch thinks "Robots?" once. |
 | Sneak | Party hall | He appears in his doorway. He walks only where the player taps. The plant outline is the only hint. Two guests stroll. The door guest turns on a steady beat. |
 | Hide | Party hall | HIDE · plant lights up only when he is close. One close pair of eyes peeks from the front leaves. |
@@ -48,6 +56,11 @@ These are the only words the game may show, plus the reaction marks below.
 - Party?
 - Now here's a classic hit from Dog Zylan!
 - Stay in here.
+- That's our song.
+- I have to go to work now.
+- Big party in the hall tonight.
+- SPACE MATH
+- Name: Squatch
 - I'm floating in space!
 - Weeee-eenn-nnttt!
 - MOONMUNCH
@@ -111,6 +124,8 @@ The game may load pictures only from `prototypes/space-snack-quest/assets/approv
 | File | What it is | Approved |
 | --- | --- | --- |
 | assets/approved/home-room-empty-closed-v5.png | Squatch's room, wardrobe closed | Brian, 2026-11-20. Locked picture. Do not redraw it. |
+| assets/approved/home-room-empty-open-v5.png | The same room with the closet open: costumes and the Guardian Box | Brian, locked with the closed room. Do not redraw it. |
+| assets/approved/speaker-option-4.png | The wall speaker, cut from the locked hall picture. Wooden box, round cone. No sound marks. | Brian, 8 Nov 2026, decision R11, option 4. |
 | assets/approved/hall-room-empty-v1.png | Party hall | Brian, 2026-11-20. Locked picture. Do not redraw it. |
 
 Drawn characters, from the live game's code at commit 4d1faa2 (17 Nov 2026), file `src/game/60-frame-draw.js` and `src/game/10-ch1.js`:
@@ -118,7 +133,7 @@ Drawn characters, from the live game's code at commit 4d1faa2 (17 Nov 2026), fil
 | Who | Drawing | Approved |
 | --- | --- | --- |
 | Squatch | function Re | Brian, 2026-11-20, for this build. Not the older title-screen Squatch. |
-| Mops | function Fe. His beard is the mop. No mop prop. | Brian, 2026-11-20. |
+| Mops | mops-approved-nov8.png. His beard is the mop. No mop prop. Blue work shirt, chest pocket, white name patch, beard to the floor. No badge. | Brian, 8 Nov 2026, decision C1. He said yes to this picture. |
 | Hidden eyes | function ga. One close pair. Each eye is a white circle, radius 6, with a 2 pixel dark outline. The centres are 18 pixels apart. The pupil sits down and to the right, and the blink is the same. The pair is centered low, on the seam where the two front leaf clumps meet. | Brian, 8 Nov 2026, decision C21, "These are the eyes." |
 
 Guests. Brian approved six on 8 Nov 2026 (decision C12, "We like these ones just fine, and actually the robot is fine as well"). The jelly in a sun hat and the furry alien are not guests. The later sheet of eight code-drawn guests is not approved. The source picture is `assets/approved/guests/nov8-six-approved-guests.png`. The game draws only the six cuts of that sheet, `teal.png`, `camera.png`, `backpack.png`, `stilt.png`, `octopus.png`, and `robot.png`. The cream around each person is transparent. The whites inside the drawings stay. No other guest art is loaded. Each person is:
@@ -157,7 +172,14 @@ Only these six may appear. Their names in the game are teal, camera, backpack, s
 | R19 | Being seen restarts the sneak, not the whole story. | Automatic |
 | R20 | The code does not show a line, a picture, or a guest the rulebook does not list. | Automatic |
 | R21 | The play link is only in this file. | Automatic |
-| R22 | The wall speaker says the party line and the song title. Mops does not. After the song he faces Squatch, says to stay, and leaves. Then the calendar, the closet, the bed, and homework, in that order, and only then the evening card. | Automatic |
+| R22 | The morning follows Brian's 20 Nov 2026 order: asleep, speaker, "Party?", Mops's hello, the wring cutaway, Dog Zylan, out of bed, "That's our song.", SING ALONG, work, the party line, "Stay in here.", then he leaves. | Automatic |
+| R23 | Squatch starts the morning asleep in the bed. Source: Brian, 20 Nov 2026 evening. | Automatic |
+| R24 | The speaker is the wooden box cut from the locked hall. Sound lines or a note show only while it is making sound. Source: decision R11 and the 15 Nov playtest. | Automatic for the picture. Eyes for the cue. |
+| R25 | Mops stands to the right of the bucket and faces Squatch when he talks. He does not rock. Source: the 17 Nov game and Brian, 20 Nov 2026 evening. | Automatic |
+| R26 | After Mops leaves, only the desk is outlined. The calendar, closet, and bed have no yellow outline. Source: Brian, 20 Nov 2026 evening. | Automatic |
+| R27 | The calendar close-up is a grid. The Moon Pie is already bitten. Source: the 17 Nov calendar, and Brian, 20 Nov 2026 evening. | Automatic |
+| R28 | Homework is the sheet titled SPACE MATH, with Name: Squatch in wobbly letters and a paw smudge. There is no extra homework chip. Source: Brian, 21 Nov 2026. | Automatic |
+| R29 | PEEK lights up on the bedroom door, and party noise plays there. Source: the 7 Nov and 17 Nov builds, and Brian, 20 Nov 2026 evening. | Automatic |
 
 The sneak, the guests, and the hidden eyes are not changed in this pass. Brian said those are wrong, and the gameplay reference was not in yet. See `docs/STORY-BEATS-CHECKLIST.md`.
 

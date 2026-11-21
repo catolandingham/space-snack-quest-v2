@@ -190,8 +190,10 @@ function Fe(l, o, i, s) {
     // His own jacket. Squatch wears the spare from the wardrobe, so this one stays on.
     m(-14, -24, 28, 14, 4),
     r("#3478f6", 1.2),
-    m(-3, -16, 6, 4, 1),
-    r("#2456b0", 1));
+    m(-8, -20, 7, 6, 1),
+    r("#2456b0", 1),
+    m(2, -22, 8, 5, 1),
+    r("#fffdf8", 1));
   let A = s.headDown ? 6 : 0;
   (e.beginPath(),
     e.moveTo(14, -24 + A),
@@ -220,10 +222,6 @@ function Fe(l, o, i, s) {
     s.eyes === "closed" ? C([17.5, -29 + A, 21, -29 + A], y, 1.2) : F(19.5, -29 + A, 1.4, y),
     F(23.5, -26.5 + A, 1.1, "#f2a7b6"),
     s.mouth === "o" && (e.beginPath(), e.ellipse(22, -24 + A, 1.4, 1.9, 0, 0, 7), (e.fillStyle = y), e.fill()),
-    e.beginPath(),
-    e.arc(-2, -18, 3.2, 0, 7),
-    wV("#ffcf33", 1.2),
-    F(-2, -18, 1.2, "#e8a400"),
     e.restore());
 }
 // One peeking eye from ga() in src/game/10-ch1.js at 4d1faa2 (decision C21, Brian t230).

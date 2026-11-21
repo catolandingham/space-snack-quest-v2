@@ -152,6 +152,12 @@ const lines = [
   'One snack',
   '...Nice gloves.',
   'Wait a second... fur!',
+  'SPACE MATH',
+  'Name: Squatch',
+  "That's our song.",
+  'I have to go to work now.',
+  'speaker-option-4.png',
+  'home-room-empty-open-v5.png',
 ];
 const checklist = fs.readFileSync(path.join(root, 'docs', 'STORY-BEATS-CHECKLIST.md'), 'utf8');
 for (let n = 1; n <= 61; n++) {
@@ -168,6 +174,9 @@ for (const line of lines) {
 const playHost = 'onrender' + '.com';
 const playLink = 'https://squatch.' + playHost;
 if (!book.includes(playLink)) fail('R21', 'the rulebook does not state the play link');
+if (!book.includes('commit ee59f4a')) fail('R21', 'the rulebook does not name the early-game quality bar');
+if (!book.includes('The latest refined decision is what to build')) fail('R21', 'the rulebook does not say the newest concept wins');
+if (!book.includes('Do not put an older idea back just because it is older')) fail('R21', 'the rulebook does not forbid reverting a refined concept');
 function walk(dir, found) {
   for (const name of fs.readdirSync(dir)) {
     if (name === '.git' || name === 'node_modules') continue;
