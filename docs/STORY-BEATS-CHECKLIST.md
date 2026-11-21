@@ -24,7 +24,7 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 
 | Beat | What was decided | Status |
 | --- | --- | --- |
-| 1 | Meet Squatch. Cards for Stormtop and who he is. Mops by the bucket. Morning, then the wall speaker's party line and the song title. Poster already in the room picture. | built |
+| 1 | Meet Squatch. He wakes in bed. The speaker announces the morning. Mops says hello from the right of the bucket. A full-screen beard wring. Dog Zylan. Out of bed. "That's our song." They sing at the door with a gap. Mops says he has to go to work, then the party line, then stay. | built |
 | 2 | They sing at the doorway. Theme stops while they sing. Mops faces Squatch, says stay, and leaves. | built |
 | 3 | That evening. Peek from the doorway. He does not walk out. Banner, muffled talk, "Robots?" once. | built |
 | 4 | Sneak to the middle plant while the door guest faces the stage. Soft outline only on that one next place. HIDE at the plant. Eyes low in the front leaves, one close pair. Jail card, then that sneak again. Two guests stroll. Only the door guest and the walkers have cones. | built |
@@ -101,4 +101,4 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 - Mops cannot pick up the painted bucket. It is part of the locked room picture, and that picture is not redrawn. He leaves through the doorway. The bucket stays in the picture.
 - The yellow box around the snack bar was painted into the locked hall picture. The file was not redrawn. The stroke is covered when the hall is shown.
 - Nick's growl recordings are not in the old repo's history, its releases, or this store as short clips. The television stays silent.
-- The next day and the ship need rooms that are not in the approved pictures. Those beats stay unbuilt rather than inventing rooms. Karaoke, the photo corner, the security chase, and the office are the same.
+- The hallway, the office, and the loading bay are already locked pictures in `assets/rooms/`. They are not missing. Day 2 and the escape stay for later. The game still loads pictures only from `assets/approved/`, so those rooms are listed there before they are used.
