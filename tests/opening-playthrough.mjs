@@ -62,7 +62,6 @@ const ALLOWED = [
   'sunglasses',
   'shirt',
   'boots',
-  '...Nice gloves.',
   'Wait a second... fur!',
   'FUR! Security!',
   "That's our song.",
