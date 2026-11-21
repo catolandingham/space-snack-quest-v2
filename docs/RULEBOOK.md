@@ -26,6 +26,12 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Sneak | Party hall | He appears in his doorway. He walks only where the player taps. The plant outline is the only hint. Two guests stroll. The door guest turns on a steady beat. |
 | Hide | Party hall | HIDE · plant lights up only when he is close. One close pair of eyes peeks from the front leaves. |
 | Seen | Party hall | He hops. The lockup card says a guest saw him. A tap starts that sneak again at the doorway. |
+| Announcement | Party hall, from the plant | Isfred welcomes everyone, names the robotics visitors, and says the helper robots are coming. Squatch stays hidden. |
+| Poster | Party hall | A poster of robots says COMING SOON! |
+| Croc Boys | Party hall | Isfred introduces the band. The lights get a little darker. What people can see does not change. |
+| Dance | Party hall | Four big buttons. A miss does not end it. Taps only. |
+| Homecoming | Squatch's room | Mops comes home. Squatch says everyone out there has someone. Mops says you have me. |
+| TV | Full screen | The Wookiee tour, the shed, the scrubbers, the walk to the ship, and the no-fur rule. |
 
 ## Approved lines
 
@@ -61,6 +67,19 @@ These are the only words the game may show, plus the reaction marks below.
 - LOCKUP
 - A guest saw Squatch!
 - Isfred
+- Welcome, everybody, to the Stormtop Space Party!
+- Let's give a big hello to our friends from Bleep-Bloop Robotics!
+- Soon their helper robots will be here, to help with the heavy work.
+- And now... put your hands together for the Croc Boys!
+- COMING SOON!
+- Everyone out there has someone.
+- You have me.
+- Years ago, on Stormtop...
+- A Wookie tour group came to visit Stormtop.
+- They shed. A LOT.
+- The fur clogged the air scrubbers. Everyone gasped for air!
+- Nobody can live outside. The scrubbers keep us breathing. NO FUR.
+- Onto the ship.
 - Mops
 - Squatch
 - Teal jacket

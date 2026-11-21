@@ -141,6 +141,13 @@ const lines = [
   'LOCKUP',
   'A guest saw Squatch!',
   'Isfred',
+  'Welcome, everybody, to the Stormtop Space Party!',
+  'COMING SOON!',
+  'Croc Boys',
+  'Everyone out there has someone.',
+  'You have me.',
+  'A Wookie tour group came to visit Stormtop.',
+  'NO FUR.',
 ];
 const checklist = fs.readFileSync(path.join(root, 'docs', 'STORY-BEATS-CHECKLIST.md'), 'utf8');
 for (let n = 1; n <= 61; n++) {

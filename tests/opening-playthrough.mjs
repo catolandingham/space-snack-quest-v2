@@ -46,6 +46,19 @@ const ALLOWED = [
   'LOCKUP',
   'A guest saw Squatch!',
   'Isfred',
+  'Welcome, everybody, to the Stormtop Space Party!',
+  "Let's give a big hello to our friends from Bleep-Bloop Robotics!",
+  'Soon their helper robots will be here, to help with the heavy work.',
+  'And now... put your hands together for the Croc Boys!',
+  'COMING SOON!',
+  'Everyone out there has someone.',
+  'You have me.',
+  'Years ago, on Stormtop...',
+  'A Wookie tour group came to visit Stormtop.',
+  'They shed. A LOT.',
+  'The fur clogged the air scrubbers. Everyone gasped for air!',
+  'Nobody can live outside. The scrubbers keep us breathing. NO FUR.',
+  'Onto the ship.',
   'Mops',
   'Squatch',
   '!',
@@ -128,10 +141,10 @@ function checkRules(s, label) {
       for (const b of s.bubbles) if (inside(b.box, c.x, c.y)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'the cone starts on a speech bubble'));
     }
   }
-  const homeBeats = ['title', 'resort', 'intro', 'morning', 'sing', 'song', 'songwalk', 'stay', 'leave', 'alone', 'homework', 'evening', 'peekready'];
+  const homeBeats = ['title', 'resort', 'intro', 'morning', 'sing', 'song', 'songwalk', 'stay', 'leave', 'alone', 'homework', 'evening', 'peekready', 'return', 'miss', 'have', 'tv', 'after'];
   if (homeBeats.includes(s.beat) && s.room !== 'home') problems.push(fails(RULE.room + ' ' + label + ' room', s.beat + ' is in the ' + s.room));
   if (homeBeats.includes(s.beat) && s.mo && !s.mo.hidden && s.mo.x > 860) problems.push(fails(RULE.room + ' ' + label + ' room', 'Mops is outside the bedroom at x ' + s.mo.x));
-  if (['peek', 'sneak', 'hidden', 'hop', 'jail'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
+  if (['peek', 'sneak', 'hidden', 'hop', 'jail', 'announce', 'poster', 'band', 'dance'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
   if ((s.beat === 'sneak' || s.beat === 'hidden') && s.cones.length > 3) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'too many cones ' + s.cones.length));
   if ((s.beat === 'sneak' || s.beat === 'hidden' || s.beat === 'hop' || s.beat === 'jail') && s.hint) {
     if (s.hint.kind !== 'planter' || s.hint.points.length < 8) problems.push(fails(RULE.outline + ' ' + label + ' hint', JSON.stringify(s.hint && s.hint.kind)));
@@ -150,7 +163,7 @@ function checkRules(s, label) {
     if (kinds.some(g => !GUESTS.includes(g))) problems.push(fails(RULE.guests + ' ' + label + ' guests', kinds.join(',')));
     if (s.beat === 'sneak' && GUESTS.some(g => !kinds.includes(g))) problems.push(fails(RULE.guests + ' ' + label + ' guests', 'missing ' + GUESTS.filter(g => !kinds.includes(g)).join(',')));
   }
-  const handled = ['SING ALONG', 'HIDE · plant', 'PEEK', 'DO \u00b7 homework', 'look', 'pie', 'line', 'card', 'start', 'pause', 'mute'];
+  const handled = ['SING ALONG', 'HIDE · plant', 'PEEK', 'DO \u00b7 homework', 'look', 'pie', 'line', 'card', 'dance', 'start', 'pause', 'mute'];
   for (const c of s.controls || []) {
     if (!handled.includes(c.id)) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'nothing handles ' + c.id));
   }
@@ -420,6 +433,51 @@ async function play(page, label) {
     if (!(e.r > 5.5 && e.r < 6.5)) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'eye radius ' + e.r));
     if (!e.pupil || e.pupil.dx <= 0 || e.pupil.dy <= 0) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'pupil is not down-right'));
   }
+
+  await tapLit(page);
+  for (const text of [
+    'Welcome, everybody, to the Stormtop Space Party!',
+    "Let's give a big hello to our friends from Bleep-Bloop Robotics!",
+    'Soon their helper robots will be here, to help with the heavy work.',
+  ]) {
+    await page.waitForFunction(t => window.game.state.bubbles.some(b => b.text === t), { timeout: 4000 }, text);
+    s = await readState(page);
+    problems.push(...checkRules(s, label + ' announce'));
+    if (text.startsWith('Welcome')) await shot(page, label + '-8-announce');
+    await tapLit(page);
+  }
+  await waitFor(page, () => window.game.state.beat === 'poster' && window.game.state.words.includes('COMING SOON!'), 4000, 'poster');
+  await shot(page, label + '-8-poster');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' poster'));
+  await tapLit(page);
+  await page.waitForFunction(() => window.game.state.bubbles.some(b => b.text.includes('Croc Boys')), { timeout: 4000 });
+  await shot(page, label + '-8-croc');
+  s = await readState(page);
+  if (!s.dim && !(await page.evaluate(() => window.game.state.dim))) problems.push(fails(label + ' croc', 'the lights did not dim'));
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'dance', 4000, 'dance');
+  await shot(page, label + '-8-dance');
+  for (let i = 0; i < 4; i++) {
+    await tapLit(page);
+    await new Promise(r => setTimeout(r, 80));
+  }
+  await waitFor(page, () => window.game.state.beat === 'miss', 8000, 'homecoming');
+  await shot(page, label + '-9-home');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' homecoming'));
+  if (!s.bubbles.some(b => b.text === 'Everyone out there has someone.')) problems.push(fails(label + ' home', 'Squatch did not say the homecoming line'));
+  await tapLit(page);
+  await page.waitForFunction(() => window.game.state.bubbles.some(b => b.text === 'You have me.'), { timeout: 4000 });
+  await shot(page, label + '-9-mops');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'tv' && window.game.state.words.some(w => w.includes('Stormtop')), 4000, 'tv');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.words.some(w => w.includes('Wookie')), 4000, 'wookie card');
+  await shot(page, label + '-9-tv');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' tv'));
+  if (s.room !== 'home' && s.beat !== 'tv') problems.push(fails(label + ' tv', 'the show is not full screen at home'));
   return problems;
 }
 
