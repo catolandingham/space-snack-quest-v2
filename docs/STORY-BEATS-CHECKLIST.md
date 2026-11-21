@@ -39,9 +39,9 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 13 | Photo corner. | not yet built |
 | 14 | Snack bar. The one-snack rule is Day 2, not this party. The party still says "...Nice gloves." and "Wait a second... fur!" The paw close-up is later. | built |
 | 15 | Balloon. | dropped. Brian, 20 Nov 2026: it has never worked. Only a really simple version, and this one is not simple. |
-| 16 | The disguise comes off. "Thanks, I've never got to dance at a party" is the later approved story. The exact line is still pending in the old lines list. | not yet built |
-| 17 | FUR alarm. "…Nice gloves." then "Wait a second... fur!" | not yet built |
-| 18 | Run home. Security searches. No security in the opening. | not yet built |
+| 16 | The disguise comes off at the dance because his fur shows. "Wait a second... fur!" | built |
+| 17 | Someone pulls the red FUR alarm. "FUR! Security!" Guards come in. | built |
+| 18 | He runs home and hides under the bed. A guard searches the room and leaves. If he is seen, that part starts again. | built |
 | 19 | Mops comes home. "Everyone out there has someone." / "You have me." | built |
 | 20 | Wookiee TV, full screen. The tour, the shed, the scrubbers, the walk to the ship, the no-fur rule. The captions are the old game's words. Nick's growl files are not in the old repo, not in its history, and not in this store as short clips. The show stays silent. | built |
 | 21 | Bedtime story. Why Moon Pies. No parents in the words or the pictures. | not yet built |

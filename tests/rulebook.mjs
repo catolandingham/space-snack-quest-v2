@@ -151,6 +151,7 @@ const lines = [
   "I've never gotten to dance at a party.",
   '...Nice gloves.',
   'Wait a second... fur!',
+  'FUR! Security!',
   'SPACE MATH',
   'Name: Squatch',
   "That's our song.",
