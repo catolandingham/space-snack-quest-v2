@@ -69,6 +69,14 @@ const ALLOWED = [
   'I better go see what that is.',
   'Please let me follow you.',
   'Okay. Just this time. Hide carefully.',
+  'Dot, Bob, and Lou are leaving.',
+  'We love you here. Visitors always love you.',
+  'So futuristic, and we still order on paper.',
+  'Isfred! A crate is damaged in the mail room.',
+  'What do I do with the other two?',
+  "I'll take care of it.",
+  'Delicious.',
+  'ORDER MORE ROBOTS',
   'MY GARDIANS',
   "I've never gotten to dance at a party.",
   'top hat',
@@ -594,6 +602,18 @@ async function play(page, label) {
   }
   await tapLit(page);
   await waitFor(page, () => window.game.state.room === 'bay' && window.game.state.hidden, 4000, 'bay plant');
+  for (const line of [
+    'Dot, Bob, and Lou are leaving.',
+    'Visitors always love you.',
+    'still order on paper.',
+    'damaged in the mail room.',
+    'the other two?',
+    "I'll take care of it.",
+    'Delicious.',
+  ]) {
+    await tapLit(page);
+    await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, line);
+  }
   return problems;
 }
 

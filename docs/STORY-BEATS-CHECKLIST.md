@@ -53,10 +53,10 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 27 | One snack, behind the counter. "One snack. That's the rule." | built |
 | 28 | The ship is coming. The speaker says so. Mops lets him follow if he hides. | built |
 | 29 | The loading bay. Eyes only, in the plant. | built |
-| 30 | The robots arrive. | not yet built |
-| 31 | The promise. | not yet built |
-| 32 | Three copies. | not yet built |
-| 33 | "Delicious." | not yet built |
+| 30 | The robots arrive. Dot, Bob, and Lou are leaving. | built |
+| 31 | "We love you here. Visitors always love you." | built |
+| 32 | Three paper copies. Isfred is called to a damaged crate. | built |
+| 33 | "I'll take care of it." then "Delicious." | built |
 | 34 | Gumbling. | not yet built |
 | 35 | Spit into the bin. | not yet built |
 | 36 | Walk home past the robots. | not yet built |

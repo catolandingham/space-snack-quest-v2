@@ -204,6 +204,21 @@ function maskedHall() {
   hallMasked = c;
   return c;
 }
+function drawBot(x, y, color) {
+  ctx.save();
+  ctx.translate(x, y);
+  roundRect(-8, -28, 16, 18, 3); ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, -36, 7, 0, Math.PI * 2); ctx.fillStyle = '#d5dbe6'; ctx.fill(); ctx.stroke();
+  ctx.fillStyle = INK; ctx.fillRect(-3, -38, 2, 2); ctx.fillRect(2, -38, 2, 2);
+  ctx.restore();
+}
+function drawPapers(x, y) {
+  [['#fffdf8', -16], ['#f7c1d9', 0], ['#ffe08a', 16]].forEach(([c, dx]) => {
+    roundRect(x + dx, y, 22, 30, 2);
+    ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke();
+  });
+  say('ORDER MORE ROBOTS', x + 8, y + 44, 12, INK, 'center', 700);
+}
 function drawRocket(x, y) {
   ctx.save();
   ctx.translate(x, y);
@@ -302,6 +317,13 @@ const LINE = {
   see: 'I better go see what that is.',
   follow: 'Please let me follow you.',
   once: 'Okay. Just this time. Hide carefully.',
+  leaving: 'Dot, Bob, and Lou are leaving.',
+  love: 'We love you here. Visitors always love you.',
+  paper: 'So futuristic, and we still order on paper.',
+  damaged: 'Isfred! A crate is damaged in the mail room.',
+  other: 'What do I do with the other two?',
+  care: "I'll take care of it.",
+  delicious: 'Delicious.',
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const NEXT = [
@@ -318,6 +340,13 @@ const NEXT = [
   { room: 'home', who: 'sq', text: LINE.follow, mops: true },
   { room: 'home', who: 'mops', text: LINE.once, mops: true },
   { room: 'bay', who: 'sq', text: '', eyes: true, x: 220, y: 500 },
+  { room: 'bay', who: 'isfred', text: LINE.leaving, prop: 'robots', x: 200, y: 520 },
+  { room: 'bay', who: 'isfred', text: LINE.love, mops: true, x: 240, y: 520, mx: 420, my: 520 },
+  { room: 'bay', who: 'mops', text: LINE.paper, mops: true, prop: 'papers', x: 240, y: 520 },
+  { room: 'bay', who: 'sq', text: LINE.damaged, mops: true, x: 240, y: 520 },
+  { room: 'bay', who: 'sq', text: LINE.other, mops: true, x: 240, y: 520 },
+  { room: 'bay', who: 'mops', text: LINE.care, mops: true, x: 240, y: 520 },
+  { room: 'bay', who: 'mops', text: LINE.delicious, mops: true, x: 240, y: 520 },
 ];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
@@ -1497,7 +1526,22 @@ function drawGuard(g) {
 }
 function drawPeople() {
   if (state.room !== 'home' && state.room !== 'hall') {
-    if (state.hidden) drawEyes();
+    if (state.beat === 'next') {
+      const step = NEXT[state.step];
+      if (step && (step.who === 'isfred' || step.prop === 'robots')) drawIsfred(360, 430, 1.6);
+      if (step && step.prop === 'robots') {
+        drawBot(460, 460, '#c9b6f2');
+        drawBot(530, 470, '#9fd0ff');
+        drawBot(600, 455, '#ffcf33');
+      }
+      if (step && step.prop === 'papers') drawPapers(480, 360);
+    }
+    if (state.hidden) {
+      ctx.save();
+      ctx.translate(state.sq.x - 439, state.sq.y - 498);
+      drawEyes();
+      ctx.restore();
+    }
     else drawSquatch(state.sq.x, state.sq.y, tune.home_sq, { face: state.sq.face || 1 });
     if (!state.mo.hidden) drawMops(state.mo.x, state.mo.y, tune.home_mo, { face: state.mo.face || -1 });
     return;
