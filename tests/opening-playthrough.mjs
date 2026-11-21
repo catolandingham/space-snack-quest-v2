@@ -64,6 +64,7 @@ const ALLOWED = [
   "I'll take Mops his lunch.",
   'Squatch! You should be hiding.',
   "My lunch! You're the best.",
+  "One snack. That's the rule.",
   'MY GARDIANS',
   "I've never gotten to dance at a party.",
   'top hat',
@@ -576,6 +577,8 @@ async function play(page, label) {
   await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, "You're the best");
   s = await readState(page);
   if (s.room !== 'hallway') problems.push(fails(label + ' lunch', 'Mops is not in the hallway'));
+  await tapLit(page);
+  await page.waitForFunction(t => window.game.state.room === 'hall' && window.game.state.words.join(' ').includes(t), { timeout: 4000 }, "One snack. That's the rule.");
   return problems;
 }
 

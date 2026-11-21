@@ -50,7 +50,7 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 24 | "He forgot his lunch!" | built |
 | 25 | He carries the lunch through the hall to the hallway. The first hallway walk is a short cutscene. | built |
 | 26 | "Squatch! You should be hiding." / "My lunch! You're the best." | built |
-| 27 | One snack, behind the counter. | not yet built |
+| 27 | One snack, behind the counter. "One snack. That's the rule." | built |
 | 28 | The ship is coming. | not yet built |
 | 29 | Walk to the loading bay. | not yet built |
 | 30 | The robots arrive. | not yet built |
