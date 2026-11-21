@@ -66,12 +66,12 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 40 | "They need me here. Plus the Guardians are here." | built |
 | 41 | Lights out. Mops snores. | built |
 | 42 | Night one. Pawature accepted. The vent takes the pink sheet. | built |
-| 43 | "Six days later." | not yet built |
-| 44 | The robots tease Mops. | not yet built |
-| 45 | "Let's go find that pancake place." | not yet built |
-| 46 | The almost-slip. | not yet built |
-| 47 | Sneak to the vent. | not yet built |
-| 48 | Mops's secret workstation. | not yet built |
+| 43 | "Six days later." | built |
+| 44 | The robots tease Mops. He will be replaced. The manager was lying. | built |
+| 45 | "Let's find that pancake place." | built |
+| 46 | "Didn't a copy get sucked into the vent?" | built |
+| 47 | Sneak to the vent. Eyes only. | built |
+| 48 | Vent desk is a stand-in. No locked picture. The note says they will always be with him. | built |
 | 49 | Grab the pink slip. | not yet built |
 | 50 | The office keypad. | not yet built |
 | 51 | Return the empty crate. | not yet built |

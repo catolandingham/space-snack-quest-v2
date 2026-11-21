@@ -237,10 +237,9 @@ function drawStandIn(id) {
   ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
   if (id === 'vent') {
     roundRect(280, 300, 240, 18, 3); ctx.fillStyle = '#6b6256'; ctx.fill();
-    say('Stand-in vent desk', 480, 160, 22, INK, 'center', 700);
+    ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke();
   } else {
     ctx.fillStyle = '#9fd0ff'; ctx.fillRect(250, 140, 180, 100);
-    say('Stand-in ship', 480, 190, 22, '#fff8ee', 'center', 700);
   }
 }
 function drawRoom(id) {
@@ -343,6 +342,15 @@ const LINE = {
   zzz: 'Zzz.',
   paw: 'Mail scanned. Pawature accepted.',
   pink: 'The vent took the pink sheet.',
+  six: 'Six days later.',
+  beard: 'We could wipe the floor with that beard.',
+  replaced: "You're going to be replaced this week.",
+  lying: 'The manager was lying to me.',
+  pancake: "The new robots come tomorrow. Let's find that pancake place.",
+  sucked: "Didn't a copy get sucked into the vent?",
+  into: 'Into the vent.',
+  notice: "I hope Mops doesn't notice.",
+  always: "We'll always be with you.",
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const NEXT = [
@@ -384,6 +392,15 @@ const NEXT = [
   { room: 'home', who: 'mops', text: LINE.zzz, mops: true, dim: true },
   { room: 'night', who: 'sq', text: LINE.paw, x: 300, y: 520 },
   { room: 'night', who: 'sq', text: LINE.pink, eyes: true, x: 180, y: 480 },
+  { room: 'home', who: 'sq', text: LINE.six, mops: true },
+  { room: 'home', who: 'sq', text: LINE.beard, mops: true, prop: 'robots' },
+  { room: 'home', who: 'sq', text: LINE.replaced, mops: true },
+  { room: 'home', who: 'mops', text: LINE.lying, mops: true },
+  { room: 'home', who: 'mops', text: LINE.pancake, mops: true },
+  { room: 'home', who: 'sq', text: LINE.sucked, mops: true },
+  { room: 'night', who: 'sq', text: LINE.into, eyes: true, x: 160, y: 470 },
+  { room: 'vent', who: 'sq', text: LINE.notice, x: 480, y: 520 },
+  { room: 'vent', who: 'sq', text: LINE.always, x: 480, y: 520 },
 ];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
@@ -1949,6 +1966,10 @@ function drawPlay() {
   if (state.beat === 'next') {
     const step = NEXT[state.step];
     if (step && step.prop === 'rocket') drawRocket(560, 470);
+    if (step && step.prop === 'robots' && state.room === 'home') {
+      drawBot(700, 500, '#c9b6f2');
+      drawBot(760, 510, '#9fd0ff');
+    }
     if (step && step.who === 'note') drawCard(step.text, LINE.box, true);
     if (step && step.look === 'calendar') {
       drawCalendar();
