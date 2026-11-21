@@ -164,6 +164,7 @@ loadRoom('home', 'home-room-empty-closed-v5.png');
 loadRoom('homeopen', 'home-room-empty-open-v5.png');
 loadRoom('hall', 'hall-room-empty-v1.png');
 loadRoom('hallway', 'hallway-room-empty-v6.png');
+loadRoom('bay', 'delivery-room-empty-day-v2.png');
 const speakerImg = new Image();
 speakerImg.src = 'assets/approved/speaker-option-4.png';
 const mopsImg = new Image();
@@ -297,6 +298,10 @@ const LINE = {
   hiding: 'Squatch! You should be hiding.',
   best: "My lunch! You're the best.",
   one: "One snack. That's the rule.",
+  pa: 'The Universal Postal Service ship is arriving!',
+  see: 'I better go see what that is.',
+  follow: 'Please let me follow you.',
+  once: 'Okay. Just this time. Hide carefully.',
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const NEXT = [
@@ -308,6 +313,11 @@ const NEXT = [
   { room: 'hallway', who: 'mops', text: LINE.hiding, mops: true, x: 280, y: 530 },
   { room: 'hallway', who: 'mops', text: LINE.best, mops: true, x: 280, y: 530 },
   { room: 'hall', who: 'mops', text: LINE.one, mops: true, x: 620, y: 540, mx: 780, my: 500 },
+  { room: 'home', who: 'speaker', text: LINE.pa },
+  { room: 'home', who: 'sq', text: LINE.see },
+  { room: 'home', who: 'sq', text: LINE.follow, mops: true },
+  { room: 'home', who: 'mops', text: LINE.once, mops: true },
+  { room: 'bay', who: 'sq', text: '', eyes: true, x: 220, y: 500 },
 ];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
@@ -1487,7 +1497,8 @@ function drawGuard(g) {
 }
 function drawPeople() {
   if (state.room !== 'home' && state.room !== 'hall') {
-    if (!state.hidden) drawSquatch(state.sq.x, state.sq.y, tune.home_sq, { face: state.sq.face || 1 });
+    if (state.hidden) drawEyes();
+    else drawSquatch(state.sq.x, state.sq.y, tune.home_sq, { face: state.sq.face || 1 });
     if (!state.mo.hidden) drawMops(state.mo.x, state.mo.y, tune.home_mo, { face: state.mo.face || -1 });
     return;
   }
@@ -1656,8 +1667,8 @@ function currentLine() {
   if (state.beat === 'bedtime') return { kind: 'line', who: 'mops', text: state.line === 0 ? LINE.crate : LINE.loved };
   if (state.beat === 'next') {
     const step = NEXT[state.step];
-    if (!step || step.look === 'calendar' || step.who === 'note') return null;
-    return { kind: 'line', who: step.who, text: step.text };
+    if (!step || step.look === 'calendar' || step.who === 'note' || !step.text) return null;
+    return { kind: 'line', who: step.who === 'speaker' ? 'speaker' : step.who, text: step.text };
   }
   if (state.beat === 'tv') return { kind: 'tv' };
   if (state.beat === 'jail') return { kind: 'jail' };
@@ -1856,6 +1867,10 @@ function drawPlay() {
     if (step && step.look === 'calendar') {
       drawCalendar();
       say(step.text, 480, 28, 20, INK, 'center', 800);
+    }
+    if (step && step.eyes) state.controls.push({ id: 'card', x: 160, y: 200, w: 200, h: 160, lit: true });
+    if (step && step.who === 'speaker') {
+      state.heads.push({ x: 848, y: 118, w: 64, h: 64, who: 'speaker' });
     }
   }
   if (state.beat === 'peekready') drawDoorPeek();

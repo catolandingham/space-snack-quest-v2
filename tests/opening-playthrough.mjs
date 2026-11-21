@@ -65,6 +65,10 @@ const ALLOWED = [
   'Squatch! You should be hiding.',
   "My lunch! You're the best.",
   "One snack. That's the rule.",
+  'The Universal Postal Service ship is arriving!',
+  'I better go see what that is.',
+  'Please let me follow you.',
+  'Okay. Just this time. Hide carefully.',
   'MY GARDIANS',
   "I've never gotten to dance at a party.",
   'top hat',
@@ -579,6 +583,17 @@ async function play(page, label) {
   if (s.room !== 'hallway') problems.push(fails(label + ' lunch', 'Mops is not in the hallway'));
   await tapLit(page);
   await page.waitForFunction(t => window.game.state.room === 'hall' && window.game.state.words.join(' ').includes(t), { timeout: 4000 }, "One snack. That's the rule.");
+  for (const line of [
+    'The Universal Postal Service ship is arriving!',
+    'I better go see what that is.',
+    'Please let me follow you.',
+    'Okay. Just this time. Hide carefully.',
+  ]) {
+    await tapLit(page);
+    await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, line);
+  }
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.room === 'bay' && window.game.state.hidden, 4000, 'bay plant');
   return problems;
 }
 

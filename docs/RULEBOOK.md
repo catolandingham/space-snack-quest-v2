@@ -56,6 +56,8 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Lunch run | Party hall, then the hallway | A short walk. "I'll take Mops his lunch." The hallway is the locked picture assets/approved/hallway-room-empty-v6.png. |
 | Lunch hello | Hallway | Mops says "Squatch! You should be hiding." then "My lunch! You're the best." |
 | One snack | Party hall, at the counter | Back at the snack bar. Mops says "One snack. That's the rule." |
+| Ship call | Squatch's room | The speaker says "The Universal Postal Service ship is arriving!" Squatch wants to see it and asks to follow. Mops says "Okay. Just this time. Hide carefully." |
+| Bay plant | Loading bay | The locked picture assets/approved/delivery-room-empty-day-v2.png. Only his eyes show, in the plant. |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 
@@ -124,6 +126,10 @@ These are the only words the game may show, plus the reaction marks below.
 - shirt
 - boots
 - One snack. That's the rule. This line is for Day 2. The party does not say it.
+- The Universal Postal Service ship is arriving!
+- I better go see what that is.
+- Please let me follow you.
+- Okay. Just this time. Hide carefully.
 - Wait a second... fur!
 - FUR! Security!
 - Mops
