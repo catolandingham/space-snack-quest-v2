@@ -215,6 +215,20 @@ async function clickLogical(page, x, y) {
   await page.mouse.click(box.left + (x / 960) * box.width, box.top + (y / 640) * box.height);
 }
 
+async function dragLogical(page, x1, y1, x2, y2) {
+  const box = await page.$eval('#game', el => {
+    const r = el.getBoundingClientRect();
+    return { left: r.left, top: r.top, width: r.width, height: r.height };
+  });
+  const pt = (x, y) => ({ x: box.left + (x / 960) * box.width, y: box.top + (y / 640) * box.height });
+  const a = pt(x1, y1), b = pt(x2, y2);
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  await page.mouse.move(b.x, b.y, { steps: 12 });
+  await page.mouse.up();
+  await new Promise(r => setTimeout(r, 60));
+}
+
 async function tapLit(page) {
   const c = await page.evaluate(() => {
     const lit = window.game.state.controls.find(c => c.lit);
@@ -495,10 +509,12 @@ async function play(page, label) {
   await clickLogical(page, 478, 596);
   await waitFor(page, () => window.game.state.beat === 'dress' && window.game.state.room === 'home' && window.game.state.closetOpen, 8000, 'dress');
   await shot(page, label + '-10-dress');
-  for (let i = 0; i < 4; i++) {
-    await tapLit(page);
-    await new Promise(r => setTimeout(r, 80));
-  }
+  const spots = await page.evaluate(() => window.game.PIECES.map((piece, i) => {
+    const home = window.game.pieceHome(i);
+    const z = window.game.dressZones()[piece.zone];
+    return { x: home.x, y: home.y, tx: z.x, ty: z.y };
+  }));
+  for (const spot of spots) await dragLogical(page, spot.x, spot.y, spot.tx, spot.ty);
   await waitFor(page, () => window.game.state.beat === 'dance' && window.game.state.room === 'hall' && !window.game.state.hidden, 10000, 'dance circle');
   const worn = await page.evaluate(() => window.game.state.worn.slice());
   if (worn.length < 4) problems.push(fails(label + ' worn', 'the clothes are not on him'));
