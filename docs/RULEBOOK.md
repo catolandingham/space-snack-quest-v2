@@ -34,13 +34,16 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Sneak | Party hall | He appears in his doorway. He walks only where the player taps. The plant outline is the only hint. Two guests stroll. The door guest turns on a steady beat. |
 | Hide | Party hall | HIDE · plant lights up only when he is close. One close pair of eyes peeks from the front leaves. |
 | Seen | Party hall | He hops. The lockup card says a guest saw him. A tap starts that sneak again at the doorway. |
-| Announcement | Party hall, from the plant | Isfred welcomes everyone, names the robotics visitors, and says the helper robots are coming. Squatch stays hidden. |
-| Poster | Party hall | A poster of robots says COMING SOON! |
-| Croc Boys | Party hall | Isfred introduces the band. The lights get a little darker. What people can see does not change. |
-| Dance | Party hall | Four big buttons. A miss does not end it. Taps only. |
-| Wish | Party hall, still in the plant | He says he has never gotten to dance at a party. |
-| Dress | Squatch's room | He taps on a top hat, sunglasses, a shirt, and boots. |
-| Snack | Party hall | One snack. The person by the bar says nice gloves, then sees the fur. |
+| Announcement | Party hall, from the plant | Isfred stands on the stage. He welcomes everyone, names the robotics visitors, and says the helper robots are coming. Squatch stays hidden. |
+| Poster | Party hall | A poster of robots beside the stage says COMING SOON! |
+| Croc Boys | Party hall | Isfred introduces the band. The band is on the stage. The lights get a little darker. What people can see does not change. |
+| Robot dance | Party hall | The guests robot-dance while the eyes watch from the plant. |
+| Wish | Party hall, still in the plant | A thought from the plant: he has never gotten to dance at a party. |
+| Sneak home | Party hall | He walks from the plant to his door. He is not moved there. |
+| Dress | Squatch's room | The closet is open. He puts on a top hat, sunglasses, a shirt, and boots, and they show on him. |
+| Walk out | His room, then the hall door | He walks to his own door, then into the hall from that door. |
+| Dance | Party hall | He is in the dance circle, dressed. One arrow at a time, about thirty seconds. A miss does not end it. Taps only. |
+| Snack | Later, on Day 2 | "One snack. That's the rule." is Mops's rule for later. It is not said at this party. The person by the bar still says nice gloves, then sees the fur. |
 | Homecoming | Squatch's room | Mops comes home. Squatch says everyone out there has someone. Mops says you have me. |
 | TV | Full screen | The Wookiee tour, the shed, the scrubbers, the walk to the ship, and the no-fur rule. |
 
@@ -101,7 +104,7 @@ These are the only words the game may show, plus the reaction marks below.
 - sunglasses
 - shirt
 - boots
-- One snack. That's the rule.
+- One snack. That's the rule. This line is for Day 2. The party does not say it.
 - ...Nice gloves.
 - Wait a second... fur!
 - Mops

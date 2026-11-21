@@ -149,7 +149,6 @@ const lines = [
   'A Wookie tour group came to visit Stormtop.',
   'NO FUR.',
   "I've never gotten to dance at a party.",
-  'One snack',
   '...Nice gloves.',
   'Wait a second... fur!',
   'SPACE MATH',
@@ -166,6 +165,8 @@ for (let n = 1; n <= 61; n++) {
 for (const word of ['built', 'not yet built', 'dropped', 'milling', 'ga()']) {
   if (!checklist.includes(word)) fail('R20', 'story checklist is missing ' + word);
 }
+if (html.includes('One snack. That')) fail('R1', 'the one-snack rule is said at the party');
+if (!book.includes('Day 2')) fail('R20', 'the rulebook does not keep the one-snack rule for later');
 for (const line of lines) {
   if (!html.includes(line)) fail('R1', 'the game dropped an approved line: ' + line);
   if (!book.includes(line)) fail('R20', 'approved line is not in the rulebook: ' + line);
