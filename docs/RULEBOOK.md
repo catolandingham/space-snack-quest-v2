@@ -68,6 +68,7 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Brochure | Squatch's room | "I swear we had more Moon Pies." "We ate at a pancake place on Mars." "Here, a brochure." No parents. |
 | Tonight | Squatch's room | "Are those other Sasquatches?" "We'll talk about it tonight." "They need me here. Plus the Guardians are here." |
 | Lights out | Squatch's room | The room goes dark. Mops snores. "Zzz." |
+| Night one | Loading bay at night | The locked picture assets/approved/delivery-room-empty-night-v2.png. He posts the order. "Mail scanned. Pawature accepted." Then "The vent took the pink sheet." Only his eyes show by the vent. |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 
@@ -163,6 +164,8 @@ These are the only words the game may show, plus the reaction marks below.
 - We'll talk about it tonight.
 - They need me here. Plus the Guardians are here.
 - Zzz.
+- Mail scanned. Pawature accepted.
+- The vent took the pink sheet.
 - ORDER MORE ROBOTS
 - Wait a second... fur!
 - FUR! Security!

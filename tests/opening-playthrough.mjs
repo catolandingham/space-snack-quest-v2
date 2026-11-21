@@ -92,6 +92,8 @@ const ALLOWED = [
   "We'll talk about it tonight.",
   'They need me here. Plus the Guardians are here.',
   'Zzz.',
+  'Mail scanned. Pawature accepted.',
+  'The vent took the pink sheet.',
   'ORDER MORE ROBOTS',
   'MY GARDIANS',
   "I've never gotten to dance at a party.",
@@ -642,6 +644,8 @@ async function play(page, label) {
     'talk about it tonight.',
     'Plus the Guardians are here.',
     'Zzz.',
+    'Pawature accepted.',
+    'pink sheet.',
   ]) {
     await tapLit(page);
     await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, line);
