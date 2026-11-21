@@ -61,6 +61,9 @@ const ALLOWED = [
   'Rule #1: Brave Sasquatches stay hidden.',
   "Moon Pie day. It's today.",
   'He forgot his lunch!',
+  "I'll take Mops his lunch.",
+  'Squatch! You should be hiding.',
+  "My lunch! You're the best.",
   'MY GARDIANS',
   "I've never gotten to dance at a party.",
   'top hat',
@@ -543,6 +546,9 @@ async function play(page, label) {
   await tapLit(page);
   await waitFor(page, () => window.game.state.beat === 'tv' && window.game.state.words.includes('Fur in the scrubber.'), 4000, 'tv');
   await shot(page, label + '-9-tv');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' tv'));
+  if (s.room !== 'home' && s.beat !== 'tv') problems.push(fails(label + ' tv', 'the show is not full screen at home'));
   await tapLit(page);
   await waitFor(page, () => window.game.state.words.includes('!'), 4000, 'gasp');
   await tapLit(page);
@@ -561,9 +567,15 @@ async function play(page, label) {
   await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, "Moon Pie day");
   await tapLit(page);
   await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, 'He forgot his lunch!');
+  await tapLit(page);
+  await page.waitForFunction(t => window.game.state.room === 'hall' && window.game.state.words.join(' ').includes(t), { timeout: 4000 }, "I'll take Mops his lunch.");
+  await tapLit(page);
+  await page.waitForFunction(t => window.game.state.room === 'hallway' && window.game.state.words.join(' ').includes(t), { timeout: 4000 }, 'You should be hiding');
+  await shot(page, label + '-11-lunch');
+  await tapLit(page);
+  await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, "You're the best");
   s = await readState(page);
-  problems.push(...checkRules(s, label + ' tv'));
-  if (s.room !== 'home' && s.beat !== 'tv') problems.push(fails(label + ' tv', 'the show is not full screen at home'));
+  if (s.room !== 'hallway') problems.push(fails(label + ' lunch', 'Mops is not in the hallway'));
   return problems;
 }
 

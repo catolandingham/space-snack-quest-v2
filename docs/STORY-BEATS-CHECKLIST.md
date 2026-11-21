@@ -48,8 +48,8 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 22 | A gift from the Guardians. Toy rocket and a note. The box says MY GARDIANS. | built |
 | 23 | Calendar delivery day. Moon Pie day is today. | built |
 | 24 | "He forgot his lunch!" | built |
-| 25 | Sneak the lunch to Mops. | not yet built |
-| 26 | "My lunch! You're the best." | not yet built |
+| 25 | He carries the lunch through the hall to the hallway. The first hallway walk is a short cutscene. | built |
+| 26 | "Squatch! You should be hiding." / "My lunch! You're the best." | built |
 | 27 | One snack, behind the counter. | not yet built |
 | 28 | The ship is coming. | not yet built |
 | 29 | Walk to the loading bay. | not yet built |

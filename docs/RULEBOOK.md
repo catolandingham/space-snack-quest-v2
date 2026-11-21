@@ -53,6 +53,8 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Gift | Squatch's room | Next morning. A toy rocket and a note. "The Guardians came! They always come when I'm scared." The note says "Rule #1: Brave Sasquatches stay hidden." The box says MY GARDIANS. |
 | Delivery day | Squatch's room | The calendar is open. "Moon Pie day. It's today." |
 | Forgot lunch | Squatch's room | "He forgot his lunch!" |
+| Lunch run | Party hall, then the hallway | A short walk. "I'll take Mops his lunch." The hallway is the locked picture assets/approved/hallway-room-empty-v6.png. |
+| Lunch hello | Hallway | Mops says "Squatch! You should be hiding." then "My lunch! You're the best." |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 
@@ -110,6 +112,9 @@ These are the only words the game may show, plus the reaction marks below.
 - Rule #1: Brave Sasquatches stay hidden.
 - Moon Pie day. It's today.
 - He forgot his lunch!
+- I'll take Mops his lunch.
+- Squatch! You should be hiding.
+- My lunch! You're the best.
 - MY GARDIANS
 - The line "Nobody can live outside. The scrubbers keep us breathing. NO FUR." is cut.
 - I've never gotten to dance at a party.
