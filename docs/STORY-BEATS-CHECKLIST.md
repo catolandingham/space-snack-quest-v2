@@ -65,7 +65,7 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 39 | "Are those other Sasquatches?" "We'll talk about it tonight." | built |
 | 40 | "They need me here. Plus the Guardians are here." | built |
 | 41 | Lights out. Mops snores. | built |
-| 42 | Night one, the paw order. | not yet built |
+| 42 | Night one. Pawature accepted. The vent takes the pink sheet. | built |
 | 43 | "Six days later." | not yet built |
 | 44 | The robots tease Mops. | not yet built |
 | 45 | "Let's go find that pancake place." | not yet built |
