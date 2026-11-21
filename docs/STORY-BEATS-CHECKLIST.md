@@ -51,8 +51,8 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 25 | He carries the lunch through the hall to the hallway. The first hallway walk is a short cutscene. | built |
 | 26 | "Squatch! You should be hiding." / "My lunch! You're the best." | built |
 | 27 | One snack, behind the counter. "One snack. That's the rule." | built |
-| 28 | The ship is coming. | not yet built |
-| 29 | Walk to the loading bay. | not yet built |
+| 28 | The ship is coming. The speaker says so. Mops lets him follow if he hides. | built |
+| 29 | The loading bay. Eyes only, in the plant. | built |
 | 30 | The robots arrive. | not yet built |
 | 31 | The promise. | not yet built |
 | 32 | Three copies. | not yet built |
