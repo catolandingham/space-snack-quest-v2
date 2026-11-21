@@ -202,7 +202,31 @@ function maskedHall() {
   hallMasked = c;
   return c;
 }
+function drawRocket(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = '#e5533d';
+  ctx.beginPath(); ctx.moveTo(0, -28); ctx.lineTo(10, -8); ctx.lineTo(-10, -8); ctx.closePath(); ctx.fill();
+  roundRect(-8, -8, 16, 22, 3); ctx.fillStyle = '#f4f1ea'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#3478f6'; ctx.fillRect(-8, 8, 16, 6);
+  ctx.restore();
+  say(LINE.box, x, y + 36, 12, INK, 'center', 700);
+}
+function drawStandIn(id) {
+  clear(id === 'ship' ? '#1b2436' : '#8a93a3');
+  roundRect(160, 80, 640, 480, 16);
+  ctx.fillStyle = id === 'ship' ? '#243044' : '#d5dbe6'; ctx.fill();
+  ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+  if (id === 'vent') {
+    roundRect(280, 300, 240, 18, 3); ctx.fillStyle = '#6b6256'; ctx.fill();
+    say('Stand-in vent desk', 480, 160, 22, INK, 'center', 700);
+  } else {
+    ctx.fillStyle = '#9fd0ff'; ctx.fillRect(250, 140, 180, 100);
+    say('Stand-in ship', 480, 190, 22, '#fff8ee', 'center', 700);
+  }
+}
 function drawRoom(id) {
+  if (id === 'vent' || id === 'ship') { drawStandIn(id); return; }
   let key = id;
   if (id === 'home' && state && state.closetOpen) key = 'homeopen';
   const img = key === 'hall' ? (maskedHall() || rooms.hall) : rooms[key];
@@ -263,8 +287,19 @@ const LINE = {
   ship: 'Onto the ship.',
   crate: 'You came to me in a Moon Pie crate.',
   loved: "You've loved Moon Pies ever since.",
+  guardians: "The Guardians came! They always come when I'm scared.",
+  rule1: 'Rule #1: Brave Sasquatches stay hidden.',
+  today: "Moon Pie day. It's today.",
+  lunch: 'He forgot his lunch!',
+  box: 'MY GARDIANS',
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
+const NEXT = [
+  { room: 'home', who: 'sq', text: LINE.guardians, prop: 'rocket' },
+  { room: 'home', who: 'note', text: LINE.rule1 },
+  { room: 'home', who: 'sq', text: LINE.today, look: 'calendar' },
+  { room: 'home', who: 'sq', text: LINE.lunch },
+];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
   calendar: { x: 108, y: 198, w: 96, h: 120 },
@@ -700,6 +735,7 @@ function onTap(p) {
     return;
   }
   if (state.beat === 'homework') { state.beat = 'evening'; blip(); return; }
+  if (state.beat === 'next') { advanceNext(); return; }
   if (state.beat === 'miss' || state.beat === 'have' || state.beat === 'tv' || state.beat === 'bedtime') { advanceHome(); return; }
   if (['wake', 'partyq', 'mophello', 'wring', 'zylan', 'oursong', 'work', 'partyagain', 'stay', 'morning', 'song', 'evening', 'jail', 'resort', 'intro'].includes(state.beat)) advanceStory();
 }
@@ -785,12 +821,39 @@ function comeHome() {
   state.sq.y = 530;
   state.sq.face = 1;
 }
+function startNext() {
+  state.beat = 'next';
+  state.step = 0;
+  state.hidden = false;
+  state.worn = [];
+  state.mo.hidden = true;
+  showNext();
+}
+function showNext() {
+  const step = NEXT[state.step];
+  if (!step) { state.beat = 'after'; return; }
+  state.room = step.room;
+  state.look = step.look || '';
+  state.prop = step.prop || '';
+  state.closetOpen = !!step.open;
+  state.hidden = !!step.eyes;
+  state.sq.x = step.x || 420;
+  state.sq.y = step.y || 530;
+  state.sq.face = step.face || 1;
+  state.mo.hidden = !(step.who === 'mops' || step.mops);
+  if (!state.mo.hidden) { state.mo.x = step.mx || 640; state.mo.y = step.my || 530; state.mo.face = -1; }
+}
+function advanceNext() {
+  state.step++;
+  showNext();
+  blip();
+}
 function advanceHome() {
   if (state.beat === 'miss') { state.beat = 'have'; blip(); return; }
   if (state.beat === 'have') { state.beat = 'tv'; state.line = 0; playGrowl(); blip(); return; }
   if (state.beat === 'bedtime') {
     state.line++;
-    if (state.line >= 2) state.beat = 'after';
+    if (state.line >= 2) startNext();
     else blip();
     return;
   }
@@ -871,7 +934,7 @@ function tickWorld(dt) {
   // was not drawn yet, but he had already left the room, and the next place
   // the player stands is that hall.
   const hallBeat = ['peek', 'sneak', 'hop', 'hidden', 'jail', 'announce', 'poster', 'band', 'groove', 'wish', 'sneakback', 'approach', 'dance', 'shed', 'pull', 'alert', 'chase'].includes(state.beat);
-  if (!hallBeat) state.room = 'home';
+  if (state.beat !== 'next' && !hallBeat) state.room = 'home';
   if (state.beat === 'alone' && state.look === 'bedline') {
     state.flopT += dt;
     if (state.flopT > 0.9) state.look = 'bedline';
@@ -1576,6 +1639,11 @@ function currentLine() {
   if (state.beat === 'miss') return { kind: 'line', who: 'sq', text: LINE.someone };
   if (state.beat === 'have') return { kind: 'line', who: 'mops', text: LINE.have };
   if (state.beat === 'bedtime') return { kind: 'line', who: 'mops', text: state.line === 0 ? LINE.crate : LINE.loved };
+  if (state.beat === 'next') {
+    const step = NEXT[state.step];
+    if (!step || step.look === 'calendar' || step.who === 'note') return null;
+    return { kind: 'line', who: step.who, text: step.text };
+  }
   if (state.beat === 'tv') return { kind: 'tv' };
   if (state.beat === 'jail') return { kind: 'jail' };
   return null;
@@ -1731,7 +1799,7 @@ function drawPlay() {
     drawIconButtons();
     return;
   }
-  drawRoom(state.room === 'hall' ? 'hall' : 'home');
+  drawRoom(state.room || 'home');
   if (state.room === 'hall') drawBanner();
   if (state.beat === 'peek' || state.beat === 'sneak' || state.beat === 'hop' || state.beat === 'hidden' || state.beat === 'jail') drawPlanterHint();
   drawPeople();
@@ -1766,6 +1834,15 @@ function drawPlay() {
   if (state.beat === 'hidden') state.controls.push({ id: 'line', x: 400, y: 460, w: 120, h: 90, lit: true });
   if (state.beat === 'dance') drawDance();
   if (state.beat === 'dress') drawClothes();
+  if (state.beat === 'next') {
+    const step = NEXT[state.step];
+    if (step && step.prop === 'rocket') drawRocket(560, 470);
+    if (step && step.who === 'note') drawCard(step.text, LINE.box, true);
+    if (step && step.look === 'calendar') {
+      drawCalendar();
+      say(step.text, 480, 28, 20, INK, 'center', 800);
+    }
+  }
   if (state.beat === 'peekready') drawDoorPeek();
   if (state.beat === 'sneak' && close && !state.hidden) drawChip(LINE.hide, true);
   drawIconButtons();

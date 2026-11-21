@@ -57,6 +57,11 @@ const ALLOWED = [
   'Onto the ship.',
   'You came to me in a Moon Pie crate.',
   "You've loved Moon Pies ever since.",
+  "The Guardians came! They always come when I'm scared.",
+  'Rule #1: Brave Sasquatches stay hidden.',
+  "Moon Pie day. It's today.",
+  'He forgot his lunch!',
+  'MY GARDIANS',
   "I've never gotten to dance at a party.",
   'top hat',
   'sunglasses',
@@ -547,6 +552,15 @@ async function play(page, label) {
   await shot(page, label + '-9-bed');
   await tapLit(page);
   await waitFor(page, () => window.game.state.words.join(' ').includes("You've loved Moon Pies ever since."), 4000, 'loved');
+  await tapLit(page);
+  await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, "The Guardians came!");
+  await shot(page, label + '-11-gift');
+  await tapLit(page);
+  await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, 'Rule #1');
+  await tapLit(page);
+  await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, "Moon Pie day");
+  await tapLit(page);
+  await page.waitForFunction(t => window.game.state.words.join(' ').includes(t), { timeout: 4000 }, 'He forgot his lunch!');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' tv'));
   if (s.room !== 'home' && s.beat !== 'tv') problems.push(fails(label + ' tv', 'the show is not full screen at home'));

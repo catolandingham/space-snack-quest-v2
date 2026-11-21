@@ -50,6 +50,9 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Homecoming | Squatch's room | Mops comes home. Squatch says everyone out there has someone. Mops says you have me. |
 | TV | Full screen | Three pictures: "Fur in the scrubber.", a red !, and "Onto the ship." Nick's growl, nick1-wookiee.mp3, plays. The line "Nobody can live outside" stays cut. |
 | Bedtime | Squatch's room | Right after the show, Mops says "You came to me in a Moon Pie crate." then "You've loved Moon Pies ever since." Squatch is asleep in bed. No parents. |
+| Gift | Squatch's room | Next morning. A toy rocket and a note. "The Guardians came! They always come when I'm scared." The note says "Rule #1: Brave Sasquatches stay hidden." The box says MY GARDIANS. |
+| Delivery day | Squatch's room | The calendar is open. "Moon Pie day. It's today." |
+| Forgot lunch | Squatch's room | "He forgot his lunch!" |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 
@@ -103,6 +106,11 @@ These are the only words the game may show, plus the reaction marks below.
 - Onto the ship.
 - You came to me in a Moon Pie crate.
 - You've loved Moon Pies ever since.
+- The Guardians came! They always come when I'm scared.
+- Rule #1: Brave Sasquatches stay hidden.
+- Moon Pie day. It's today.
+- He forgot his lunch!
+- MY GARDIANS
 - The line "Nobody can live outside. The scrubbers keep us breathing. NO FUR." is cut.
 - I've never gotten to dance at a party.
 - top hat
