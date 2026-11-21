@@ -145,9 +145,44 @@ function loadRoom(id, file) {
 }
 loadRoom('home', 'home-room-empty-closed-v5.png');
 loadRoom('hall', 'hall-room-empty-v1.png');
+let hallMasked = null;
+function maskedHall() {
+  if (hallMasked) return hallMasked;
+  const img = rooms.hall;
+  if (!img || !img.complete || !img.naturalWidth) return null;
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth;
+  c.height = img.naturalHeight;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, 0, 0);
+  const frame = g.getImageData(0, 0, c.width, c.height);
+  const d = frame.data;
+  const w = c.width;
+  const yellow = i => {
+    const r = d[i], gch = d[i + 1], b = d[i + 2];
+    return r > 210 && gch > 150 && gch < 240 && b < 110 && r - b > 110;
+  };
+  for (let y = 300; y < 720 && y < c.height; y++) {
+    for (let x = 1000; x < 1260 && x < w; x++) {
+      const i = (y * w + x) * 4;
+      if (!yellow(i)) continue;
+      let nr = d[i], ng = d[i + 1], nb = d[i + 2];
+      for (const [dx, dy] of [[-8, 0], [8, 0], [0, -8], [0, 8]]) {
+        const xx = x + dx, yy = y + dy;
+        if (xx < 0 || yy < 0 || xx >= w || yy >= c.height) continue;
+        const j = (yy * w + xx) * 4;
+        if (!yellow(j)) { nr = d[j]; ng = d[j + 1]; nb = d[j + 2]; break; }
+      }
+      d[i] = nr; d[i + 1] = ng; d[i + 2] = nb;
+    }
+  }
+  g.putImageData(frame, 0, 0);
+  hallMasked = c;
+  return c;
+}
 function drawRoom(id) {
-  const img = rooms[id];
-  if (img && img.complete && img.naturalWidth) ctx.drawImage(img, 0, 0, W, H);
+  const img = id === 'hall' ? (maskedHall() || rooms.hall) : rooms[id];
+  if (img && (img.complete === undefined || img.complete) && img.width) ctx.drawImage(img, 0, 0, W, H);
   else { ctx.fillStyle = '#d7d1c6'; ctx.fillRect(0, 0, W, H); }
 }
 
@@ -178,8 +213,13 @@ const LINE = {
     'Blanket fort night',
   ],
   evening: 'That evening\u2026',
+  peek: 'PEEK',
+  hide: 'HIDE · plant',
+  banner: 'ROBOTICS DELEGATION!',
+  mumble: 'Mmf mmf... mm-mmf... mmf!',
+  robots: 'Robots?',
   lockup: 'LOCKUP',
-  needed: '[line needed]',
+  saw: 'A guest saw Squatch!',
 };
 const HOME = {
   calendar: { x: 108, y: 198, w: 96, h: 120 },
@@ -194,9 +234,10 @@ const PLANTER = [
   [442, 443], [462, 454], [476, 472], [481, 488], [472, 506], [460, 516],
   [460, 540], [425, 540], [423, 516], [410, 504], [403, 486], [412, 468], [426, 452],
 ];
-const LEAF = { x: 416, y: 492, w: 52, h: 20 };
-// One scaled ga() eye in each front clump. y=500 is in the leaves, above the pot rim.
-const EYES = [{ x: 426, y: 500 }, { x: 454, y: 500 }];
+const LEAF = { x: 416, y: 488, w: 56, h: 28 };
+// One close pair, the original ga() size, centered on the seam of the two front clumps.
+const EYE_PAIR = { x: 439, y: 498 };
+const EYES = [{ x: EYE_PAIR.x - 9, y: EYE_PAIR.y }, { x: EYE_PAIR.x + 9, y: EYE_PAIR.y }];
 const BUSH_GAP = 18;
 const GUESTS = ['teal', 'camera', 'backpack', 'stilt', 'octopus', 'robot'];
 const GUEST_SCALE = 1;
@@ -214,12 +255,22 @@ function guestBox(kind, scale) {
   return { w: w * GUEST_PX * scale, h: h * GUEST_PX * scale };
 }
 const POT = { x: 442, y: 526 };
-const DOOR = { x: 300, y: 590 };
-const WATCH_FEET = { x: 640, y: 592 };
-function watchEyes() {
-  const h = guestBox('camera', GUEST_SCALE).h;
-  return { x: WATCH_FEET.x, y: WATCH_FEET.y - h * 0.84 };
+// The gap in the bottom wall of the locked hall picture.
+const DOOR = { x: 478, y: 596 };
+const WATCH_FEET = { x: 640, y: 590 };
+const WATCH_EYES = { x: 640, y: 500 };
+function watchEyes() { return { x: WATCH_EYES.x, y: WATCH_EYES.y }; }
+function freshWalkers() {
+  return [
+    { kind: 'teal', x: 720, y: 520, x0: 720, y0: 520, x1: 780, y1: 500, dir: 1, pause: 0, face: 0 },
+    { kind: 'octopus', x: 150, y: 460, x0: 150, y0: 460, x1: 240, y1: 440, dir: 1, pause: 0.6, face: 0 },
+  ];
 }
+const STANDING = [
+  { kind: 'backpack', x: 230, y: 500 },
+  { kind: 'stilt', x: 280, y: 450 },
+  { kind: 'robot', x: 200, y: 540 },
+];
 function outsideBush(points, gap) {
   let cx = 0, cy = 0;
   for (const p of points) { cx += p[0]; cy += p[1]; }
@@ -252,6 +303,7 @@ function reset() {
     hint: null, eyes: [], hopTrace: [], mopProp: false, look: 'away',
     sparks: [], heartAt: -9, bangAt: -9,
     step: 0, look: '', bitten: false, flopT: 0, hwT: 0,
+    walkers: freshWalkers(),
   };
 }
 function blocker() {
@@ -263,9 +315,19 @@ function homeBlocked(x, y) {
   return false;
 }
 function hallBlocked(x, y) {
-  if (x < 56 || x > 750 || y < 408 || y > 608) return true;
-  if (x > 420 && x < 464 && y > 512 && y < 546) return true; // the pot
+  if (x < 56 || x > 760 || y < 408 || y > 608) return true;
+  if (x > 420 && x < 470 && y > 500 && y < 548) return true; // the middle pot
+  if (x > 790 && y > 300 && y < 540) return true; // the snack bar
+  for (const b of guestFeet()) {
+    if (Math.abs(x - b.x) < 26 && y < b.y + 6 && y > b.y - 78) return true;
+  }
   return false;
+}
+function guestFeet() {
+  const feet = STANDING.map(s => ({ x: s.x, y: s.y }));
+  feet.push({ x: WATCH_FEET.x, y: WATCH_FEET.y });
+  for (const w of (state && state.walkers) || []) feet.push({ x: w.x, y: w.y });
+  return feet;
 }
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 function walkToward(p, tx, ty, dt, free) {
@@ -293,7 +355,7 @@ function lookNow() {
   const away = tune.safe_time, turn = tune.turn_time, look = tune.look_time;
   const cyc = away + turn + look + turn;
   const u = state.lookT % cyc;
-  const up = -Math.PI / 2, left = Math.PI - 0.5;
+  const up = -Math.PI / 2, left = Math.PI - 0.55;
   if (u < away) return { mode: 'away', face: up };
   if (u < away + turn) return { mode: 'turn', face: up + angNorm(left - up) * ((u - away) / turn) };
   if (u < away + turn + look) return { mode: 'look', face: left };
@@ -334,7 +396,7 @@ function advanceStory() {
     return;
   }
   if (state.beat === 'stay') { state.beat = 'leave'; return; }
-  if (state.beat === 'evening') { enterSneak(); return; }
+  if (state.beat === 'evening') { state.beat = 'peekready'; return; }
   if (state.beat === 'jail') { restartSneak(); return; }
 }
 function startSong() {
@@ -344,12 +406,25 @@ function startSong() {
   state.sq.sing = false;
   state.mo.hidden = false;
 }
+function enterPeek() {
+  state.beat = 'peek';
+  state.room = 'hall';
+  state.control = false;
+  state.line = 0;
+  state.hidden = false;
+  state.lookT = 0;
+  state.walkers = freshWalkers();
+  state.sq.x = DOOR.x; state.sq.y = DOOR.y;
+  state.sq.target = null; state.sq.moving = false;
+  state.mo.hidden = true;
+}
 function enterSneak() {
   state.beat = 'sneak';
   state.room = 'hall';
   state.control = true;
   state.hidden = false;
   state.lookT = 0;
+  state.walkers = freshWalkers();
   state.sq.x = DOOR.x; state.sq.y = DOOR.y; state.sq.face = -1;
   state.sq.target = null; state.sq.moving = false; state.sq.sing = false;
   state.mo.hidden = true;
@@ -362,9 +437,32 @@ function restartSneak() {
   state.hidden = false;
   state.hopT = 0;
   state.lookT = 0;
+  state.walkers = freshWalkers();
   state.sq.x = DOOR.x; state.sq.y = DOOR.y;
   state.sq.target = null; state.sq.moving = false;
   state.hopTrace = [];
+}
+function seenBySomeone(look) {
+  const bodyY = state.sq.y - 16;
+  if (look.mode === 'look') {
+    const eyes = watchEyes();
+    if (inCone(state.sq.x, bodyY, eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len)) return true;
+  }
+  for (const w of state.walkers) {
+    if (inCone(state.sq.x, bodyY, w.x, w.y - 70, w.face, tune.cone_half, tune.cone_len)) return true;
+  }
+  return false;
+}
+function tickWalkers(dt) {
+  for (const w of state.walkers) {
+    if (w.pause > 0) { w.pause -= dt; w.face = -Math.PI / 2; continue; }
+    const tx = w.dir > 0 ? w.x1 : w.x0, ty = w.dir > 0 ? w.y1 : w.y0;
+    const dx = tx - w.x, dy = ty - w.y, d = Math.hypot(dx, dy) || 1;
+    const step = Math.min(d, 55 * dt);
+    w.x += (dx / d) * step; w.y += (dy / d) * step;
+    w.face = dx >= 0 ? 0 : Math.PI;
+    if (d <= 55 * dt + 0.5) { w.x = tx; w.y = ty; w.dir *= -1; w.pause = 2.2; }
+  }
 }
 function caught() {
   state.beat = 'hop';
@@ -400,8 +498,19 @@ function onTap(p) {
     return;
   }
   if (state.beat === 'alone') { tapAlone(p); return; }
+  if (state.beat === 'peekready') {
+    const chip = state.controls.find(c => c.id === 'PEEK');
+    if (chip && hitControl(p, chip)) enterPeek();
+    return;
+  }
+  if (state.beat === 'peek') {
+    state.line++;
+    if (state.line >= 2) enterSneak();
+    else blip();
+    return;
+  }
   if (state.beat === 'sneak') {
-    const chip = state.controls.find(c => c.id === 'HIDE');
+    const chip = state.controls.find(c => c.id === LINE.hide);
     if (chip && hitControl(p, chip)) { doHide(); return; }
     if (state.control && !state.paused) state.sq.target = { x: p.x, y: p.y };
     return;
@@ -447,6 +556,8 @@ function tapAlone(p) {
 function activateKey() {
   if (scene === 'title') { beginStory(); scene = 'play'; return; }
   if (state.beat === 'sing') { startSong(); return; }
+  if (state.beat === 'peekready') { enterPeek(); return; }
+  if (state.beat === 'peek') { state.line++; if (state.line >= 2) enterSneak(); return; }
   if (state.beat === 'sneak') {
     if (dist(state.sq, POT) <= tune.hide_reach) doHide();
     return;
@@ -478,7 +589,7 @@ function tickWorld(dt) {
   // through the wall and off the picture. The hall is a different picture and
   // was not drawn yet, but he had already left the room, and the next place
   // the player stands is that hall.
-  if (state.beat !== 'sneak' && state.beat !== 'hop' && state.beat !== 'hidden' && state.beat !== 'jail') {
+  if (state.beat !== 'peek' && state.beat !== 'sneak' && state.beat !== 'hop' && state.beat !== 'hidden' && state.beat !== 'jail') {
     state.room = 'home';
   }
   if (state.beat === 'alone' && state.look === 'flop') {
@@ -510,16 +621,14 @@ function tickWorld(dt) {
       state.song = 'off';
     }
   }
+  if (state.beat === 'peek' || state.beat === 'sneak') {
+    if (!state.paused) { state.lookT += dt; tickWalkers(dt); }
+  }
   if (state.beat === 'sneak') {
-    state.lookT += dt;
     if (state.sq.target) walkToward(state.sq, state.sq.target.x, state.sq.target.y, dt);
     const look = lookNow();
     state.look = look.mode;
-    if (look.mode === 'look' && !state.hidden) {
-      const bodyY = state.sq.y - 16;
-      const eyes = watchEyes();
-      if (inCone(state.sq.x, bodyY, eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len)) caught();
-    }
+    if (!state.hidden && seenBySomeone(look)) caught();
   }
   if (state.beat === 'hop') {
     state.hopT += dt;
@@ -662,10 +771,10 @@ function drawBubble(who, text, head) {
   ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
   ctx.restore();
   if (who !== 'speaker') {
-    const tag = who === 'mops' ? 'Mops' : 'Squatch';
+    const tag = who === 'mops' ? 'Mops' : who === 'isfred' ? 'Isfred' : 'Squatch';
     const tagW = tag.length * 11 + 18;
     roundRect(box.x + 12, box.y - 12, tagW, 22, 10);
-    ctx.fillStyle = who === 'mops' ? '#1f7a4d' : '#6b4428'; ctx.fill();
+    ctx.fillStyle = who === 'mops' ? '#1f7a4d' : who === 'isfred' ? '#3478f6' : '#6b4428'; ctx.fill();
     say(tag, box.x + 12 + tagW / 2, box.y - 1, 14, '#fff', 'center', 700);
   }
   lines.forEach((l, i) => say(l, box.x + box.w / 2, box.y + 26 + i * 32, size, INK, 'center', 700));
@@ -712,6 +821,12 @@ function drawPlanterHint() {
     inner: PLANTER.map(p => p.slice()),
     color: '#ffcf33', width: 6, dashed: true, gap: BUSH_GAP,
   };
+}
+function drawBanner() {
+  roundRect(248, 168, 400, 34, 8);
+  ctx.fillStyle = '#3478f6'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke();
+  say(LINE.banner, 448, 185, 18, '#ffffff', 'center', 800);
 }
 function drawHomeSpot(box) {
   const pulse = 0.5 + 0.5 * Math.sin(state.t * 3);
@@ -803,9 +918,8 @@ function drawIconButtons() {
   if (pulse) return;
 }
 function drawEyes() {
-  const k = ART.eyeScale;
-  for (const p of EYES) ART.eyes(ctx, p.x, p.y, state.t, k);
-  state.eyes = EYES.map(p => ({ x: p.x, y: p.y, r: 6 * k, pupil: { dx: k, dy: k } }));
+  for (const p of EYES) ART.eyes(ctx, p.x, p.y, state.t, 1);
+  state.eyes = EYES.map(p => ({ x: p.x, y: p.y, r: 6, pupil: { dx: 1, dy: 1 } }));
 }
 function rise(kind, x, y) {
   const wait = kind === 'heart' ? 2.5 : 2.2;
@@ -862,21 +976,29 @@ function drawPeople() {
   state.look = look.mode;
   const eyes = watchEyes();
   state.watchEyes = eyes;
-  const watchHot = !state.hidden && look.mode === 'look' && inCone(state.sq.x, state.sq.y - 16, eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len);
-  drawCone(eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len, watchHot);
-  if (watchHot) rise('bang', eyes.x, eyes.y - 30);
-  // The other five approved guests look at the stage. Same cone size, pointed up.
-  [[160, 540, 'teal'], [250, 500, 'backpack'], [520, 590, 'stilt'], [780, 540, 'octopus'], [860, 520, 'robot']].forEach(([x, y, kind]) => {
-    const box = guestBox(kind, GUEST_SCALE);
-    const ox = x, oy = y - box.h * 0.8;
-    const face = -Math.PI / 2;
-    const hot = !state.hidden && inCone(state.sq.x, state.sq.y - 16, ox, oy, face, tune.cone_half, tune.cone_len);
-    drawCone(ox, oy, face, tune.cone_half, tune.cone_len, hot);
-    if (hot) rise('bang', ox, oy - 20);
-    drawGuest(x, y, GUEST_SCALE, kind, 1);
-  });
+  if (look.mode === 'look') {
+    const hot = state.beat !== 'peek' && !state.hidden && inCone(state.sq.x, state.sq.y - 16, eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len);
+    drawCone(eyes.x, eyes.y, look.face, tune.cone_half, tune.cone_len, hot);
+    if (hot) rise('bang', eyes.x, eyes.y - 30);
+  }
+  for (const w of state.walkers) {
+    const bob = Math.sin(state.t * 3 + w.x) * 2;
+    const hot = state.beat !== 'peek' && !state.hidden && inCone(state.sq.x, state.sq.y - 16, w.x, w.y - 70, w.face, tune.cone_half, tune.cone_len);
+    drawCone(w.x, w.y - 70, w.face, tune.cone_half, tune.cone_len, hot);
+    if (hot) rise('bang', w.x, w.y - 100);
+    drawGuest(w.x, w.y + bob, GUEST_SCALE, w.kind, Math.cos(w.face) < 0 ? -1 : 1);
+  }
+  for (const s of STANDING) {
+    const bob = Math.sin(state.t * 2 + s.x) * 2;
+    drawGuest(s.x, s.y + bob, GUEST_SCALE, s.kind, 1);
+  }
   const watchFace = Math.cos(look.face) < 0 ? -1 : 1;
-  drawGuest(WATCH_FEET.x, WATCH_FEET.y, GUEST_SCALE, 'camera', watchFace);
+  drawGuest(WATCH_FEET.x, WATCH_FEET.y + Math.sin(state.t * 2) * 1.5, GUEST_SCALE, 'camera', watchFace);
+  if (state.beat === 'peek') {
+    state.heads.push({ x: DOOR.x - 20, y: 560, w: 40, h: 30, who: 'sq' });
+    state.heads.push({ x: 400, y: 250, w: 50, h: 36, who: 'isfred' });
+    return;
+  }
   if (!state.hidden) {
     const hop = state.beat === 'hop' ? Math.sin(Math.min(1, state.hopT / tune.hop_time) * Math.PI) * tune.hop_height : 0;
     drawSquatch(state.sq.x, state.sq.y, tune.hall_sq, { face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, hop });
@@ -903,6 +1025,8 @@ function currentLine() {
   if (state.beat === 'alone' && state.look === 'bedline') return { kind: 'line', who: 'sq', text: LINE.bed };
   if (state.beat === 'alone' && state.look === 'calendar') return { kind: 'calendar' };
   if (state.beat === 'evening') return { kind: 'evening' };
+  if (state.beat === 'peek' && state.line === 0) return { kind: 'line', who: 'isfred', text: LINE.mumble };
+  if (state.beat === 'peek') return { kind: 'line', who: 'sq', text: LINE.robots };
   if (state.beat === 'jail') return { kind: 'jail' };
   return null;
 }
@@ -917,7 +1041,8 @@ function drawPlay() {
     return;
   }
   drawRoom(state.room === 'hall' ? 'hall' : 'home');
-  if (state.beat === 'sneak' || state.beat === 'hop' || state.beat === 'hidden' || state.beat === 'jail') drawPlanterHint();
+  if (state.room === 'hall') drawBanner();
+  if (state.beat === 'peek' || state.beat === 'sneak' || state.beat === 'hop' || state.beat === 'hidden' || state.beat === 'jail') drawPlanterHint();
   drawPeople();
   drawSparks();
   const line = currentLine();
@@ -933,13 +1058,14 @@ function drawPlay() {
     if (head) drawBubble(line.who, line.text, head);
   } else if (line && line.kind === 'calendar') drawCalendar();
   else if (line && line.kind === 'evening') drawCard(LINE.evening, '', true);
-  else if (line && line.kind === 'jail') drawCard(LINE.lockup, LINE.needed, true);
+  else if (line && line.kind === 'jail') drawCard(LINE.lockup, LINE.saw, true);
   if (state.beat === 'homework') drawHomework();
   const close = state.room === 'hall' && dist(state.sq, POT) <= tune.hide_reach;
   if (state.beat === 'sing') drawChip('SING ALONG', true);
   if (state.beat === 'alone' && !state.look && state.step < 3) drawHomeSpot(state.step === 0 ? HOME.calendar : state.step === 1 ? HOME.closet : HOME.bed);
   if (state.beat === 'alone' && !state.look && state.step === 3) drawChip(LINE.homework, true);
-  if (state.beat === 'sneak' && close && !state.hidden) drawChip('HIDE', true);
+  if (state.beat === 'peekready') drawChip('PEEK', true);
+  if (state.beat === 'sneak' && close && !state.hidden) drawChip(LINE.hide, true);
   drawIconButtons();
   if (state.paused) {
     ctx.fillStyle = 'rgba(12,16,28,.35)'; ctx.fillRect(0, 0, W, H);
@@ -1027,7 +1153,7 @@ function drawFrame() {
   ctx.fillText = (text, x, y, max) => { state.words.push(String(text)); return orig(text, x, y, max); };
   scenes[scene].draw();
   ctx.fillText = orig;
-  state.chip = (state.controls.find(c => c.id === 'SING ALONG' || c.id === 'HIDE' || c.id === LINE.homework) || {}).id || '';
+  state.chip = (state.controls.find(c => c.id === 'SING ALONG' || c.id === LINE.hide || c.id === 'PEEK' || c.id === LINE.homework) || {}).id || '';
   state.close = state.room === 'hall' && dist(state.sq, POT) <= tune.hide_reach;
 }
 function frame() { tick(); requestAnimationFrame(frame); }

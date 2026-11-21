@@ -37,10 +37,15 @@ const ALLOWED = [
   'Not sleepy anymore.',
   'DO \u00b7 homework',
   'That evening\u2026',
+  'PEEK',
+  'ROBOTICS DELEGATION!',
+  'Mmf mmf... mm-mmf... mmf!',
+  'Robots?',
   'SING ALONG',
-  'HIDE',
+  'HIDE · plant',
   'LOCKUP',
-  '[line needed]',
+  'A guest saw Squatch!',
+  'Isfred',
   'Mops',
   'Squatch',
   '!',
@@ -123,10 +128,11 @@ function checkRules(s, label) {
       for (const b of s.bubbles) if (inside(b.box, c.x, c.y)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'the cone starts on a speech bubble'));
     }
   }
-  const homeBeats = ['title', 'resort', 'intro', 'morning', 'sing', 'song', 'songwalk', 'stay', 'leave', 'alone', 'homework', 'evening'];
+  const homeBeats = ['title', 'resort', 'intro', 'morning', 'sing', 'song', 'songwalk', 'stay', 'leave', 'alone', 'homework', 'evening', 'peekready'];
   if (homeBeats.includes(s.beat) && s.room !== 'home') problems.push(fails(RULE.room + ' ' + label + ' room', s.beat + ' is in the ' + s.room));
   if (homeBeats.includes(s.beat) && s.mo && !s.mo.hidden && s.mo.x > 860) problems.push(fails(RULE.room + ' ' + label + ' room', 'Mops is outside the bedroom at x ' + s.mo.x));
-  if (['sneak', 'hidden', 'hop', 'jail'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
+  if (['peek', 'sneak', 'hidden', 'hop', 'jail'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
+  if ((s.beat === 'sneak' || s.beat === 'hidden') && s.cones.length > 3) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'too many cones ' + s.cones.length));
   if ((s.beat === 'sneak' || s.beat === 'hidden' || s.beat === 'hop' || s.beat === 'jail') && s.hint) {
     if (s.hint.kind !== 'planter' || s.hint.points.length < 8) problems.push(fails(RULE.outline + ' ' + label + ' hint', JSON.stringify(s.hint && s.hint.kind)));
     if (s.hint.color !== '#ffcf33' || s.hint.width !== 6 || !s.hint.dashed) problems.push(fails(RULE.outline + ' ' + label + ' hint', 'outline is ' + s.hint.color + ' at ' + s.hint.width + ' dashed ' + s.hint.dashed));
@@ -144,11 +150,11 @@ function checkRules(s, label) {
     if (kinds.some(g => !GUESTS.includes(g))) problems.push(fails(RULE.guests + ' ' + label + ' guests', kinds.join(',')));
     if (s.beat === 'sneak' && GUESTS.some(g => !kinds.includes(g))) problems.push(fails(RULE.guests + ' ' + label + ' guests', 'missing ' + GUESTS.filter(g => !kinds.includes(g)).join(',')));
   }
-  const handled = ['SING ALONG', 'HIDE', 'DO \u00b7 homework', 'look', 'pie', 'line', 'card', 'start', 'pause', 'mute'];
+  const handled = ['SING ALONG', 'HIDE · plant', 'PEEK', 'DO \u00b7 homework', 'look', 'pie', 'line', 'card', 'start', 'pause', 'mute'];
   for (const c of s.controls || []) {
     if (!handled.includes(c.id)) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'nothing handles ' + c.id));
   }
-  if (s.chip === 'HIDE' && !(s.beat === 'sneak' && s.close)) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'HIDE before he can hide'));
+  if (s.chip === 'HIDE · plant' && !(s.beat === 'sneak' && s.close)) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'HIDE before he can hide'));
   if (s.chip === 'SING ALONG' && s.beat !== 'sing') problems.push(fails(RULE.chip + ' ' + label + ' chip', 'SING ALONG at the wrong time'));
   if (s.chip === 'DO \u00b7 homework' && !(s.beat === 'alone' && s.step === 3)) problems.push(fails('R22 ' + label + ' homework', 'homework is offered too early'));
   if (s.bubbles.length && s.chip) problems.push(fails(RULE.chip + ' ' + label + ' chip', 'a chip is up during a line'));
@@ -329,8 +335,23 @@ async function play(page, label) {
   if (!s.words.includes('That evening\u2026')) problems.push(fails(label + ' evening', 'missing the evening card'));
 
   await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'peekready' && window.game.state.chip === 'PEEK', 4000, 'peek button');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'peek' && window.game.state.room === 'hall', 4000, 'peek');
+  await shot(page, label + '-5-peek');
+  s = await readState(page);
+  problems.push(...checkRules(s, label + ' peek'));
+  if (!s.bubbles.some(b => b.text === 'Mmf mmf... mm-mmf... mmf!')) problems.push(fails('R22 ' + label + ' peek', 'Isfred is not mumbling'));
+  if (!s.words.includes('ROBOTICS DELEGATION!')) problems.push(fails('R22 ' + label + ' peek', 'the banner is missing'));
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.bubbles.some(b => b.text === 'Robots?'), 4000, 'robots');
+  await shot(page, label + '-5-robots');
+  await tapLit(page);
   await waitFor(page, () => window.game.state.beat === 'sneak', 4000, 'sneak');
   const parked = await page.evaluate(() => ({ x: window.game.state.sq.x, y: window.game.state.sq.y }));
+  const door = await page.evaluate(() => window.game.DOOR);
+  if (Math.hypot(parked.x - door.x, parked.y - door.y) > 8) problems.push(fails('R6 ' + label + ' door', 'he did not start in the doorway'));
+  if (parked.x < 430 || parked.x > 525) problems.push(fails('R6 ' + label + ' door', 'the doorway is not the gap in the wall'));
   await new Promise(r => setTimeout(r, 400));
   await shot(page, label + '-5-sneak');
   s = await readState(page);
@@ -338,8 +359,12 @@ async function play(page, label) {
   fs.copyFileSync(path.join(shotDir, label + '-5-sneak.png'), path.join(artDir, label + '-outline.png'));
   s = await readState(page);
   problems.push(...checkRules(s, label + ' sneak'));
-  if (s.chip === 'HIDE') problems.push(fails(label + ' sneak', 'HIDE is offered before he is at the plant'));
+  if (s.chip === 'HIDE · plant') problems.push(fails(label + ' sneak', 'HIDE is offered before he is at the plant'));
   if (!s.hint || s.hint.kind !== 'planter') problems.push(fails(label + ' sneak', 'the planter is not outlined'));
+  const moved = await page.evaluate(() => window.game.state.walkers.map(w => w.x + w.y));
+  await new Promise(r => setTimeout(r, 700));
+  const moved2 = await page.evaluate(() => window.game.state.walkers.map(w => w.x + w.y));
+  if (moved.every((n, i) => Math.abs(n - moved2[i]) < 2)) problems.push(fails(label + ' mill', 'the strolling guests are standing still'));
 
   // Walk into the look so he is seen.
   await clickLogical(page, 500, 590);
@@ -351,7 +376,7 @@ async function play(page, label) {
   await shot(page, label + '-7-jail');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' jail'));
-  if (!s.words.includes('LOCKUP') || !s.words.includes('[line needed]')) problems.push(fails(label + ' jail', 'lockup card is missing the placeholder'));
+  if (!s.words.includes('LOCKUP') || !s.words.some(w => w.includes('guest saw'))) problems.push(fails(label + ' jail', 'lockup card is missing the line'));
   const hop = s.hop;
   if (hop.length < 3) problems.push(fails(label + ' hop', 'no hop was recorded'));
   else {
@@ -373,12 +398,10 @@ async function play(page, label) {
   if (back > 8) problems.push(fails(label + ' restart', 'he did not come back to the doorway'));
 
   // The safe walk, while the guest is still looking at the stage.
-  await clickLogical(page, 210, 560);
-  await waitFor(page, () => Math.hypot(window.game.state.sq.x - 210, window.game.state.sq.y - 560) < 30, 5000, 'left');
-  await clickLogical(page, 200, 450);
-  await waitFor(page, () => Math.hypot(window.game.state.sq.x - 200, window.game.state.sq.y - 450) < 30, 5000, 'up');
-  await clickLogical(page, 400, 500);
-  await waitFor(page, () => window.game.state.chip === 'HIDE', 6000, 'hide chip');
+  await clickLogical(page, 470, 560);
+  await waitFor(page, () => Math.hypot(window.game.state.sq.x - 470, window.game.state.sq.y - 560) < 30, 5000, 'toward the plant');
+  await clickLogical(page, 450, 555);
+  await waitFor(page, () => window.game.state.chip === 'HIDE · plant', 6000, 'hide chip');
   await shot(page, label + '-6-hide');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' hide'));
@@ -388,11 +411,13 @@ async function play(page, label) {
   fs.copyFileSync(path.join(shotDir, label + '-6-eyes.png'), path.join(artDir, label + '-eyes.png'));
   s = await readState(page);
   problems.push(...checkRules(s, label + ' eyes'));
-  const leaf = { x: 416, y: 492, w: 52, h: 20 };
+  const leaf = { x: 416, y: 488, w: 56, h: 28 };
   if (s.eyes.length !== 2) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'expected two eyes'));
+  const gap = Math.hypot(s.eyes[0].x - s.eyes[1].x, s.eyes[0].y - s.eyes[1].y);
+  if (Math.abs(gap - 18) > 2) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'the pair is ' + gap + ' apart'));
   for (const e of s.eyes) {
-    if (e.x < leaf.x || e.x > leaf.x + leaf.w || e.y < leaf.y || e.y > leaf.y + leaf.h) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'eyes are not in the front leaves'));
-    if (!(e.r > 2.5 && e.r < 4.2)) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'eye radius ' + e.r));
+    if (e.x < leaf.x || e.x > leaf.x + leaf.w || e.y < leaf.y || e.y > leaf.y + leaf.h) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'eyes are not on the front seam'));
+    if (!(e.r > 5.5 && e.r < 6.5)) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'eye radius ' + e.r));
     if (!e.pupil || e.pupil.dx <= 0 || e.pupil.dy <= 0) problems.push(fails(RULE.eyes + ' ' + label + ' eyes', 'pupil is not down-right'));
   }
   return problems;

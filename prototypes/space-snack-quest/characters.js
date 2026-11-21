@@ -250,8 +250,8 @@ function ga(l, o, k) {
       use(ctx, time);
       ga(x, yy, scale);
     },
-    // Original front leaf is a 40px clump. This locked bush's front clumps are about 22px.
-    eyeScale: 22 / 40,
+    // The plant pair is drawn at the original ga() size: radius 6, centres 18 apart.
+    eyeScale: 1,
     guests: ["teal", "camera", "backpack", "stilt", "octopus", "robot"],
   };
 })();

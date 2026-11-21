@@ -132,10 +132,15 @@ const lines = [
   'Not sleepy anymore.',
   'DO \u00b7 homework',
   'That evening',
+  'PEEK',
+  'ROBOTICS DELEGATION!',
+  'Mmf mmf... mm-mmf... mmf!',
+  'Robots?',
   'SING ALONG',
-  'HIDE',
+  'HIDE · plant',
   'LOCKUP',
-  '[line needed]',
+  'A guest saw Squatch!',
+  'Isfred',
 ];
 const checklist = fs.readFileSync(path.join(root, 'docs', 'STORY-BEATS-CHECKLIST.md'), 'utf8');
 for (let n = 1; n <= 61; n++) {

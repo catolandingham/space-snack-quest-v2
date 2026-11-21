@@ -2,23 +2,23 @@
 
 Every decided Chapter 1 beat is on this list. A beat is built, not yet built, or dropped on purpose. Nothing decided is dropped without a reason.
 
-Newer words from Brian's 20 Nov 2026 digest replace older lines. The sneak, the party guests, and the hidden eyes are held. Brian said those are already wrong, and the gameplay reference was not in yet, so this pass does not change them.
+Newer words from Brian's 20 Nov 2026 digest replace older lines. The gameplay reference is in. The eyes are one close pair, low in the front leaves. He peeks before he steps out. The sneak starts in his doorway. Two guests stroll, and only the people who can catch him have cones.
 
 ## What a first-time player gets today
 
-The title says where this is and who Squatch is. Mops says good morning and wrings his beard. The wall speaker, not Mops, says there is a party tonight and puts on a song. They sing at the doorway. Mops faces Squatch, tells him to stay, and leaves. Squatch looks at the calendar, the closet, and the bed, then does homework, and the evening card comes up. The party he just heard about is the reason for that card.
+The title says where this is and who Squatch is. Mops says good morning and wrings his beard. The wall speaker, not Mops, says there is a party tonight and puts on a song. They sing at the doorway. Mops faces Squatch, tells him to stay, and leaves. Squatch looks at the calendar, the closet, and the bed, then does homework, and the evening card comes up. He peeks and sees the party and the banner before he steps out. Then he sneaks from his doorway to the plant while two guests stroll and the door guest looks away.
 
 The poster on the wall already says to stay in here, and Mops says it too. The calendar's Moon Pie bite pays off on delivery day, which is later and still not built. The Guardian Box is named now and opened in a later beat.
 
-## Held: sneak, milling, eyes
+## How the older game did the sneak
 
-Read from the old game `catolandingham/space-snack-quest` at commit `4d1faa2` and the commits under it. Not changed in this pass.
+Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 Nov) and `4d1faa2` (17 Nov), and the gameplay reference.
 
-**Sneak.** Commit `ea6bbde` (pull request 48) is the one that says the player steers Squatch from his doorway to the plant. In `src/game/15-ch1-scene1.js` the door guest faces the stage for 3.5 seconds, turns for 0.4, looks for 2, and turns back. His cone points left across the floor between the door and the plant, and it does not cover the plant. If he sees Squatch, a red exclamation mark shows and Squatch hurries back to the doorway to try again. Hiding is a HIDE button at the plant. Later, commit `0d09ec6` splits the party into five scenes and restarts the current one after the jail card. The v2 sneak still has a tap-walk, a turning guest, a hop, and a jail card. Brian says the sneak idea is lost. It stays as it is until the gameplay reference is read.
+**Sneak.** Commit `ea6bbde` (pull request 48) is the one that says the player steers Squatch from his doorway to the plant. In `src/game/15-ch1-scene1.js` the door guest faces the stage, turns, looks across the floor, and turns back. His cone does not cover the plant. If he sees Squatch, a red exclamation mark shows and that sneak starts again at the doorway. Hiding is HIDE · plant. v2 now does this. The locked timing is 6 seconds facing the stage, 0.45 to turn, and 2.4 looking. Those numbers were already in the game and were not changed.
 
-**Guests milling.** In the party hall drawing (`src/game/12-ch1-redesign.js`, `CH1_GUESTS`) the six stand-ins stand on fixed spots and only bob about a pixel and a half. They do not walk. The older deck scene in `src/game/10-ch1.js` (`aV.tour`) does move people: one stands, and one walks a lane between two points, pauses, and turns around. Brian wants the party guests to mill about, not stand still. That change waits for the gameplay reference, because the hall is held.
+**Guests milling.** The Nov 17 party guests only bobbed. The Nov 7 deck scene walks a tourist between two points, pauses, and turns, and the cone moves with her. v2 now has two of the six approved guests on fixed strolls. The other four stand and face the party. Only the door guest and the two walkers have cones.
 
-**Hidden eyes.** Decision C21, 8 Nov 2026, "These are the eyes." The drawing is `ga()` in `src/game/10-ch1.js`: two white circles, dark outline, pupil nudged down and to the right, with a blink. On the game plant the eyes sit low in the two front leaf clumps. The party hide calls `ga(400, 500)` and draws nothing of Squatch's body. Decision C8: only the plant and the eyes, never his body. Brian says the v2 eyes are wrong again. They are not moved in this pass.
+**Hidden eyes.** Decision C21, "These are the eyes." `ga()` draws one pair: two white circles, radius 6, centres 18 pixels apart, pupil down and to the right, with a blink. They sit low, centered on the seam of the two front leaf clumps. v2 had put one small eye in each clump. That is fixed. Only the plant and the eyes show.
 
 ## Beats
 
@@ -26,13 +26,13 @@ Read from the old game `catolandingham/space-snack-quest` at commit `4d1faa2` an
 | --- | --- | --- |
 | 1 | Meet Squatch. Cards for Stormtop and who he is. Mops by the bucket. Morning, then the wall speaker's party line and the song title. Poster already in the room picture. | built |
 | 2 | They sing at the doorway. Theme stops while they sing. Mops faces Squatch, says stay, and leaves. | built |
-| 3 | That evening. Peek from the doorway. He does not walk out. Banner, muffled talk, "Robots?" once. | not yet built |
-| 4 | Sneak to the middle plant while the door guest faces the stage. Soft outline only on that one next place. HIDE at the plant. Eyes low in the front leaves. Jail card, then that sneak again. | not yet built. A sneak is in the game and is held. See above. |
+| 3 | That evening. Peek from the doorway. He does not walk out. Banner, muffled talk, "Robots?" once. | built |
+| 4 | Sneak to the middle plant while the door guest faces the stage. Soft outline only on that one next place. HIDE at the plant. Eyes low in the front leaves, one close pair. Jail card, then that sneak again. Two guests stroll. Only the door guest and the walkers have cones. | built |
 | 5 | Isfred's announcement and the robot poster. The spoken lines are not approved. | not yet built |
 | 6 | Croc Boys. Lights a little darker, no change to what anyone can see. The band's words are not approved. | not yet built |
 | 7 | Dress-up from the closet. The lines for it are not approved. | not yet built |
 | 8 | Into the party in the disguise. | not yet built |
-| 9 | A real party. Guests should mill about. | not yet built. Held with the hall. |
+| 9 | A real party. Guests should mill about. | not yet built. The opening sneak now has two strolling guests. The rest of the party is later. |
 | 10 | Robot dance. Only a tiny tap game, or it is dropped. Not dropped yet, because the party around it is not in. | not yet built |
 | 11 | Karaoke, the Moon Pie song. | not yet built |
 | 12 | Juke the octopus. | not yet built |

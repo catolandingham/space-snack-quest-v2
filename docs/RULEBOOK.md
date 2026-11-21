@@ -22,9 +22,10 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Mops leaves | Squatch's room | Mops walks to the doorway and leaves from inside the room. |
 | Home alone | Squatch's room | Calendar, then the closet, then the bed, then homework. One at a time. |
 | That evening | Squatch's room | The card waits for a tap. The hall is not on screen yet. |
-| Sneak | Party hall | Squatch starts at the doorway. He walks only where the player taps. The bush outline shows the way. |
-| Hide | Party hall | HIDE lights up only when he is close. His eyes peek from the front leaves. |
-| Seen | Party hall | He hops. A lockup card shows. A tap starts that sneak again at the doorway. |
+| Peek | Party hall, from the doorway | PEEK shows the hall. Squatch is not drawn yet. The banner, the guests, and the cones are on screen. Isfred mumbles. Squatch thinks "Robots?" once. |
+| Sneak | Party hall | He appears in his doorway. He walks only where the player taps. The plant outline is the only hint. Two guests stroll. The door guest turns on a steady beat. |
+| Hide | Party hall | HIDE · plant lights up only when he is close. One close pair of eyes peeks from the front leaves. |
+| Seen | Party hall | He hops. The lockup card says a guest saw him. A tap starts that sneak again at the doorway. |
 
 ## Approved lines
 
@@ -51,10 +52,15 @@ These are the only words the game may show, plus the reaction marks below.
 - Not sleepy anymore.
 - DO · homework
 - That evening…
+- PEEK
+- ROBOTICS DELEGATION!
+- Mmf mmf... mm-mmf... mmf!
+- Robots?
 - SING ALONG
-- HIDE
+- HIDE · plant
 - LOCKUP
-- [line needed]
+- A guest saw Squatch!
+- Isfred
 - Mops
 - Squatch
 - Teal jacket
@@ -66,7 +72,7 @@ These are the only words the game may show, plus the reaction marks below.
 
 Reaction marks, not dialogue: ! and ♥.
 
-The lockup card's other lines are not decided. The card says LOCKUP and [line needed].
+The lockup card says LOCKUP and "A guest saw Squatch!"
 
 ## Approved art
 
@@ -83,7 +89,7 @@ Drawn characters, from the live game's code at commit 4d1faa2 (17 Nov 2026), fil
 | --- | --- | --- |
 | Squatch | function Re | Brian, 2026-11-20, for this build. Not the older title-screen Squatch. |
 | Mops | function Fe. His beard is the mop. No mop prop. | Brian, 2026-11-20. |
-| Hidden eyes | function ga. White circle, dark outline, pupil down-right, with the blink. Scaled to 22/40 so the eye stays the same fraction of this bush's front leaf. One eye in each front clump. | Brian, 8 Nov 2026, decision C21, "These are the eyes." |
+| Hidden eyes | function ga. One close pair. Each eye is a white circle, radius 6, with a 2 pixel dark outline. The centres are 18 pixels apart. The pupil sits down and to the right, and the blink is the same. The pair is centered low, on the seam where the two front leaf clumps meet. | Brian, 8 Nov 2026, decision C21, "These are the eyes." |
 
 Guests. Brian approved six on 8 Nov 2026 (decision C12, "We like these ones just fine, and actually the robot is fine as well"). The jelly in a sun hat and the furry alien are not guests. The later sheet of eight code-drawn guests is not approved. The source picture is `assets/approved/guests/nov8-six-approved-guests.png`. The game draws only the six cuts of that sheet, `teal.png`, `camera.png`, `backpack.png`, `stilt.png`, `octopus.png`, and `robot.png`. The cream around each person is transparent. The whites inside the drawings stay. No other guest art is loaded. Each person is:
 
@@ -103,10 +109,10 @@ Only these six may appear. Their names in the game are teal, camera, backpack, s
 | R1 | Only the approved lines and the two reaction marks are on screen. | Automatic |
 | R2 | Speech bubbles sit on the speaker and stay off faces. | Automatic |
 | R3 | Every chip does something, and a chip is offered only when the player can use it. | Automatic |
-| R4 | Every sight cone is dashed and within 15% of the others in length and spread. Mops's cone matches the guests. | Automatic |
-| R5 | The bush hint is a dashed yellow line, 6 pixels thick, color #ffcf33, a small gap outside the leaves and the pot. It traces that shape. It is not a circle. It pulses gently. | Automatic for color, dashes, thickness, gap, and shape. Eyes for the pulse. |
-| R6 | The morning, through Mops leaving and the evening card, stays in Squatch's room. The party hall starts when that card is tapped. | Automatic |
-| R7 | Hidden eyes are the original ga drawing, scaled to this bush's front leaves, pupil down-right, peeking from those leaves and not sitting on the pot rim. | Automatic for size, place, and pupil. Eyes for the side-by-side. |
+| R4 | Every sight cone is dashed and within 15% of the others in length and spread. Mops's cone matches the guests. In the hall, only the door guest and the guests who walk the floor have cones. | Automatic |
+| R5 | The only hint is a dashed yellow line on the plant, 6 pixels thick, color #ffcf33, a small gap outside the leaves and the pot. It traces that shape. It is not a circle. It pulses gently. No other hint. | Automatic for color, dashes, thickness, gap, and shape. Eyes for the pulse. |
+| R6 | The morning, through Mops leaving, the time at home, and the evening card, stays in Squatch's room. PEEK shows the hall. Squatch is not drawn in the hall until the sneak, and he starts in the doorway. | Automatic |
+| R7 | Hidden eyes are one close pair from the original ga drawing, radius 6, centres 18 pixels apart, pupil down-right, centered low on the seam of the two front leaf clumps, not on the pot. | Automatic |
 | R8 | When Squatch is inside Mops's cone, red hearts rise from Mops and fade. | Automatic |
 | R9 | When Squatch is inside a guest's cone, a red exclamation mark rises in a yellow circle and fades. | Automatic |
 | R10 | The only guests are the six approved ones. | Automatic |
