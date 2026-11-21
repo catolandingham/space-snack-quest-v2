@@ -260,14 +260,8 @@ const LINE = {
   gloves: '...Nice gloves.',
   fur: 'Wait a second... fur!',
   alarm: 'FUR! Security!',
-  tv: [
-    'Years ago, on Stormtop...',
-    'A Wookie tour group came to visit Stormtop.',
-    'They shed. A LOT.',
-    'The fur clogged the air scrubbers. Everyone gasped for air!',
-    'Nobody can live outside. The scrubbers keep us breathing. NO FUR.',
-    'Onto the ship.',
-  ],
+  scrubber: 'Fur in the scrubber.',
+  ship: 'Onto the ship.',
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const DANCE = ['L', 'R', 'U', 'D'];
@@ -792,10 +786,10 @@ function comeHome() {
 }
 function advanceHome() {
   if (state.beat === 'miss') { state.beat = 'have'; blip(); return; }
-  if (state.beat === 'have') { state.beat = 'tv'; state.line = 0; blip(); return; }
+  if (state.beat === 'have') { state.beat = 'tv'; state.line = 0; playGrowl(); blip(); return; }
   if (state.beat === 'tv') {
     state.line++;
-    if (state.line >= LINE.tv.length) state.beat = 'after';
+    if (state.line >= 3) { state.beat = 'after'; if (growl) growl.pause(); }
     else blip();
   }
 }
@@ -1676,15 +1670,35 @@ function drawDance() {
   ctx.fill();
   state.controls.push({ id: 'dance', x: x - 54, y: y - 54, w: 108, h: 108, lit: true });
 }
+let growl = null;
+function playGrowl() {
+  if (muted) return;
+  if (!growl) {
+    growl = new Audio('assets/approved/nick1-wookiee.mp3');
+    growl.volume = 0.45;
+  }
+  growl.currentTime = 0;
+  const playing = growl.play && growl.play();
+  if (playing && playing.catch) playing.catch(() => {});
+}
 function drawTv() {
   clear('#10141c');
-  roundRect(120, 80, 720, 420, 18);
+  roundRect(120, 60, 720, 500, 18);
   ctx.fillStyle = '#d7ecf5'; ctx.fill();
   ctx.lineWidth = 8; ctx.strokeStyle = '#1e2430'; ctx.stroke();
-  const text = LINE.tv[state.line] || '';
-  const lines = wrap(text, 28, 620);
-  lines.forEach((l, i) => say(l, 480, 260 + i * 36, 28, INK, 'center', 800));
-  state.controls.push({ id: 'card', x: 120, y: 80, w: 720, h: 420, lit: true });
+  if (state.line === 0) {
+    drawSquatch(340, 400, 1.7, { face: 1 });
+    drawSquatch(560, 410, 1.55, { face: -1 });
+    say(LINE.scrubber, 480, 130, 28, INK, 'center', 800);
+  } else if (state.line === 1) {
+    drawGuest(430, 420, 1.3, 'teal', 1);
+    say('!', 620, 220, 80, '#e5533d', 'center', 900);
+  } else {
+    drawIsfred(320, 400, 1.8);
+    drawSquatch(580, 420, 1.5, { face: -1 });
+    say(LINE.ship, 480, 130, 28, INK, 'center', 800);
+  }
+  state.controls.push({ id: 'card', x: 120, y: 60, w: 720, h: 500, lit: true });
 }
 function drawPlay() {
   if (state.beat === 'tv' || state.beat === 'wring') {
