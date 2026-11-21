@@ -166,6 +166,8 @@ loadRoom('hall', 'hall-room-empty-v1.png');
 loadRoom('hallway', 'hallway-room-empty-v6.png');
 loadRoom('bay', 'delivery-room-empty-day-v2.png');
 loadRoom('night', 'delivery-room-empty-night-v2.png');
+loadRoom('office', 'office-room-empty-v2.png');
+loadRoom('pickup', 'delivery-room-empty-pickup-v3.png');
 const speakerImg = new Image();
 speakerImg.src = 'assets/approved/speaker-option-4.png';
 const mopsImg = new Image();
@@ -351,6 +353,25 @@ const LINE = {
   into: 'Into the vent.',
   notice: "I hope Mops doesn't notice.",
   always: "We'll always be with you.",
+  hurry: 'Hurry. Pink slip. Got it!',
+  before: 'Get it before he sees it.',
+  opens: 'The office door opens.',
+  returnbox: 'Order a new box. Return the empty crate.',
+  allsnacks: 'This time, take all the snacks you want.',
+  leavefood: "I'll leave the Guardians some food.",
+  pack: 'Guardian Box inside. Bucket on top.',
+  checkout: "Get out. They're checking a crate.",
+  quickhome: 'Quick, home.',
+  spare: 'The spare jacket. The beard. And the horns.',
+  bleat: 'More bleat. Less roar.',
+  hair: 'HAIR... PROBABLY. PROCEED.',
+  photo: 'Send in Mops for his photo.',
+  isnt: "Mops isn't here.",
+  station: "He can't live off the station!",
+  tapes: 'Get me the security tapes.',
+  later: 'Later that evening.',
+  rec: 'REC',
+  stop: 'The base called the ship. It has to stop.',
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const NEXT = [
@@ -401,6 +422,26 @@ const NEXT = [
   { room: 'night', who: 'sq', text: LINE.into, eyes: true, x: 160, y: 470 },
   { room: 'vent', who: 'sq', text: LINE.notice, x: 480, y: 520 },
   { room: 'vent', who: 'sq', text: LINE.always, x: 480, y: 520 },
+  { room: 'vent', who: 'sq', text: LINE.hurry, x: 480, y: 520 },
+  { room: 'hallway', who: 'sq', text: LINE.before, mops: true, x: 280, y: 530 },
+  { room: 'hallway', who: 'sq', text: LINE.opens, x: 480, y: 530 },
+  { room: 'office', who: 'sq', text: LINE.returnbox, x: 400, y: 500 },
+  { room: 'hall', who: 'mops', text: LINE.allsnacks, mops: true, x: 500, y: 540, mx: 700, my: 500 },
+  { room: 'home', who: 'sq', text: LINE.leavefood, mops: true },
+  { room: 'home', who: 'sq', text: LINE.pack, mops: true, prop: 'rocket' },
+  { room: 'pickup', who: 'sq', text: LINE.checkout, prop: 'robots', x: 240, y: 520 },
+  { room: 'home', who: 'mops', text: LINE.quickhome, mops: true },
+  { room: 'home', who: 'mops', text: LINE.spare, mops: true },
+  { room: 'home', who: 'mops', text: LINE.bleat, mops: true },
+  { room: 'hallway', who: 'sq', text: LINE.tied, x: 300, y: 530 },
+  { room: 'bay', who: 'sq', text: LINE.hair, x: 420, y: 520 },
+  { room: 'office', who: 'isfred', text: LINE.photo, x: 500, y: 500 },
+  { room: 'office', who: 'sq', text: LINE.isnt, x: 300, y: 500 },
+  { room: 'office', who: 'isfred', text: LINE.station, x: 500, y: 500 },
+  { room: 'office', who: 'isfred', text: LINE.tapes, x: 500, y: 500 },
+  { room: 'office', who: 'sq', text: LINE.later, x: 400, y: 500 },
+  { room: 'office', who: 'sq', text: LINE.rec, x: 400, y: 500 },
+  { room: 'ship', who: 'speaker', text: LINE.stop, x: 480, y: 460 },
 ];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
@@ -1590,6 +1631,7 @@ function drawPeople() {
         drawBot(600, 455, '#ffcf33');
       }
       if (step && step.prop === 'papers') drawPapers(480, 360);
+      if (step && step.who === 'speaker') state.heads.push({ x: 400, y: 140, w: 160, h: 40, who: 'speaker' });
     }
     if (state.hidden) {
       ctx.save();
@@ -1939,7 +1981,6 @@ function drawPlay() {
     const wy = state.witness ? state.witness.y : 500;
     state.heads.push({ x: wx - 20, y: wy - 80, w: 40, h: 30, who: 'witness' });
   }
-  if (state.beat === 'shed') state.heads.push({ x: 620, y: 430, w: 40, h: 30, who: 'witness' });
   drawSparks();
   const line = currentLine();
   if (line && (line.kind === 'card' || line.kind === 'intro')) {
