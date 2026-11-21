@@ -146,8 +146,9 @@ const lines = [
   'Croc Boys',
   'Everyone out there has someone.',
   'You have me.',
-  'A Wookie tour group came to visit Stormtop.',
-  'NO FUR.',
+  'Fur in the scrubber.',
+  'Onto the ship.',
+  'nick1-wookiee.mp3',
   "I've never gotten to dance at a party.",
   '...Nice gloves.',
   'Wait a second... fur!',
@@ -167,6 +168,7 @@ for (const word of ['built', 'not yet built', 'dropped', 'milling', 'ga()']) {
   if (!checklist.includes(word)) fail('R20', 'story checklist is missing ' + word);
 }
 if (html.includes('One snack. That')) fail('R1', 'the one-snack rule is said at the party');
+if (html.includes('Nobody can live outside')) fail('R1', 'the cut no-fur speech is back');
 if (!book.includes('Day 2')) fail('R20', 'the rulebook does not keep the one-snack rule for later');
 for (const line of lines) {
   if (!html.includes(line)) fail('R1', 'the game dropped an approved line: ' + line);

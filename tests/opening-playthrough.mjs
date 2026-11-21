@@ -53,11 +53,7 @@ const ALLOWED = [
   'COMING SOON!',
   'Everyone out there has someone.',
   'You have me.',
-  'Years ago, on Stormtop...',
-  'A Wookie tour group came to visit Stormtop.',
-  'They shed. A LOT.',
-  'The fur clogged the air scrubbers. Everyone gasped for air!',
-  'Nobody can live outside. The scrubbers keep us breathing. NO FUR.',
+  'Fur in the scrubber.',
   'Onto the ship.',
   "I've never gotten to dance at a party.",
   'top hat',
@@ -539,10 +535,12 @@ async function play(page, label) {
   await page.waitForFunction(() => window.game.state.bubbles.some(b => b.text === 'You have me.'), { timeout: 4000 });
   await shot(page, label + '-9-mops');
   await tapLit(page);
-  await waitFor(page, () => window.game.state.beat === 'tv' && window.game.state.words.some(w => w.includes('Stormtop')), 4000, 'tv');
-  await tapLit(page);
-  await waitFor(page, () => window.game.state.words.some(w => w.includes('Wookie')), 4000, 'wookie card');
+  await waitFor(page, () => window.game.state.beat === 'tv' && window.game.state.words.includes('Fur in the scrubber.'), 4000, 'tv');
   await shot(page, label + '-9-tv');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.words.includes('!'), 4000, 'gasp');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.words.includes('Onto the ship.'), 4000, 'ship');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' tv'));
   if (s.room !== 'home' && s.beat !== 'tv') problems.push(fails(label + ' tv', 'the show is not full screen at home'));

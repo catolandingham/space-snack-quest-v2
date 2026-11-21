@@ -48,7 +48,7 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Run home | Party hall, then his room | Guards come in. He runs to his own door. If a guard sees him, the lockup card shows and this run starts again. |
 | Search | Squatch's room | He hides under the bed. A guard looks around and leaves. If the guard sees him, the search starts again. |
 | Homecoming | Squatch's room | Mops comes home. Squatch says everyone out there has someone. Mops says you have me. |
-| TV | Full screen | The Wookiee tour, the shed, the scrubbers, the walk to the ship, and the no-fur rule. |
+| TV | Full screen | Three pictures: "Fur in the scrubber.", a red !, and "Onto the ship." Nick's growl, nick1-wookiee.mp3, plays. The line "Nobody can live outside" stays cut. |
 
 ## Approved lines
 
@@ -96,12 +96,9 @@ These are the only words the game may show, plus the reaction marks below.
 - COMING SOON!
 - Everyone out there has someone.
 - You have me.
-- Years ago, on Stormtop...
-- A Wookie tour group came to visit Stormtop.
-- They shed. A LOT.
-- The fur clogged the air scrubbers. Everyone gasped for air!
-- Nobody can live outside. The scrubbers keep us breathing. NO FUR.
+- Fur in the scrubber.
 - Onto the ship.
+- The line "Nobody can live outside. The scrubbers keep us breathing. NO FUR." is cut.
 - I've never gotten to dance at a party.
 - top hat
 - sunglasses
