@@ -64,6 +64,10 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | The other copies | Loading bay | "What do I do with the other two?" Mops says "I'll take care of it." then "Delicious." |
 | Gumbling | Loading bay | "Mmf mrrf!" Squatch says "You're gumbling!" Mops says "Ptoo!" |
 | Fur or hair | Hallway | On the walk home: "We got to watch out for these robots." "What's the difference between fur and hair?" "Paperwork." |
+| The wall | Hallway | "Mops, with a cone on his head." The crooked photo hides "Tied together forever." A robot says "BEEP BEEP". |
+| Brochure | Squatch's room | "I swear we had more Moon Pies." "We ate at a pancake place on Mars." "Here, a brochure." No parents. |
+| Tonight | Squatch's room | "Are those other Sasquatches?" "We'll talk about it tonight." "They need me here. Plus the Guardians are here." |
+| Lights out | Squatch's room | The room goes dark. Mops snores. "Zzz." |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 
@@ -149,6 +153,16 @@ These are the only words the game may show, plus the reaction marks below.
 - We got to watch out for these robots.
 - What's the difference between fur and hair?
 - Paperwork.
+- Mops, with a cone on his head.
+- Tied together forever.
+- BEEP BEEP
+- I swear we had more Moon Pies.
+- We ate at a pancake place on Mars.
+- Here, a brochure.
+- Are those other Sasquatches?
+- We'll talk about it tonight.
+- They need me here. Plus the Guardians are here.
+- Zzz.
 - ORDER MORE ROBOTS
 - Wait a second... fur!
 - FUR! Security!

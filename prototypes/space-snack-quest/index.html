@@ -330,6 +330,16 @@ const LINE = {
   watch: 'We got to watch out for these robots.',
   furhair: "What's the difference between fur and hair?",
   paperwork: 'Paperwork.',
+  cone: 'Mops, with a cone on his head.',
+  tied: 'Tied together forever.',
+  beep: 'BEEP BEEP',
+  more: 'I swear we had more Moon Pies.',
+  mars: 'We ate at a pancake place on Mars.',
+  brochure: 'Here, a brochure.',
+  others: 'Are those other Sasquatches?',
+  tonight: "We'll talk about it tonight.",
+  need: 'They need me here. Plus the Guardians are here.',
+  zzz: 'Zzz.',
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const NEXT = [
@@ -359,6 +369,16 @@ const NEXT = [
   { room: 'hallway', who: 'sq', text: LINE.watch, mops: true, x: 280, y: 530 },
   { room: 'hallway', who: 'sq', text: LINE.furhair, mops: true, x: 280, y: 530 },
   { room: 'hallway', who: 'mops', text: LINE.paperwork, mops: true, x: 280, y: 530 },
+  { room: 'hallway', who: 'sq', text: LINE.cone, mops: true, x: 280, y: 530 },
+  { room: 'hallway', who: 'sq', text: LINE.tied, mops: true, x: 280, y: 530 },
+  { room: 'hallway', who: 'sq', text: LINE.beep, mops: true, x: 280, y: 530 },
+  { room: 'home', who: 'sq', text: LINE.more, mops: true },
+  { room: 'home', who: 'sq', text: LINE.mars, mops: true },
+  { room: 'home', who: 'mops', text: LINE.brochure, mops: true },
+  { room: 'home', who: 'sq', text: LINE.others, mops: true },
+  { room: 'home', who: 'mops', text: LINE.tonight, mops: true },
+  { room: 'home', who: 'mops', text: LINE.need, mops: true },
+  { room: 'home', who: 'mops', text: LINE.zzz, mops: true, dim: true },
 ];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
@@ -893,6 +913,7 @@ function showNext() {
   const step = NEXT[state.step];
   if (!step) { state.beat = 'after'; return; }
   state.room = step.room;
+  state.dim = !!step.dim;
   state.look = step.look || '';
   state.prop = step.prop || '';
   state.closetOpen = !!step.open;
@@ -1885,7 +1906,10 @@ function drawPlay() {
   if (state.room === 'hall') drawBanner();
   if (state.beat === 'peek' || state.beat === 'sneak' || state.beat === 'hop' || state.beat === 'hidden' || state.beat === 'jail') drawPlanterHint();
   drawPeople();
-  if (state.dim) { ctx.fillStyle = 'rgba(8, 10, 18, 0.18)'; ctx.fillRect(0, 0, W, H); }
+  if (state.dim) {
+    ctx.fillStyle = state.beat === 'next' ? 'rgba(8, 10, 18, 0.62)' : 'rgba(8, 10, 18, 0.18)';
+    ctx.fillRect(0, 0, W, H);
+  }
   if (state.beat === 'wish') state.heads.push({ x: EYE_PAIR.x - 18, y: EYE_PAIR.y - 20, w: 36, h: 20, who: 'thought' });
   if ((state.beat === 'shed' || state.beat === 'alert' || state.beat === 'pull') && state.beat !== 'pull') {
     const wx = state.witness ? state.witness.x : 640;
