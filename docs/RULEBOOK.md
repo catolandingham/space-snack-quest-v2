@@ -58,6 +58,10 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | One snack | Party hall, at the counter | Back at the snack bar. Mops says "One snack. That's the rule." |
 | Ship call | Squatch's room | The speaker says "The Universal Postal Service ship is arriving!" Squatch wants to see it and asks to follow. Mops says "Okay. Just this time. Hide carefully." |
 | Bay plant | Loading bay | The locked picture assets/approved/delivery-room-empty-day-v2.png. Only his eyes show, in the plant. |
+| Robots leave | Loading bay | Isfred shakes hands. "Dot, Bob, and Lou are leaving." |
+| The promise | Loading bay | "We love you here. Visitors always love you." |
+| Paper order | Loading bay | Three copies. "So futuristic, and we still order on paper." Then "Isfred! A crate is damaged in the mail room." |
+| The other copies | Loading bay | "What do I do with the other two?" Mops says "I'll take care of it." then "Delicious." |
 
 A phone tap-through from the bed in the morning to sleep at the end follows this list. The old party path, the four dress buttons, the six TV cards, and the unused gloves line are gone. The early game is still the bar for how it feels.
 
@@ -130,6 +134,14 @@ These are the only words the game may show, plus the reaction marks below.
 - I better go see what that is.
 - Please let me follow you.
 - Okay. Just this time. Hide carefully.
+- Dot, Bob, and Lou are leaving.
+- We love you here. Visitors always love you.
+- So futuristic, and we still order on paper.
+- Isfred! A crate is damaged in the mail room.
+- What do I do with the other two?
+- I'll take care of it.
+- Delicious.
+- ORDER MORE ROBOTS
 - Wait a second... fur!
 - FUR! Security!
 - Mops
