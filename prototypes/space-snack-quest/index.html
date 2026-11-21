@@ -262,6 +262,8 @@ const LINE = {
   alarm: 'FUR! Security!',
   scrubber: 'Fur in the scrubber.',
   ship: 'Onto the ship.',
+  crate: 'You came to me in a Moon Pie crate.',
+  loved: "You've loved Moon Pies ever since.",
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const DANCE = ['L', 'R', 'U', 'D'];
@@ -699,7 +701,7 @@ function onTap(p) {
     return;
   }
   if (state.beat === 'homework') { state.beat = 'evening'; blip(); return; }
-  if (state.beat === 'miss' || state.beat === 'have' || state.beat === 'tv') { advanceHome(); return; }
+  if (state.beat === 'miss' || state.beat === 'have' || state.beat === 'tv' || state.beat === 'bedtime') { advanceHome(); return; }
   if (['wake', 'partyq', 'mophello', 'wring', 'zylan', 'oursong', 'work', 'partyagain', 'stay', 'morning', 'song', 'evening', 'jail', 'resort', 'intro'].includes(state.beat)) advanceStory();
 }
 function tapDance(p) {
@@ -787,9 +789,25 @@ function comeHome() {
 function advanceHome() {
   if (state.beat === 'miss') { state.beat = 'have'; blip(); return; }
   if (state.beat === 'have') { state.beat = 'tv'; state.line = 0; playGrowl(); blip(); return; }
+  if (state.beat === 'bedtime') {
+    state.line++;
+    if (state.line >= 2) state.beat = 'after';
+    else blip();
+    return;
+  }
   if (state.beat === 'tv') {
     state.line++;
-    if (state.line >= 3) { state.beat = 'after'; if (growl) growl.pause(); }
+    if (state.line >= 3) {
+      if (growl) growl.pause();
+      state.beat = 'bedtime';
+      state.line = 0;
+      state.room = 'home';
+      state.hidden = false;
+      state.worn = [];
+      state.sq.x = 190; state.sq.y = 520; state.sq.face = 1;
+      state.mo.hidden = false; state.mo.x = 400; state.mo.y = 530; state.mo.face = -1;
+      blip();
+    }
     else blip();
   }
 }
@@ -1413,11 +1431,11 @@ function drawPeople() {
       if (hot) rise('heart', state.mo.x, hy - 10);
     }
     const flop = state.look === 'bedline' ? Math.sin(Math.min(1, state.flopT / 0.9) * Math.PI) * -18 : 0;
-    const inBed = ['asleep', 'wake', 'partyq', 'mophello', 'zylan'].includes(state.beat);
+    const inBed = ['asleep', 'wake', 'partyq', 'mophello', 'zylan', 'bedtime'].includes(state.beat);
     const sqX = inBed ? 190 : state.sq.x, sqY = (inBed ? 520 : state.sq.y) + flop;
     const sqHead = drawSquatch(sqX, sqY, sqScale, {
       face: state.sq.face, walk: state.sq.moving ? state.sq.walk : 0, sing: state.sq.sing,
-      eyes: state.beat === 'asleep' ? 'closed' : '',
+      eyes: state.beat === 'asleep' || state.beat === 'bedtime' ? 'closed' : '',
     });
     if (!inBed) drawWorn(sqX, sqY, sqScale);
     if (inBed) {
@@ -1558,6 +1576,7 @@ function currentLine() {
   if (state.beat === 'alert') return { kind: 'line', who: 'witness', text: LINE.alarm };
   if (state.beat === 'miss') return { kind: 'line', who: 'sq', text: LINE.someone };
   if (state.beat === 'have') return { kind: 'line', who: 'mops', text: LINE.have };
+  if (state.beat === 'bedtime') return { kind: 'line', who: 'mops', text: state.line === 0 ? LINE.crate : LINE.loved };
   if (state.beat === 'tv') return { kind: 'tv' };
   if (state.beat === 'jail') return { kind: 'jail' };
   return null;

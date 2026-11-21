@@ -49,6 +49,7 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Search | Squatch's room | He hides under the bed. A guard looks around and leaves. If the guard sees him, the search starts again. |
 | Homecoming | Squatch's room | Mops comes home. Squatch says everyone out there has someone. Mops says you have me. |
 | TV | Full screen | Three pictures: "Fur in the scrubber.", a red !, and "Onto the ship." Nick's growl, nick1-wookiee.mp3, plays. The line "Nobody can live outside" stays cut. |
+| Bedtime | Squatch's room | Right after the show, Mops says "You came to me in a Moon Pie crate." then "You've loved Moon Pies ever since." Squatch is asleep in bed. No parents. |
 
 ## Approved lines
 
@@ -98,6 +99,8 @@ These are the only words the game may show, plus the reaction marks below.
 - You have me.
 - Fur in the scrubber.
 - Onto the ship.
+- You came to me in a Moon Pie crate.
+- You've loved Moon Pies ever since.
 - The line "Nobody can live outside. The scrubbers keep us breathing. NO FUR." is cut.
 - I've never gotten to dance at a party.
 - top hat

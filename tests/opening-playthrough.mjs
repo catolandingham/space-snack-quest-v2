@@ -55,6 +55,8 @@ const ALLOWED = [
   'You have me.',
   'Fur in the scrubber.',
   'Onto the ship.',
+  'You came to me in a Moon Pie crate.',
+  "You've loved Moon Pies ever since.",
   "I've never gotten to dance at a party.",
   'top hat',
   'sunglasses',
@@ -152,7 +154,7 @@ function checkRules(s, label) {
       for (const b of s.bubbles) if (inside(b.box, c.x, c.y)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'the cone starts on a speech bubble'));
     }
   }
-  const homeBeats = ['title', 'resort', 'intro', 'asleep', 'wake', 'partyq', 'mophello', 'wring', 'zylan', 'hopout', 'oursong', 'sing', 'song', 'songwalk', 'work', 'partyagain', 'stay', 'leave', 'alone', 'homework', 'evening', 'peekready', 'dress', 'walkout', 'search', 'return', 'miss', 'have', 'tv', 'after'];
+  const homeBeats = ['title', 'resort', 'intro', 'asleep', 'wake', 'partyq', 'mophello', 'wring', 'zylan', 'hopout', 'oursong', 'sing', 'song', 'songwalk', 'work', 'partyagain', 'stay', 'leave', 'alone', 'homework', 'evening', 'peekready', 'dress', 'walkout', 'search', 'return', 'miss', 'have', 'tv', 'bedtime', 'after'];
   if (homeBeats.includes(s.beat) && s.room !== 'home') problems.push(fails(RULE.room + ' ' + label + ' room', s.beat + ' is in the ' + s.room));
   if (homeBeats.includes(s.beat) && s.mo && !s.mo.hidden && s.mo.x > 860) problems.push(fails(RULE.room + ' ' + label + ' room', 'Mops is outside the bedroom at x ' + s.mo.x));
   if (['peek', 'sneak', 'hidden', 'hop', 'jail', 'announce', 'poster', 'band', 'groove', 'wish', 'sneakback', 'approach', 'dance', 'shed', 'pull', 'alert', 'chase'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
@@ -541,6 +543,11 @@ async function play(page, label) {
   await waitFor(page, () => window.game.state.words.includes('!'), 4000, 'gasp');
   await tapLit(page);
   await waitFor(page, () => window.game.state.words.includes('Onto the ship.'), 4000, 'ship');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'bedtime' && window.game.state.words.join(' ').includes('You came to me in a Moon Pie crate.'), 4000, 'crate');
+  await shot(page, label + '-9-bed');
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.words.join(' ').includes("You've loved Moon Pies ever since."), 4000, 'loved');
   s = await readState(page);
   problems.push(...checkRules(s, label + ' tv'));
   if (s.room !== 'home' && s.beat !== 'tv') problems.push(fails(label + ' tv', 'the show is not full screen at home'));
