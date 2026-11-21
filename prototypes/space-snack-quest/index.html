@@ -148,6 +148,8 @@ loadRoom('homeopen', 'home-room-empty-open-v5.png');
 loadRoom('hall', 'hall-room-empty-v1.png');
 const speakerImg = new Image();
 speakerImg.src = 'assets/approved/speaker-option-4.png';
+const mopsImg = new Image();
+mopsImg.src = 'assets/approved/mops-approved-nov8.png';
 let hallMasked = null;
 function maskedHall() {
   if (hallMasked) return hallMasked;
@@ -807,9 +809,19 @@ function drawSquatch(x, y, scale, opt) {
 }
 function drawMops(x, y, scale, opt) {
   const f = opt.face || 1;
-  ART.mops(ctx, x, y, scale, { f, walk: opt.walk || 0, sway: opt.sway || 0, mouth: opt.sing ? 'o' : '', t: state.t });
-  const hx = x + 17 * scale * f, hy = y - 36 * scale;
-  const head = { x: hx - 16 * scale, y: hy - 14 * scale, w: 34 * scale, h: 34 * scale, who: 'mops' };
+  const bob = Math.sin(opt.walk || 0) * 2;
+  const h = 62 * scale;
+  const w = h * (1120 / 912);
+  if (mopsImg.complete && mopsImg.naturalWidth) {
+    ctx.save();
+    ctx.translate(x, y + bob);
+    if (f > 0) ctx.scale(-1, 1);
+    ctx.drawImage(mopsImg, -w * 0.62, -h, w, h);
+    ctx.restore();
+  }
+  const hx = x + (f < 0 ? -w * 0.24 : w * 0.24);
+  const hy = y - h * 0.68;
+  const head = { x: hx - 18 * scale, y: hy - 14 * scale, w: 36 * scale, h: 36 * scale, who: 'mops' };
   state.heads.push(head);
   return head;
 }
@@ -1044,15 +1056,15 @@ function drawWring() {
   roundRect(160, 60, 640, 500, 18);
   ctx.fillStyle = '#d7ecf5'; ctx.fill();
   ctx.lineWidth = 8; ctx.strokeStyle = INK; ctx.stroke();
-  roundRect(400, 360, 160, 90, 8);
+  const twist = Math.sin(state.t * 4) * 0.06;
+  ctx.save();
+  ctx.translate(500, 424);
+  ctx.rotate(twist);
+  if (mopsImg.complete && mopsImg.naturalWidth) ctx.drawImage(mopsImg, -260, -360, 540, 440);
+  ctx.restore();
+  roundRect(390, 400, 180, 100, 8);
   ctx.fillStyle = '#e0b040'; ctx.fill();
   ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.stroke();
-  const twist = Math.sin(state.t * 4) * 0.4;
-  ctx.save();
-  ctx.translate(480, 280);
-  ctx.rotate(twist);
-  drawMops(0, 40, 4, { face: 1, walk: 0, sing: false, sway: 0 });
-  ctx.restore();
   state.controls.push({ id: 'card', x: 160, y: 60, w: 640, h: 500, lit: true });
 }
 function drawDoorPeek() {
@@ -1239,7 +1251,7 @@ function syncTune() {
     roomTune.loop = true;
     roomTune.addEventListener('error', () => { tuneFailed = true; });
   }
-  roomTune.volume = state.beat === 'song' ? 0.05 : 0.35;
+  roomTune.volume = state.beat === 'song' ? 0.05 : 0.22;
   const play = roomTune.play && roomTune.play();
   if (play && play.catch) play.catch(() => {});
 }
@@ -1523,7 +1535,7 @@ window.game = {
   get events() { return events; },
   inCone, PLANTER, BUSH_OUTLINE, LEAF, EYES, POT, DOOR, WATCH_FEET, watchEyes, LINE, GUESTS, HOME, SPEAKER,
   roomsReady() {
-    const imgs = [...Object.values(rooms), ...Object.values(guestSprites), speakerImg];
+    const imgs = [...Object.values(rooms), ...Object.values(guestSprites), speakerImg, mopsImg];
     return imgs.every(img => img.complete && img.naturalWidth);
   },
   step(n = 1, draw = true, alpha = 1) {

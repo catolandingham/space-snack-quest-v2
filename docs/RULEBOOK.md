@@ -21,7 +21,7 @@ The game is at https://squatch.onrender.com. This is the only place that states 
 | Wake | Squatch's room | The speaker shows sound lines and says good morning and the party. Squatch says "Party?" |
 | Mops hello | Squatch's room | Mops stops to the right of the bucket, faces Squatch, and says good morning. He does not rock. |
 | Wring | Full screen | A close-up of Mops wringing his beard into the bucket. No new words. |
-| Song on | Squatch's room | The speaker shows a music note and names Dog Zylan. The room song starts. |
+| Song on | Squatch's room | The speaker shows a music note and names Dog Zylan. Brian's own recording, floating-in-space.mp3, starts and loops softly the whole time Squatch is in his room. It ducks while they sing. |
 | Out of bed | Squatch's room | Squatch hops out of bed. Mops says "That's our song." |
 | SING ALONG | Squatch's room | SING ALONG lights up. On tap, Mops goes to the door and Squatch stops beside him with a gap. |
 | Song | Squatch's room | They sing. The room song ducks while the bubbles are up. |
@@ -133,7 +133,7 @@ Drawn characters, from the live game's code at commit 4d1faa2 (17 Nov 2026), fil
 | Who | Drawing | Approved |
 | --- | --- | --- |
 | Squatch | function Re | Brian, 2026-11-20, for this build. Not the older title-screen Squatch. |
-| Mops | function Fe. His beard is the mop. No mop prop. Blue work shirt, chest pocket, white name patch. No badge. | Brian, 8 Nov 2026, decision C1. The approved picture file is still missing, so this drawing is the closest. |
+| Mops | mops-approved-nov8.png. His beard is the mop. No mop prop. Blue work shirt, chest pocket, white name patch, beard to the floor. No badge. | Brian, 8 Nov 2026, decision C1. He said yes to this picture. |
 | Hidden eyes | function ga. One close pair. Each eye is a white circle, radius 6, with a 2 pixel dark outline. The centres are 18 pixels apart. The pupil sits down and to the right, and the blink is the same. The pair is centered low, on the seam where the two front leaf clumps meet. | Brian, 8 Nov 2026, decision C21, "These are the eyes." |
 
 Guests. Brian approved six on 8 Nov 2026 (decision C12, "We like these ones just fine, and actually the robot is fine as well"). The jelly in a sun hat and the furry alien are not guests. The later sheet of eight code-drawn guests is not approved. The source picture is `assets/approved/guests/nov8-six-approved-guests.png`. The game draws only the six cuts of that sheet, `teal.png`, `camera.png`, `backpack.png`, `stilt.png`, `octopus.png`, and `robot.png`. The cream around each person is transparent. The whites inside the drawings stay. No other guest art is loaded. Each person is:
