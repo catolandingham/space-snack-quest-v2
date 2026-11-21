@@ -163,6 +163,7 @@ function loadRoom(id, file) {
 loadRoom('home', 'home-room-empty-closed-v5.png');
 loadRoom('homeopen', 'home-room-empty-open-v5.png');
 loadRoom('hall', 'hall-room-empty-v1.png');
+loadRoom('hallway', 'hallway-room-empty-v6.png');
 const speakerImg = new Image();
 speakerImg.src = 'assets/approved/speaker-option-4.png';
 const mopsImg = new Image();
@@ -292,6 +293,9 @@ const LINE = {
   today: "Moon Pie day. It's today.",
   lunch: 'He forgot his lunch!',
   box: 'MY GARDIANS',
+  bring: "I'll take Mops his lunch.",
+  hiding: 'Squatch! You should be hiding.',
+  best: "My lunch! You're the best.",
 };
 const CLOTHES = ['top hat', 'sunglasses', 'shirt', 'boots'];
 const NEXT = [
@@ -299,6 +303,9 @@ const NEXT = [
   { room: 'home', who: 'note', text: LINE.rule1 },
   { room: 'home', who: 'sq', text: LINE.today, look: 'calendar' },
   { room: 'home', who: 'sq', text: LINE.lunch },
+  { room: 'hall', who: 'sq', text: LINE.bring, x: 500, y: 560 },
+  { room: 'hallway', who: 'mops', text: LINE.hiding, mops: true, x: 280, y: 530 },
+  { room: 'hallway', who: 'mops', text: LINE.best, mops: true, x: 280, y: 530 },
 ];
 const DANCE = ['L', 'R', 'U', 'D'];
 const HOME = {
@@ -1477,6 +1484,11 @@ function drawGuard(g) {
   }
 }
 function drawPeople() {
+  if (state.room !== 'home' && state.room !== 'hall') {
+    if (!state.hidden) drawSquatch(state.sq.x, state.sq.y, tune.home_sq, { face: state.sq.face || 1 });
+    if (!state.mo.hidden) drawMops(state.mo.x, state.mo.y, tune.home_mo, { face: state.mo.face || -1 });
+    return;
+  }
   if (state.room === 'home') {
     const sqScale = tune.home_sq, moScale = tune.home_mo;
     // While he walks out, he faces the door. A cone there would leave the picture.
