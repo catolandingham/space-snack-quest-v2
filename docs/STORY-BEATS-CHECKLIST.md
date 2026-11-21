@@ -60,11 +60,11 @@ Read from the old game `catolandingham/space-snack-quest`, commits `ee59f4a` (7 
 | 34 | "Mmf mrrf!" / "You're gumbling!" | built |
 | 35 | "Ptoo!" | built |
 | 36 | Walk home. Fur or hair? "Paperwork." | built |
-| 37 | Employee of the Month wall. | not yet built |
-| 38 | Missing Moon Pies and a pancake brochure. | not yet built |
-| 39 | Other Sasquatches? | not yet built |
-| 40 | The Mars talk. | not yet built |
-| 41 | Lights out. | not yet built |
+| 37 | Employee of the Month wall. Cone photo, the hidden drawing, BEEP BEEP. | built |
+| 38 | Missing Moon Pies. A pancake brochure. No parents. | built |
+| 39 | "Are those other Sasquatches?" "We'll talk about it tonight." | built |
+| 40 | "They need me here. Plus the Guardians are here." | built |
+| 41 | Lights out. Mops snores. | built |
 | 42 | Night one, the paw order. | not yet built |
 | 43 | "Six days later." | not yet built |
 | 44 | The robots tease Mops. | not yet built |
