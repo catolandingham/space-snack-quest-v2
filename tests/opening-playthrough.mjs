@@ -66,6 +66,7 @@ const ALLOWED = [
   'boots',
   '...Nice gloves.',
   'Wait a second... fur!',
+  'FUR! Security!',
   "That's our song.",
   'I have to go to work now.',
   'Big party in the hall tonight.',
@@ -155,10 +156,10 @@ function checkRules(s, label) {
       for (const b of s.bubbles) if (inside(b.box, c.x, c.y)) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'the cone starts on a speech bubble'));
     }
   }
-  const homeBeats = ['title', 'resort', 'intro', 'asleep', 'wake', 'partyq', 'mophello', 'wring', 'zylan', 'hopout', 'oursong', 'sing', 'song', 'songwalk', 'work', 'partyagain', 'stay', 'leave', 'alone', 'homework', 'evening', 'peekready', 'dress', 'walkout', 'return', 'miss', 'have', 'tv', 'after'];
+  const homeBeats = ['title', 'resort', 'intro', 'asleep', 'wake', 'partyq', 'mophello', 'wring', 'zylan', 'hopout', 'oursong', 'sing', 'song', 'songwalk', 'work', 'partyagain', 'stay', 'leave', 'alone', 'homework', 'evening', 'peekready', 'dress', 'walkout', 'search', 'return', 'miss', 'have', 'tv', 'after'];
   if (homeBeats.includes(s.beat) && s.room !== 'home') problems.push(fails(RULE.room + ' ' + label + ' room', s.beat + ' is in the ' + s.room));
   if (homeBeats.includes(s.beat) && s.mo && !s.mo.hidden && s.mo.x > 860) problems.push(fails(RULE.room + ' ' + label + ' room', 'Mops is outside the bedroom at x ' + s.mo.x));
-  if (['peek', 'sneak', 'hidden', 'hop', 'jail', 'announce', 'poster', 'band', 'groove', 'wish', 'sneakback', 'approach', 'dance', 'gloves', 'furryline'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
+  if (['peek', 'sneak', 'hidden', 'hop', 'jail', 'announce', 'poster', 'band', 'groove', 'wish', 'sneakback', 'approach', 'dance', 'shed', 'pull', 'alert', 'chase'].includes(s.beat) && s.room !== 'hall') problems.push(fails(RULE.room + ' ' + label + ' room', 'the sneak is not in the hall'));
   if ((s.beat === 'sneak' || s.beat === 'hidden') && s.cones.length > 3) problems.push(fails(RULE.cone + ' ' + label + ' cones', 'too many cones ' + s.cones.length));
   if ((s.beat === 'sneak' || s.beat === 'hidden' || s.beat === 'hop' || s.beat === 'jail') && s.hint) {
     if (s.hint.kind !== 'planter' || s.hint.points.length < 8) problems.push(fails(RULE.outline + ' ' + label + ' hint', JSON.stringify(s.hint && s.hint.kind)));
@@ -518,12 +519,17 @@ async function play(page, label) {
   await waitFor(page, () => window.game.state.beat === 'dance' && window.game.state.room === 'hall' && !window.game.state.hidden, 10000, 'dance circle');
   const worn = await page.evaluate(() => window.game.state.worn.slice());
   if (worn.length < 4) problems.push(fails(label + ' worn', 'the clothes are not on him'));
-  await page.waitForFunction(() => window.game.state.beat === 'gloves', { timeout: 8000 });
-  await page.waitForFunction(() => window.game.state.bubbles.some(b => b.text === '...Nice gloves.'), { timeout: 4000 });
-  await tapLit(page);
+  await page.waitForFunction(() => window.game.state.beat === 'shed' && window.game.state.worn.length === 0, { timeout: 8000 });
   await page.waitForFunction(() => window.game.state.bubbles.some(b => b.text.includes('fur')), { timeout: 4000 });
   await shot(page, label + '-10-fur');
   await tapLit(page);
+  await page.waitForFunction(() => window.game.state.bubbles.some(b => b.text === 'FUR! Security!'), { timeout: 6000 });
+  await tapLit(page);
+  await waitFor(page, () => window.game.state.beat === 'chase', 4000, 'chase');
+  await clickLogical(page, 478, 596);
+  await waitFor(page, () => window.game.state.beat === 'search' && window.game.state.room === 'home', 8000, 'search');
+  await clickLogical(page, 195, 490);
+  await waitFor(page, () => window.game.state.hidden && window.game.state.beat === 'search', 2000, 'under the bed');
   await waitFor(page, () => window.game.state.beat === 'miss', 8000, 'homecoming');
   await shot(page, label + '-9-home');
   s = await readState(page);

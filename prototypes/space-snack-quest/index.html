@@ -259,6 +259,7 @@ const LINE = {
   wish: "I've never gotten to dance at a party.",
   gloves: '...Nice gloves.',
   fur: 'Wait a second... fur!',
+  alarm: 'FUR! Security!',
   tv: [
     'Years ago, on Stormtop...',
     'A Wookie tour group came to visit Stormtop.',
@@ -464,7 +465,9 @@ function advanceStory() {
   if (state.beat === 'stay') { state.beat = 'leave'; return; }
   if (state.beat === 'evening') { state.beat = 'peekready'; return; }
   if (state.beat === 'jail') {
-    if (state.backHome) restartBack();
+    if (state.chaseJail) { state.chaseJail = false; restartChase(); }
+    else if (state.searchJail) { state.searchJail = false; restartSearch(); }
+    else if (state.backHome) restartBack();
     else restartSneak();
     return;
   }
@@ -530,10 +533,47 @@ function enterDress() {
   blip();
 }
 function finishDance() {
-  state.beat = 'gloves';
+  state.beat = 'shed';
+  state.worn = [];
   state.dim = false;
+  state.hidden = false;
   state.line = 0;
   blip();
+}
+function startChase() {
+  state.beat = 'chase';
+  state.room = 'hall';
+  state.control = true;
+  state.hidden = false;
+  state.worn = [];
+  state.dim = false;
+  state.sq.x = 560; state.sq.y = 590; state.sq.target = null; state.sq.moving = false;
+  state.guards = [
+    { x: 860, y: 490, face: -1, walk: 0, moving: false },
+    { x: 930, y: 560, face: -1, walk: 0, moving: false },
+  ];
+  state.guard = null;
+}
+function restartChase() {
+  state.restarted++;
+  startChase();
+}
+function enterSearch() {
+  state.beat = 'search';
+  state.room = 'home';
+  state.hidden = false;
+  state.control = true;
+  state.worn = [];
+  state.sq.x = 480; state.sq.y = 530; state.sq.target = null;
+  state.mo.hidden = true;
+  state.searchT = 0;
+  state.guard = { x: 840, y: 520, face: -1, walk: 0, moving: false };
+  state.guards = [];
+  blip();
+}
+function restartSearch() {
+  state.restarted++;
+  enterSearch();
 }
 function restartSneak() {
   state.restarted++;
@@ -643,9 +683,27 @@ function onTap(p) {
     return;
   }
   if (state.beat === 'dress') return;
-  if (state.beat === 'snack') { state.beat = 'gloves'; blip(); return; }
-  if (state.beat === 'gloves') { state.beat = 'furryline'; blip(); return; }
-  if (state.beat === 'furryline') { comeHome(); return; }
+  if (state.beat === 'shed') {
+    state.beat = 'pull';
+    state.witness = { x: 680, y: 520, kind: 'robot', face: 1 };
+    return;
+  }
+  if (state.beat === 'alert') { startChase(); return; }
+  if (state.beat === 'chase') {
+    if (state.control && !state.paused) state.sq.target = { x: p.x, y: p.y };
+    return;
+  }
+  if (state.beat === 'search') {
+    if (hitControl(p, HOME.bed)) {
+      state.hidden = true;
+      state.sq.x = 190; state.sq.y = 530;
+      state.sq.target = null;
+      blip();
+      return;
+    }
+    if (state.control) state.sq.target = { x: p.x, y: p.y };
+    return;
+  }
   if (state.beat === 'homework') { state.beat = 'evening'; blip(); return; }
   if (state.beat === 'miss' || state.beat === 'have' || state.beat === 'tv') { advanceHome(); return; }
   if (['wake', 'partyq', 'mophello', 'wring', 'zylan', 'oursong', 'work', 'partyagain', 'stay', 'morning', 'song', 'evening', 'jail', 'resort', 'intro'].includes(state.beat)) advanceStory();
@@ -801,7 +859,7 @@ function tickWorld(dt) {
   // through the wall and off the picture. The hall is a different picture and
   // was not drawn yet, but he had already left the room, and the next place
   // the player stands is that hall.
-  const hallBeat = ['peek', 'sneak', 'hop', 'hidden', 'jail', 'announce', 'poster', 'band', 'groove', 'wish', 'sneakback', 'approach', 'dance', 'snack', 'gloves', 'furryline'].includes(state.beat);
+  const hallBeat = ['peek', 'sneak', 'hop', 'hidden', 'jail', 'announce', 'poster', 'band', 'groove', 'wish', 'sneakback', 'approach', 'dance', 'shed', 'pull', 'alert', 'chase'].includes(state.beat);
   if (!hallBeat) state.room = 'home';
   if (state.beat === 'alone' && state.look === 'bedline') {
     state.flopT += dt;
@@ -877,6 +935,38 @@ function tickWorld(dt) {
     const hold = FAST ? 0.08 : 2;
     state.line = Math.min(14, Math.floor(state.danceT / hold));
     if (state.danceT >= 15 * hold) finishDance();
+  }
+  if (state.beat === 'pull' && state.witness) {
+    state.witness.face = 1;
+    if (walkToward(state.witness, 750, 500, dt, true)) { state.beat = 'alert'; state.alarm = true; blip(); }
+  }
+  if (state.beat === 'chase') {
+    for (const g of state.guards || []) {
+      walkToward(g, state.sq.x, Math.min(580, state.sq.y), dt * 0.45, true);
+      g.face = g.x > state.sq.x ? -1 : 1;
+      const aim = g.face < 0 ? Math.PI : 0;
+      if (!state.hidden && inCone(state.sq.x, state.sq.y - 16, g.x, g.y - 36, aim, tune.cone_half, tune.cone_len)) {
+        state.chaseJail = true;
+        state.beat = 'jail';
+        state.control = false;
+        break;
+      }
+    }
+    if (state.beat === 'chase' && state.sq.target) walkToward(state.sq, state.sq.target.x, state.sq.target.y, dt);
+    if (state.beat === 'chase' && dist(state.sq, DOOR) < 40) enterSearch();
+  }
+  if (state.beat === 'search' && state.guard) {
+    state.searchT += dt;
+    const g = state.guard;
+    const tx = state.searchT < (FAST ? 0.45 : 2.2) ? 460 : 220;
+    walkToward(g, tx, 530, dt * 0.35, true);
+    g.face = -1;
+    const aim = Math.PI;
+    if (!state.hidden && inCone(state.sq.x, state.sq.y - 16, g.x, g.y - 36, aim, tune.cone_half, tune.cone_len)) {
+      state.searchJail = true;
+      state.beat = 'jail';
+      state.control = false;
+    } else if (state.hidden && state.searchT > (FAST ? 1.1 : 5)) comeHome();
   }
   if (state.beat === 'return' && walkToward(state.mo, 620, 520, dt)) state.beat = 'miss';
   if (state.beat === 'sneak' || state.beat === 'sneakback') {
@@ -1046,7 +1136,7 @@ function drawBubble(who, text, head) {
     [[18, 16, 5], [32, 28, 8]].forEach(([dx, dy, r]) => {
       ctx.beginPath(); ctx.arc(hx + dx, hy - dy, r, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 2; ctx.stroke();
     });
-  } else if (who !== 'speaker' && who !== 'bar') {
+  } else if (who !== 'speaker' && who !== 'bar' && who !== 'witness') {
     const tag = who === 'mops' ? 'Mops' : who === 'isfred' ? 'Isfred' : 'Squatch';
     const tagW = tag.length * 11 + 18;
     roundRect(box.x + 12, box.y - 12, tagW, 22, 10);
@@ -1295,6 +1385,23 @@ function drawSparks() {
     ctx.restore();
   }
 }
+function drawGuard(g) {
+  const x = g.x, y = g.y, face = g.face || -1;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(face < 0 ? -1 : 1, 1);
+  roundRect(-7, -16, 5, 16, 2); ctx.fillStyle = '#3d4454'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
+  roundRect(2, -16, 5, 16, 2); ctx.fill(); ctx.stroke();
+  roundRect(-12, -40, 24, 26, 4); ctx.fillStyle = '#243056'; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, -48, 9, 0, Math.PI * 2); ctx.fillStyle = '#f0bf93'; ctx.fill(); ctx.stroke();
+  roundRect(-11, -58, 22, 7, 2); ctx.fillStyle = '#1e2430'; ctx.fill();
+  ctx.restore();
+  const aim = face < 0 ? Math.PI : 0;
+  if (state.beat === 'chase' || state.beat === 'search') {
+    const hot = !state.hidden && inCone(state.sq.x, state.sq.y - 16, x, y - 36, aim, tune.cone_half, tune.cone_len);
+    drawCone(x, y - 36, aim, tune.cone_half, tune.cone_len, hot);
+  }
+}
 function drawPeople() {
   if (state.room === 'home') {
     const sqScale = tune.home_sq, moScale = tune.home_mo;
@@ -1328,6 +1435,7 @@ function drawPeople() {
       const sway = state.beat === 'song' ? Math.sin(state.t * 4) * 0.05 : 0;
       drawMops(state.mo.x, state.mo.y, moScale, { face: state.mo.face, walk: state.mo.moving ? state.mo.walk : 0, sing: state.mo.sing, sway });
     }
+    if (state.beat === 'search' && state.guard) drawGuard(state.guard);
     drawSpeaker();
     return sqHead;
   }
@@ -1359,6 +1467,19 @@ function drawPeople() {
   }
   const watchFace = Math.cos(look.face) < 0 ? -1 : 1;
   drawGuest(WATCH_FEET.x, WATCH_FEET.y + Math.sin(state.t * 2) * 1.5, GUEST_SCALE, 'camera', watchFace);
+  if (state.witness && (state.beat === 'pull' || state.beat === 'alert' || state.beat === 'chase')) {
+    drawGuest(state.witness.x, state.witness.y, GUEST_SCALE, state.witness.kind, state.witness.face || 1);
+  }
+  for (const g of state.guards || []) drawGuard(g);
+  if (state.alarm) {
+    const pulse = 0.5 + 0.5 * Math.sin(state.t * 10);
+    ctx.save();
+    ctx.strokeStyle = '#e5533d';
+    ctx.lineWidth = 4;
+    ctx.globalAlpha = 0.45 + 0.55 * pulse;
+    ctx.strokeRect(868, 142, 48, 36);
+    ctx.restore();
+  }
   if (state.beat === 'peek') {
     state.heads.push({ x: DOOR.x - 20, y: 560, w: 40, h: 30, who: 'sq' });
     return;
@@ -1439,8 +1560,8 @@ function currentLine() {
   if (state.beat === 'poster') return { kind: 'poster' };
   if (state.beat === 'band') return { kind: 'line', who: 'isfred', text: LINE.croc };
   if (state.beat === 'wish') return { kind: 'line', who: 'thought', text: LINE.wish };
-  if (state.beat === 'gloves') return { kind: 'line', who: 'bar', text: LINE.gloves };
-  if (state.beat === 'furryline') return { kind: 'line', who: 'bar', text: LINE.fur };
+  if (state.beat === 'shed') return { kind: 'line', who: 'witness', text: LINE.fur };
+  if (state.beat === 'alert') return { kind: 'line', who: 'witness', text: LINE.alarm };
   if (state.beat === 'miss') return { kind: 'line', who: 'sq', text: LINE.someone };
   if (state.beat === 'have') return { kind: 'line', who: 'mops', text: LINE.have };
   if (state.beat === 'tv') return { kind: 'tv' };
@@ -1584,6 +1705,12 @@ function drawPlay() {
   drawPeople();
   if (state.dim) { ctx.fillStyle = 'rgba(8, 10, 18, 0.18)'; ctx.fillRect(0, 0, W, H); }
   if (state.beat === 'wish') state.heads.push({ x: EYE_PAIR.x - 18, y: EYE_PAIR.y - 20, w: 36, h: 20, who: 'thought' });
+  if ((state.beat === 'shed' || state.beat === 'alert' || state.beat === 'pull') && state.beat !== 'pull') {
+    const wx = state.witness ? state.witness.x : 640;
+    const wy = state.witness ? state.witness.y : 500;
+    state.heads.push({ x: wx - 20, y: wy - 80, w: 40, h: 30, who: 'witness' });
+  }
+  if (state.beat === 'shed') state.heads.push({ x: 620, y: 430, w: 40, h: 30, who: 'witness' });
   if (state.beat === 'gloves' || state.beat === 'furryline') state.heads.push({ x: 600, y: 430, w: 50, h: 40, who: 'bar' });
   drawSparks();
   const line = currentLine();
